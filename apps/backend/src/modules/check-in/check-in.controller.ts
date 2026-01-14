@@ -21,8 +21,8 @@ import {
   TodayCheckInStatusDto,
   CheckInHistoryDto,
 } from './dto';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '@/modules/auth/decorators';
+import { JwtAuthGuard } from '@/modules/auth/guards';
 
 @Controller('api/v1/check-ins')
 @UseGuards(JwtAuthGuard)
