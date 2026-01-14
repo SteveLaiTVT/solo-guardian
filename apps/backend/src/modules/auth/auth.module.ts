@@ -1,20 +1,23 @@
 /**
  * @file auth.module.ts
- * @description Auth module configuration with JwtModule
- * @task TASK-001-D
- * @design_state_version 0.2.0
+ * @description Auth module configuration with JwtModule and Passport
+ * @task TASK-001-D, TASK-007
+ * @design_state_version 0.9.0
  */
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-// DONE(B): Configure JwtModule - TASK-001-D
 @Module({
   imports: [
     ConfigModule,
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -25,7 +28,7 @@ import { AuthRepository } from './auth.repository';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository],
-  exports: [AuthService],
+  providers: [AuthService, AuthRepository, JwtStrategy],
+  exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}
