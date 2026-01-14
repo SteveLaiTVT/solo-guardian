@@ -1,0 +1,328 @@
+# ============================================================
+# HANDOFF: HO-011 - Main Pages (Dashboard, Settings, History)
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-011"
+design_state_version: "1.1.0"
+priority: "P0"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the main user pages: Dashboard (check-in),
+  Settings, and History. These are the core user experience
+  of Solo Guardian.
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  The Dashboard is the most important page - users should be
+  able to check in with a single tap. Settings allows
+  configuring check-in deadline. History shows past records.
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-011-1"
+    title: "Create Dashboard page"
+    file: "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+    action: |
+      Create main check-in dashboard:
+
+      **Layout (mobile-first):**
+      - Large check-in button in center
+      - Status indicator (checked in / not checked in / overdue)
+      - Time until deadline
+      - Optional note input (expandable)
+
+      **States:**
+      1. Not checked in (before deadline):
+         - Green "Check In" button
+         - Shows "Deadline: 10:00 AM"
+         - Encouraging message
+
+      2. Not checked in (overdue):
+         - Red "Check In Now!" button
+         - Warning message
+         - Shows how late
+
+      3. Already checked in:
+         - Checkmark icon
+         - "You're safe today!" message
+         - Show check-in time
+         - Button to view note or add note
+
+      ```typescript
+      // TODO(B): Implement DashboardPage
+      // - Use hooks.useCheckInToday() to get status
+      // - Use hooks.useCreateCheckIn() mutation
+      // - Handle loading/error states
+      // - Show appropriate UI based on status
+      ```
+
+  - id: "TASK-011-2"
+    title: "Create CheckInButton component"
+    file: "apps/user-web/src/components/check-in/CheckInButton.tsx"
+    action: |
+      Large, prominent check-in button:
+
+      ```typescript
+      interface CheckInButtonProps {
+        status: 'pending' | 'overdue' | 'completed';
+        onCheckIn: () => void;
+        isLoading: boolean;
+      }
+
+      // TODO(B): Implement CheckInButton
+      // - Large circular button (at least 150px on mobile)
+      // - Different colors based on status:
+      //   - pending: green (bg-green-500)
+      //   - overdue: red (bg-red-500)
+      //   - completed: gray with checkmark
+      // - Pulse animation when overdue
+      // - Loading spinner when submitting
+      ```
+
+  - id: "TASK-011-3"
+    title: "Create StatusCard component"
+    file: "apps/user-web/src/components/check-in/StatusCard.tsx"
+    action: |
+      Display check-in status information:
+
+      ```typescript
+      interface StatusCardProps {
+        status: TodayStatus;
+      }
+
+      // TODO(B): Implement StatusCard
+      // - Show deadline time
+      // - Show current time (update every minute)
+      // - Show time remaining or time overdue
+      // - Different styling based on status
+      ```
+
+  - id: "TASK-011-4"
+    title: "Create Settings page"
+    file: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+    action: |
+      User settings page:
+
+      **Sections:**
+      1. Check-in Settings:
+         - Deadline time picker (e.g., 10:00 AM)
+         - Reminder time picker (e.g., 09:00 AM)
+         - Reminder toggle (on/off)
+         - Timezone selector
+
+      2. Account:
+         - Email (display only)
+         - Change password (placeholder for now)
+         - Logout button
+
+      ```typescript
+      // TODO(B): Implement SettingsPage
+      // - Use hooks.useSettings() to load current settings
+      // - Use hooks.useUpdateSettings() to save changes
+      // - Time picker component for deadline/reminder
+      // - Auto-save on change or Save button
+      ```
+
+  - id: "TASK-011-5"
+    title: "Create TimePicker component"
+    file: "apps/user-web/src/components/ui/TimePicker.tsx"
+    action: |
+      Simple time picker for deadline/reminder:
+
+      ```typescript
+      interface TimePickerProps {
+        value: string;  // "HH:MM" format
+        onChange: (value: string) => void;
+        label: string;
+      }
+
+      // TODO(B): Implement TimePicker
+      // - Can use native time input or custom
+      // - Display in 12-hour format with AM/PM
+      // - Store in 24-hour format
+      ```
+
+  - id: "TASK-011-6"
+    title: "Create History page"
+    file: "apps/user-web/src/pages/history/HistoryPage.tsx"
+    action: |
+      Check-in history with pagination:
+
+      **Layout:**
+      - List of past check-ins
+      - Each item shows: date, time, note (if any)
+      - Calendar view option (future enhancement)
+      - Infinite scroll or pagination
+
+      ```typescript
+      // TODO(B): Implement HistoryPage
+      // - Use hooks.useCheckInHistory(page, pageSize)
+      // - Show loading skeleton while fetching
+      // - Empty state if no history
+      // - Infinite scroll preferred
+      ```
+
+  - id: "TASK-011-7"
+    title: "Create HistoryItem component"
+    file: "apps/user-web/src/components/history/HistoryItem.tsx"
+    action: |
+      Single history item display:
+
+      ```typescript
+      interface HistoryItemProps {
+        checkIn: CheckIn;
+      }
+
+      // TODO(B): Implement HistoryItem
+      // - Show date in friendly format (Today, Yesterday, Jan 15)
+      // - Show check-in time
+      // - Show note if exists (truncated with expand)
+      // - Green checkmark indicator
+      ```
+
+  - id: "TASK-011-8"
+    title: "Update Layout with navigation"
+    file: "apps/user-web/src/components/layout/Layout.tsx"
+    action: |
+      Update layout with bottom navigation:
+
+      ```typescript
+      // TODO(B): Update Layout
+      // - Header with logo and menu
+      // - Bottom navigation for mobile:
+      //   - Home (dashboard)
+      //   - History
+      //   - Settings
+      // - Highlight active route
+      // - Outlet for page content
+      ```
+
+  - id: "TASK-011-9"
+    title: "Create MobileNav component"
+    file: "apps/user-web/src/components/layout/MobileNav.tsx"
+    action: |
+      Bottom navigation bar for mobile:
+
+      ```typescript
+      // TODO(B): Implement MobileNav
+      // - Fixed to bottom of screen
+      // - 3 items: Home, History, Settings
+      // - Icons + labels
+      // - Active state indication
+      // - Hide on desktop (md:hidden)
+      ```
+
+# ============================================================
+# Deliverables
+# ============================================================
+deliverables:
+  - "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+  - "apps/user-web/src/pages/settings/SettingsPage.tsx"
+  - "apps/user-web/src/pages/history/HistoryPage.tsx"
+  - "apps/user-web/src/components/check-in/CheckInButton.tsx"
+  - "apps/user-web/src/components/check-in/StatusCard.tsx"
+  - "apps/user-web/src/components/history/HistoryItem.tsx"
+  - "apps/user-web/src/components/ui/TimePicker.tsx"
+  - "Updated Layout and MobileNav components"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "Dashboard shows check-in status"
+    verification: "Load dashboard, see current status"
+
+  - description: "Can check in"
+    verification: "Click button, check-in created, status updates"
+
+  - description: "Settings page loads"
+    verification: "Navigate to settings, see current values"
+
+  - description: "Can update deadline"
+    verification: "Change deadline, save, value persists"
+
+  - description: "History shows records"
+    verification: "Navigate to history, see past check-ins"
+
+  - description: "Mobile navigation works"
+    verification: "Bottom nav shows on mobile, navigates correctly"
+
+  - description: "Responsive design"
+    verification: "All pages look good on 375px and 1024px"
+
+# ============================================================
+# UI Design Guidelines
+# ============================================================
+ui_design:
+  dashboard:
+    layout: |
+      Mobile (< 768px):
+      ┌─────────────────────┐
+      │     Solo Guardian   │ Header
+      ├─────────────────────┤
+      │                     │
+      │   ╭─────────────╮   │
+      │   │             │   │
+      │   │  CHECK IN   │   │ Big button
+      │   │             │   │
+      │   ╰─────────────╯   │
+      │                     │
+      │  Deadline: 10:00 AM │ Status
+      │  Time left: 2h 30m  │
+      │                     │
+      ├─────────────────────┤
+      │  🏠    📋    ⚙️   │ Bottom nav
+      └─────────────────────┘
+
+  colors:
+    check_in_pending: "bg-green-500 hover:bg-green-600"
+    check_in_overdue: "bg-red-500 hover:bg-red-600 animate-pulse"
+    check_in_done: "bg-gray-300"
+
+  spacing:
+    button_size: "w-40 h-40 md:w-48 md:h-48"
+    mobile_nav_height: "h-16"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Mobile-first responsive design"
+  - "Check-in button must be easily tappable (min 44x44px)"
+  - "No any types"
+  - "Use shadcn/ui components where applicable"
+  - "Single file < 300 lines"
+  - "Loading states for all async operations"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  - "TASK-008 (user-web infrastructure)"
+  - "TASK-009 (api-client package)"
+  - "TASK-010 (auth pages)"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  The check-in button is THE most important UI element.
+  It should be:
+  - Impossible to miss
+  - Easy to tap on mobile
+  - Satisfying to press (consider haptic feedback later)
+  - Clear about current status
+
+  Users should be able to check in within 2 seconds of
+  opening the app.

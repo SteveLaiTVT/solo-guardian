@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.0.0"
-  updated_at: "2026-01-14"
+  version: "1.1.0"
+  updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Backend MVP Complete - Ready for E2E Testing"
+  milestone: "User Web MVP Development"
 
 # ============================================================
 # 1. Technical Architecture
@@ -152,6 +152,28 @@ modules:
         status: "pending"
         description: "Track consecutive check-in days (gamification)"
 
+  user_web:
+    status: "in_progress"
+    owner: "B Session"
+    description: "User-facing web application"
+    started_iteration: "iter-005"
+    features:
+      - name: "Login/Register"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in Dashboard"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in Settings"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in History"
+        priority: "P0"
+        status: "pending"
+      - name: "Mobile Responsive"
+        priority: "P0"
+        status: "pending"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -217,7 +239,42 @@ code_constraints:
 # ============================================================
 # 5. Current Iteration
 # ============================================================
-current_iteration: null  # Backend MVP Complete - Ready for E2E Testing
+current_iteration:
+  id: "iter-005"
+  goal: "Implement user-web frontend MVP"
+  started_at: "2026-01-15"
+  status: "in_progress"
+  tasks:
+    - id: "TASK-008"
+      title: "Frontend: User-web infrastructure setup"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-008-user-web-infra.yaml"
+      description: "Vite + React + TypeScript + Tailwind + shadcn/ui"
+
+    - id: "TASK-009"
+      title: "Frontend: Shared API client package"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-009-api-client.yaml"
+      depends_on: []
+      description: "TanStack Query + Axios API client"
+
+    - id: "TASK-010"
+      title: "Frontend: Auth pages (Login/Register)"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-010-auth-pages.yaml"
+      depends_on: ["TASK-008", "TASK-009"]
+      description: "Login, Register pages with Zustand auth store"
+
+    - id: "TASK-011"
+      title: "Frontend: Main pages (Dashboard/Settings/History)"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-011-main-pages.yaml"
+      depends_on: ["TASK-010"]
+      description: "Check-in dashboard, settings, history pages"
 
 # ============================================================
 # 5.1 Iteration History
@@ -366,6 +423,25 @@ decision_log:
       - JwtAuthGuard for protecting routes
       - CurrentUser decorator for extracting user from token
       - Consistent with NestJS ecosystem
+
+  - id: "ADR-007"
+    date: "2026-01-15"
+    decision: "User-web uses Vite + React + shadcn/ui + Tailwind"
+    rationale: |
+      - Vite for fast development and build
+      - shadcn/ui for accessible, customizable components
+      - Tailwind for mobile-first responsive design
+      - TanStack Query for server state management
+      - Zustand for client state (auth tokens)
+
+  - id: "ADR-008"
+    date: "2026-01-15"
+    decision: "Shared API client package (@solo-guardian/api-client)"
+    rationale: |
+      - Type-safe API calls matching backend
+      - Automatic token refresh handling
+      - Shared between user-web and admin-web
+      - TanStack Query hooks for data fetching
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

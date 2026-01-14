@@ -1,0 +1,204 @@
+# ============================================================
+# HANDOFF: HO-008 - User Web Infrastructure
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-008"
+design_state_version: "1.1.0"
+priority: "P0"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Set up user-web frontend project infrastructure with Vite,
+  React 18, TypeScript, Tailwind CSS, and shadcn/ui.
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  This is the user-facing web application for Solo Guardian.
+  It needs to be mobile-first responsive design since users
+  will primarily access it from their phones.
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-008-1"
+    title: "Initialize Vite React project"
+    action: |
+      ```bash
+      cd apps
+      npm create vite@latest user-web -- --template react-ts
+      cd user-web
+      ```
+
+  - id: "TASK-008-2"
+    title: "Configure package.json"
+    file: "apps/user-web/package.json"
+    action: |
+      Update package.json with:
+      - name: "@solo-guardian/user-web"
+      - Add dependencies: react-router-dom, zustand, @tanstack/react-query, axios
+      - Add dev dependencies for Tailwind
+
+  - id: "TASK-008-3"
+    title: "Install and configure Tailwind CSS"
+    action: |
+      ```bash
+      npm install -D tailwindcss postcss autoprefixer
+      npx tailwindcss init -p
+      ```
+
+      Configure tailwind.config.js with:
+      - content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"]
+      - Add responsive breakpoints (sm: 640px, md: 768px, lg: 1024px)
+
+  - id: "TASK-008-4"
+    title: "Install shadcn/ui"
+    action: |
+      ```bash
+      npx shadcn@latest init
+      ```
+
+      Configuration:
+      - Style: Default
+      - Base color: Slate
+      - CSS variables: Yes
+      - Components location: src/components/ui
+
+  - id: "TASK-008-5"
+    title: "Create project structure"
+    action: |
+      Create directories:
+      ```
+      apps/user-web/src/
+        components/
+          ui/          # shadcn components
+          layout/      # Header, Footer, etc.
+        pages/
+          auth/        # Login, Register
+          dashboard/   # Main check-in page
+          settings/    # User settings
+        hooks/         # Custom hooks
+        stores/        # Zustand stores
+        lib/           # Utilities
+        types/         # TypeScript types
+      ```
+
+  - id: "TASK-008-6"
+    title: "Configure path aliases"
+    file: "apps/user-web/tsconfig.json"
+    action: |
+      Add path aliases:
+      ```json
+      {
+        "compilerOptions": {
+          "baseUrl": ".",
+          "paths": {
+            "@/*": ["./src/*"]
+          }
+        }
+      }
+      ```
+
+  - id: "TASK-008-7"
+    title: "Create basic layout components"
+    files:
+      - "apps/user-web/src/components/layout/Header.tsx"
+      - "apps/user-web/src/components/layout/MobileNav.tsx"
+      - "apps/user-web/src/components/layout/Layout.tsx"
+    action: |
+      Create skeleton layout with TODO markers:
+      - Header with logo and user menu
+      - MobileNav for bottom navigation
+      - Layout wrapper component
+
+  - id: "TASK-008-8"
+    title: "Configure React Router"
+    file: "apps/user-web/src/App.tsx"
+    action: |
+      Set up basic routing structure with TODO markers:
+      - / -> Dashboard (protected)
+      - /login -> Login page
+      - /register -> Register page
+      - /settings -> Settings (protected)
+      - /history -> Check-in history (protected)
+
+  - id: "TASK-008-9"
+    title: "Create env configuration"
+    files:
+      - "apps/user-web/.env.example"
+      - "apps/user-web/src/lib/config.ts"
+    action: |
+      Environment variables:
+      - VITE_API_URL=http://localhost:3000
+
+# ============================================================
+# Deliverables
+# ============================================================
+deliverables:
+  - "apps/user-web/package.json with all dependencies"
+  - "apps/user-web/tailwind.config.js configured"
+  - "apps/user-web/tsconfig.json with path aliases"
+  - "apps/user-web/src/ directory structure"
+  - "Basic layout components with TODO markers"
+  - "React Router configuration"
+  - "npm run dev starts without errors"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "Project builds successfully"
+    verification: "npm run build completes without errors"
+
+  - description: "Dev server starts"
+    verification: "npm run dev shows Vite dev server"
+
+  - description: "Tailwind CSS works"
+    verification: "Utility classes apply styles correctly"
+
+  - description: "shadcn/ui installed"
+    verification: "Can import Button from @/components/ui/button"
+
+  - description: "Path aliases work"
+    verification: "Imports like @/components/... resolve correctly"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use Vite (not Create React App)"
+  - "React 18 with TypeScript"
+  - "Mobile-first responsive design"
+  - "shadcn/ui for UI components (not Ant Design)"
+  - "Single file < 300 lines"
+  - "No any types"
+
+# ============================================================
+# Tech Stack Reference
+# ============================================================
+tech_stack:
+  framework: "React 18"
+  bundler: "Vite"
+  language: "TypeScript"
+  styling: "Tailwind CSS"
+  ui_library: "shadcn/ui"
+  routing: "React Router v6"
+  state: "Zustand"
+  api: "TanStack Query + Axios"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This task sets up the foundation. Actual page implementations
+  will be in subsequent tasks (TASK-010, TASK-011).
+
+  Focus on getting the build pipeline working first.
