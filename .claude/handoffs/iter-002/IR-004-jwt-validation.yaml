@@ -1,0 +1,150 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-004 - JWT Secret Validation
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "IR-004"
+task_id: "TASK-004"
+handoff_id: "HO-004"
+design_state_version: "0.6.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Added startup validation for JWT secrets using NestJS OnModuleInit
+  lifecycle hook. Application now fails fast with clear error messages
+  if JWT_ACCESS_SECRET or JWT_REFRESH_SECRET environment variables
+  are missing.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-004-1"
+    description: "Add OnModuleInit interface"
+    code: |
+      import { OnModuleInit } from '@nestjs/common';
+
+      export class AuthService implements OnModuleInit {
+        onModuleInit(): void {
+          this.validateJwtSecrets();
+        }
+      }
+
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-004-2"
+    description: "Implement validateJwtSecrets method"
+    lines: "171-191"
+    code: |
+      private validateJwtSecrets(): void {
+        const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
+        const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+        if (!accessSecret) {
+          throw new Error(
+            'JWT_ACCESS_SECRET is not configured. ' +
+              'Please set it in your environment variables.',
+          );
+        }
+
+        if (!refreshSecret) {
+          throw new Error(
+            'JWT_REFRESH_SECRET is not configured. ' +
+              'Please set it in your environment variables.',
+          );
+        }
+
+        this.logger.log('JWT secrets validated successfully');
+      }
+
+# ============================================================
+# Error Messages
+# ============================================================
+error_messages:
+  missing_access_secret: |
+    Error: JWT_ACCESS_SECRET is not configured. Please set it in your environment variables.
+
+  missing_refresh_secret: |
+    Error: JWT_REFRESH_SECRET is not configured. Please set it in your environment variables.
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "App fails fast if JWT_ACCESS_SECRET is missing"
+    status: "pass"
+    evidence: "Lines 176-181 - throws Error if accessSecret is falsy"
+
+  - criterion: "App fails fast if JWT_REFRESH_SECRET is missing"
+    status: "pass"
+    evidence: "Lines 183-188 - throws Error if refreshSecret is falsy"
+
+  - criterion: "Clear error message for missing secrets"
+    status: "pass"
+    evidence: "Error messages specify which secret is missing and how to fix"
+
+  - criterion: "Validation happens on module init"
+    status: "pass"
+    evidence: "Lines 42-44 - onModuleInit() calls validateJwtSecrets()"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Use OnModuleInit lifecycle hook"
+    status: "compliant"
+    evidence: "AuthService implements OnModuleInit interface"
+
+  - constraint: "Throw Error (not custom exception) for startup failures"
+    status: "compliant"
+    evidence: "Using standard Error class, not NestJS exceptions"
+
+  - constraint: "Error message must be clear and actionable"
+    status: "compliant"
+    evidence: "Messages specify what is missing and suggest setting env vars"
+
+  - constraint: "Keep function size under 50 lines"
+    status: "compliant"
+    evidence: "validateJwtSecrets() is 20 lines"
+
+  - constraint: "Do not log secret values"
+    status: "compliant"
+    evidence: "Only logs 'JWT secrets validated successfully', no values"
+
+# ============================================================
+# Issue Resolution
+# ============================================================
+resolves:
+  - review_report: "RR-001-auth.yaml"
+    issue_id: "ISS-002"
+    description: "ConfigService.get returns undefined if env var not set"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes: |
+  To verify:
+
+  1. Remove JWT_ACCESS_SECRET from .env:
+     - App should fail to start
+     - Error: "JWT_ACCESS_SECRET is not configured..."
+
+  2. Remove JWT_REFRESH_SECRET from .env:
+     - App should fail to start
+     - Error: "JWT_REFRESH_SECRET is not configured..."
+
+  3. With both secrets present:
+     - App starts successfully
+     - Log: "[AuthService] JWT secrets validated successfully"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

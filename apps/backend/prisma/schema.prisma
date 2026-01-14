@@ -1,7 +1,7 @@
 // ============================================================
 // Prisma Schema for Solo Guardian
-// @task TASK-001-A
-// @design_state_version 0.2.0
+// @task TASK-001-A, TASK-005
+// @design_state_version 0.8.0
 // ============================================================
 
 generator client {
@@ -24,7 +24,9 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  refreshTokens RefreshToken[]
+  refreshTokens   RefreshToken[]
+  checkIns        CheckIn[]
+  checkInSettings CheckInSettings?
 
   @@map("users")
 }
@@ -44,4 +46,44 @@ model RefreshToken {
   @@index([userId])
   @@index([tokenHash])
   @@map("refresh_tokens")
+}
+
+// ============================================================
+// CheckIn Model - Daily safety check-in records
+// @task TASK-005
+// ============================================================
+model CheckIn {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  checkInDate String   @map("check_in_date") // YYYY-MM-DD format
+  checkedInAt DateTime @default(now()) @map("checked_in_at")
+  note        String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, checkInDate]) // One check-in per day per user
+  @@index([userId])
+  @@index([checkInDate])
+  @@map("check_ins")
+}
+
+// ============================================================
+// CheckInSettings Model - User preferences for check-in
+// @task TASK-005
+// ============================================================
+model CheckInSettings {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  deadlineTime    String   @default("10:00") @map("deadline_time") // HH:mm format
+  reminderTime    String   @default("09:00") @map("reminder_time") // HH:mm format
+  reminderEnabled Boolean  @default(true) @map("reminder_enabled")
+  timezone        String   @default("Asia/Shanghai")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("check_in_settings")
 }

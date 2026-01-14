@@ -1,0 +1,165 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-003 - Security Event Logging
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "IR-003"
+task_id: "TASK-003"
+handoff_id: "HO-003"
+design_state_version: "0.6.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Added NestJS Logger to AuthService with security event logging for:
+  - Registration events (success, duplicate email attempts)
+  - Login events (success, user not found, invalid password)
+  - Token refresh events (success, invalid/expired token)
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-003-1"
+    description: "Add Logger instance to AuthService"
+    code: |
+      import { Logger } from '@nestjs/common';
+
+      private readonly logger = new Logger(AuthService.name);
+
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-003-2"
+    description: "Log registration events"
+    locations:
+      - line: 49
+        code: "this.logger.warn(`Registration attempt with existing email: ${dto.email}`);"
+      - line: 67
+        code: "this.logger.warn(`Registration race condition - duplicate email: ${dto.email}`);"
+      - line: 82
+        code: "this.logger.log(`User registered: ${user.email}`);"
+
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-003-3"
+    description: "Log login events"
+    locations:
+      - line: 98
+        code: "this.logger.warn(`Login failed - user not found: ${dto.email}`);"
+      - line: 107
+        code: "this.logger.warn(`Login failed - invalid password: ${dto.email}`);"
+      - line: 120
+        code: "this.logger.log(`User logged in: ${user.email}`);"
+
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    task: "TASK-003-4"
+    description: "Log token refresh events"
+    locations:
+      - line: 140
+        code: "this.logger.warn('Token refresh failed - invalid or expired token');"
+      - line: 153
+        code: "this.logger.log(`Token refreshed for user: ${consumedToken.user.email}`);"
+
+# ============================================================
+# Log Events Summary
+# ============================================================
+log_events:
+  success_events:
+    - event: "User registered"
+      level: "log"
+      format: "User registered: {email}"
+
+    - event: "User logged in"
+      level: "log"
+      format: "User logged in: {email}"
+
+    - event: "Token refreshed"
+      level: "log"
+      format: "Token refreshed for user: {email}"
+
+  failure_events:
+    - event: "Registration with existing email"
+      level: "warn"
+      format: "Registration attempt with existing email: {email}"
+
+    - event: "Registration race condition"
+      level: "warn"
+      format: "Registration race condition - duplicate email: {email}"
+
+    - event: "Login user not found"
+      level: "warn"
+      format: "Login failed - user not found: {email}"
+
+    - event: "Login invalid password"
+      level: "warn"
+      format: "Login failed - invalid password: {email}"
+
+    - event: "Token refresh failed"
+      level: "warn"
+      format: "Token refresh failed - invalid or expired token"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "Login failures logged with email"
+    status: "pass"
+    evidence: "Lines 98, 107 - warn level logs for user not found and invalid password"
+
+  - criterion: "Successful logins logged"
+    status: "pass"
+    evidence: "Line 120 - log level for successful login"
+
+  - criterion: "Registration events logged"
+    status: "pass"
+    evidence: "Lines 49, 67, 82 - warn for duplicates, log for success"
+
+  - criterion: "Use NestJS Logger"
+    status: "pass"
+    evidence: "Line 33 - private readonly logger = new Logger(AuthService.name)"
+
+  - criterion: "Appropriate log levels"
+    status: "pass"
+    evidence: "warn for failures/security events, log for success"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Never log passwords or tokens"
+    status: "compliant"
+    evidence: "Only email addresses logged, no sensitive data"
+
+  - constraint: "Use NestJS Logger (not console.log)"
+    status: "compliant"
+    evidence: "Using Logger from @nestjs/common"
+
+  - constraint: "Log level: warn for failures, log for success"
+    status: "compliant"
+    evidence: "All failure events use warn, success events use log"
+
+  - constraint: "Keep function size under 50 lines"
+    status: "compliant"
+    evidence: "No function exceeds 50 lines"
+
+  - constraint: "Email is safe to log"
+    status: "compliant"
+    evidence: "Email logged for audit trail purposes"
+
+# ============================================================
+# Issue Resolution
+# ============================================================
+resolves:
+  - review_report: "RR-001-auth.yaml"
+    issue_id: "ISS-001"
+    description: "Login failures and success events are not logged"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

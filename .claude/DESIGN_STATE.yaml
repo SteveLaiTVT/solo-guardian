@@ -9,10 +9,10 @@
 # ============================================================
 
 meta:
-  version: "0.5.0"
+  version: "0.8.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
-  branch: "feature/iter-001"
+  branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
 
@@ -68,18 +68,28 @@ architecture:
 # ============================================================
 modules:
   auth:
-    status: "in_progress"  # designing | in_progress | done | blocked
+    status: "done"  # designing | in_progress | done | blocked
     owner: "B Session"
     description: "User authentication and authorization"
     skeleton_created: true
     skeleton_version: "0.2.0"
+    completed_iteration: "iter-002"
+    hardened: true
     features:
       - name: "Email/Password Login"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
       - name: "JWT Token Management"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
+      - name: "Security Event Logging"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-002"
+      - name: "Config Validation"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-002"
       - name: "OAuth (Google/Apple)"
         priority: "P1"
         status: "pending"
@@ -98,6 +108,38 @@ modules:
       - name: "Profile editing"
         priority: "P1"
         status: "pending"
+
+  check_in:
+    status: "in_progress"  # designing | in_progress | done | blocked
+    owner: "B Session"
+    description: "Core check-in functionality - daily safety check-in"
+    skeleton_created: true
+    skeleton_version: "0.8.0"
+    features:
+      - name: "Daily Check-in"
+        priority: "P0"
+        status: "in_progress"
+        description: "User can check in with one tap to confirm safety"
+      - name: "Check-in Settings"
+        priority: "P0"
+        status: "in_progress"
+        description: "User can set daily deadline and reminder time"
+      - name: "Check-in History"
+        priority: "P0"
+        status: "in_progress"
+        description: "View past check-in records"
+      - name: "Today Status"
+        priority: "P0"
+        status: "in_progress"
+        description: "Check if user has checked in today"
+      - name: "Missed Check-in Detection"
+        priority: "P1"
+        status: "pending"
+        description: "Scheduled job to detect missed check-ins (future)"
+      - name: "Check-in Streak"
+        priority: "P2"
+        status: "pending"
+        description: "Track consecutive check-in days (gamification)"
 
 # ============================================================
 # 3. API Design Constraints
@@ -165,36 +207,104 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-001"
-  goal: "Complete user authentication MVP"
+  id: "iter-003"
+  goal: "Implement check-in module MVP - core safety check-in functionality"
   started_at: "2026-01-14"
 
   tasks:
-    - id: "TASK-002"
-      title: "Backend: Auth module - Remove leftover TODO comment"
+    - id: "TASK-005"
+      title: "Database: Add CheckIn and CheckInSettings models"
       assigned_to: "B Session"
       status: "pending"
-      handoff_doc: ".claude/handoffs/iter-001/HO-002-auth-cleanup.yaml"
+      priority: "P0"
+      handoff_doc: ".claude/handoffs/iter-003/HO-005-checkin-schema.yaml"
       acceptance_criteria:
-        - "Remove TODO comment in register.dto.ts lines 6-11"
-        - "File should have no TODO(B) markers remaining"
+        - "CheckIn model added to schema.prisma"
+        - "CheckInSettings model added to schema.prisma"
+        - "Proper relations to User model"
+        - "prisma generate succeeds"
+        - "prisma migrate dev succeeds"
       files:
-        - "apps/backend/src/modules/auth/dto/register.dto.ts"
+        - "apps/backend/prisma/schema.prisma"
+
+    - id: "TASK-006"
+      title: "Backend: Check-in module skeleton with TODOs"
+      assigned_to: "B Session"
+      status: "pending"
+      priority: "P0"
+      depends_on: "TASK-005"
+      handoff_doc: ".claude/handoffs/iter-003/HO-006-checkin-module.yaml"
+      acceptance_criteria:
+        - "POST /api/v1/check-ins creates a check-in"
+        - "GET /api/v1/check-ins returns user's check-in history"
+        - "GET /api/v1/check-ins/today returns today's status"
+        - "GET /api/v1/check-in-settings returns user's settings"
+        - "PUT /api/v1/check-in-settings updates settings"
+        - "All endpoints require authentication"
+        - "Follows Controller/Service/Repository pattern"
+      files:
+        - "apps/backend/src/modules/check-in/check-in.module.ts"
+        - "apps/backend/src/modules/check-in/check-in.controller.ts"
+        - "apps/backend/src/modules/check-in/check-in.service.ts"
+        - "apps/backend/src/modules/check-in/check-in.repository.ts"
+        - "apps/backend/src/modules/check-in/dto/create-check-in.dto.ts"
+        - "apps/backend/src/modules/check-in/dto/check-in-settings.dto.ts"
+        - "apps/backend/src/modules/check-in/dto/check-in-response.dto.ts"
 
   blocked_tasks: []
+  completed_tasks: []
 
-  completed_tasks:
-    - id: "TASK-000"
-      title: "Backend: Project infrastructure setup"
-      completed_at: "2026-01-14"
-      review_verdict: "pass"
-      review_doc: ".claude/handoffs/iter-001/RR-000-infrastructure.yaml"
+# ============================================================
+# 5.1 Iteration History
+# ============================================================
+iteration_history:
+  - id: "iter-002"
+    goal: "Auth module hardening - security logging and config validation"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      Auth module hardening complete:
+      - Security event logging for login/register/refresh
+      - JWT secret validation on startup (fail-fast)
+      - All deferred issues from iter-001 resolved
+    tasks_completed:
+      - id: "TASK-003"
+        title: "Backend: Add security event logging"
+        review_verdict: "pass"
+        resolves: "ISS-001"
+      - id: "TASK-004"
+        title: "Backend: Add JWT secret validation"
+        review_verdict: "pass"
+        resolves: "ISS-002"
+    issues_resolved:
+      - "ISS-001: Security event logging"
+      - "ISS-002: JWT secret validation"
 
-    - id: "TASK-001"
-      title: "Backend: Auth module - Fill TODOs"
-      completed_at: "2026-01-14"
-      review_verdict: "conditional_pass"
-      review_doc: ".claude/handoffs/iter-001/RR-001-auth.yaml"
+  - id: "iter-001"
+    goal: "Complete user authentication MVP"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      Successfully implemented auth module MVP:
+      - Email/password registration and login
+      - JWT access/refresh token management
+      - Refresh token rotation
+      - Password hashing with bcrypt (cost 12)
+    tasks_completed:
+      - id: "TASK-000"
+        title: "Backend: Project infrastructure setup"
+        review_verdict: "pass"
+      - id: "TASK-001"
+        title: "Backend: Auth module - Fill TODOs"
+        review_verdict: "conditional_pass"
+      - id: "TASK-002"
+        title: "Backend: Auth module - Remove leftover TODO"
+        review_verdict: "pass"
+    deferred_issues:
+      - "ISS-001: Security event logging → iter-002 TASK-003"
+      - "ISS-002: JWT secret validation → iter-002 TASK-004"
 
 # ============================================================
 # 6. Pending Decisions
@@ -227,10 +337,43 @@ decision_log:
     decision: "Use feature branches for iterations"
     rationale: "Keep main branch stable, feature/iter-XXX for development"
 
+  - id: "ADR-004"
+    date: "2026-01-14"
+    decision: "Check-in uses date-based uniqueness (one per day)"
+    rationale: |
+      - User can only check in once per day (no duplicate check-ins)
+      - Check-in date stored as DATE type (not timestamp) for easy querying
+      - Allows "re-check-in" by updating existing record
+      - Simplifies "did user check in today?" queries
+
+  - id: "ADR-005"
+    date: "2026-01-14"
+    decision: "Check-in settings default to 10:00 deadline if not set"
+    rationale: |
+      - New users should have sensible defaults
+      - 10:00 AM is a reasonable morning deadline
+      - User can customize after registration
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-002"
+    task: "TASK-003"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    resolves: "ISS-001"
+
+  - iteration: "iter-002"
+    task: "TASK-004"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    resolves: "ISS-002"
+
   - iteration: "iter-001"
     task: "TASK-000"
     reviewer: "C Session"
@@ -241,7 +384,7 @@ review_history:
         type: "consistency"
         severity: "suggestion"
         description: "Consider using NestJS Logger instead of console.log"
-        resolution: "Optional improvement"
+        resolution: "Resolved in iter-002 TASK-003"
       - id: "ISS-007"
         type: "consistency"
         severity: "suggestion"
@@ -258,12 +401,12 @@ review_history:
         type: "security"
         severity: "warning"
         description: "Missing security event logging"
-        resolution: "Deferred to iter-002"
+        resolution: "Resolved in iter-002 TASK-003"
       - id: "ISS-002"
         type: "error_handling"
         severity: "warning"
         description: "JWT secrets not validated on startup"
-        resolution: "Deferred to iter-002"
+        resolution: "Resolved in iter-002 TASK-004"
       - id: "ISS-003"
         type: "consistency"
         severity: "warning"
@@ -273,4 +416,4 @@ review_history:
         type: "todo_incomplete"
         severity: "suggestion"
         description: "Leftover TODO in register.dto.ts"
-        resolution: "Created TASK-002"
+        resolution: "Resolved in iter-001 TASK-002"
