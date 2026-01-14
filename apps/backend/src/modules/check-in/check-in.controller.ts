@@ -8,7 +8,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Body,
   Query,
   HttpCode,
@@ -18,11 +17,9 @@ import {
 import { CheckInService } from './check-in.service';
 import {
   CreateCheckInDto,
-  UpdateCheckInSettingsDto,
   CheckInResponseDto,
   TodayCheckInStatusDto,
   CheckInHistoryDto,
-  CheckInSettingsResponseDto,
 } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -55,20 +52,5 @@ export class CheckInController {
     @CurrentUser() userId: string,
   ): Promise<CheckInHistoryDto> {
     return this.checkInService.getHistory(userId, page, pageSize);
-  }
-
-  @Get('../check-in-settings')
-  async getSettings(
-    @CurrentUser() userId: string,
-  ): Promise<CheckInSettingsResponseDto> {
-    return this.checkInService.getSettings(userId);
-  }
-
-  @Put('../check-in-settings')
-  async updateSettings(
-    @Body() dto: UpdateCheckInSettingsDto,
-    @CurrentUser() userId: string,
-  ): Promise<CheckInSettingsResponseDto> {
-    return this.checkInService.updateSettings(userId, dto);
   }
 }
