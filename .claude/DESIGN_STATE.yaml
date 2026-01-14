@@ -9,11 +9,11 @@
 # ============================================================
 
 meta:
-  version: "0.1.0"
+  version: "0.2.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
-  project_name: "Your Project Name"
-  description: "Brief project description"
+  project_name: "Solo Guardian"
+  description: "Safety check-in app for people living alone"
 
 # ============================================================
 # 1. Technical Architecture
@@ -67,16 +67,18 @@ architecture:
 # ============================================================
 modules:
   auth:
-    status: "designing"  # designing | in_progress | done | blocked
-    owner: "A Session"
+    status: "in_progress"  # designing | in_progress | done | blocked
+    owner: "B Session"
     description: "User authentication and authorization"
+    skeleton_created: true
+    skeleton_version: "0.2.0"
     features:
       - name: "Email/Password Login"
         priority: "P0"
-        status: "pending"
+        status: "in_progress"
       - name: "JWT Token Management"
         priority: "P0"
-        status: "pending"
+        status: "in_progress"
       - name: "OAuth (Google/Apple)"
         priority: "P1"
         status: "pending"
@@ -165,22 +167,30 @@ current_iteration:
   id: "iter-001"
   goal: "Complete user authentication MVP"
   started_at: "2026-01-14"
-  
+
   tasks:
     - id: "TASK-001"
-      title: "Backend: Auth module base structure"
+      title: "Backend: Auth module - Fill TODOs"
       assigned_to: "B Session"
       status: "pending"  # pending | in_progress | review | done | blocked
+      skeleton_ready: true
+      handoff_doc: ".claude/handoffs/iter-001/HO-001-auth.yaml"
       acceptance_criteria:
-        - "POST /api/v1/auth/register available"
-        - "POST /api/v1/auth/login available"
-        - "Password encrypted with bcrypt"
-      files_to_create:
+        - "POST /api/v1/auth/register returns AuthResult"
+        - "POST /api/v1/auth/login returns AuthResult"
+        - "POST /api/v1/auth/refresh returns new tokens"
+        - "POST /api/v1/auth/logout invalidates token"
+        - "Password encrypted with bcrypt (cost 12+)"
+        - "Refresh token rotation implemented"
+      skeleton_files:
         - "apps/backend/src/modules/auth/auth.controller.ts"
         - "apps/backend/src/modules/auth/auth.service.ts"
         - "apps/backend/src/modules/auth/auth.repository.ts"
-        - "apps/backend/src/modules/auth/dto/*.ts"
-        
+        - "apps/backend/src/modules/auth/auth.module.ts"
+        - "apps/backend/src/modules/auth/dto/register.dto.ts"
+        - "apps/backend/src/modules/auth/dto/login.dto.ts"
+        - "apps/backend/src/modules/auth/dto/auth-result.dto.ts"
+
   blocked_tasks: []
   completed_tasks: []
 

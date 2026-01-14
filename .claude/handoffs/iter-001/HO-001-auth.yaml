@@ -1,0 +1,279 @@
+# ============================================================
+# HANDOFF DOCUMENT: HO-001 - Auth Module Implementation
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-001"
+design_state_version: "0.2.0"
+iteration: "iter-001"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the authentication module by filling in all TODO(B) markers
+  in the skeleton files. This includes user registration, login,
+  token refresh, and logout functionality.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  packages_to_install:
+    - "@nestjs/jwt"
+    - "@nestjs/config"
+    - "bcrypt"
+    - "@types/bcrypt"
+    - "class-validator"
+    - "class-transformer"
+
+  environment_variables:
+    - name: "JWT_ACCESS_SECRET"
+      description: "Secret key for signing access tokens"
+      example: "your-access-secret-key-min-32-chars"
+    - name: "JWT_REFRESH_SECRET"
+      description: "Secret key for signing refresh tokens"
+      example: "your-refresh-secret-key-min-32-chars"
+
+  database_setup:
+    - "Prisma schema must include User model"
+    - "Prisma schema must include RefreshToken model"
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-001-A"
+    title: "Setup Prisma models for Auth"
+    priority: 1
+    description: |
+      Create the necessary Prisma models for authentication.
+      This should be done before implementing repository methods.
+
+    deliverables:
+      - path: "apps/backend/prisma/schema.prisma"
+        action: "Add User and RefreshToken models"
+
+    model_requirements:
+      User:
+        - "id: String (UUID, primary key)"
+        - "email: String (unique)"
+        - "passwordHash: String"
+        - "name: String"
+        - "createdAt: DateTime"
+        - "updatedAt: DateTime"
+      RefreshToken:
+        - "id: String (UUID, primary key)"
+        - "tokenHash: String (unique)"
+        - "userId: String (foreign key to User)"
+        - "expiresAt: DateTime"
+        - "createdAt: DateTime"
+
+  - id: "TASK-001-B"
+    title: "Implement AuthRepository methods"
+    priority: 2
+    description: "Fill in all TODO(B) markers in auth.repository.ts"
+
+    skeleton_file: "apps/backend/src/modules/auth/auth.repository.ts"
+
+    todos:
+      - marker: "TODO(B): Inject PrismaService"
+        guidance: "Import and inject PrismaService in constructor"
+
+      - marker: "TODO(B): Implement findByEmail"
+        guidance: |
+          - Use prisma.user.findUnique({ where: { email } })
+          - Convert email to lowercase for case-insensitive lookup
+          - Return full user including passwordHash
+
+      - marker: "TODO(B): Implement findById"
+        guidance: |
+          - Use prisma.user.findUnique({ where: { id } })
+          - Exclude passwordHash from result using select
+
+      - marker: "TODO(B): Implement createUser"
+        guidance: |
+          - Use prisma.user.create()
+          - Return user without passwordHash
+
+      - marker: "TODO(B): Implement saveRefreshToken"
+        guidance: |
+          - Use prisma.refreshToken.create()
+          - Store tokenHash, userId, expiresAt
+
+      - marker: "TODO(B): Implement findValidRefreshToken"
+        guidance: |
+          - Find token by hash
+          - Check expiresAt > now
+          - Include user relation
+
+      - marker: "TODO(B): Implement deleteRefreshToken"
+        guidance: "Use prisma.refreshToken.delete()"
+
+  - id: "TASK-001-C"
+    title: "Implement AuthService methods"
+    priority: 3
+    description: "Fill in all TODO(B) markers in auth.service.ts"
+
+    skeleton_file: "apps/backend/src/modules/auth/auth.service.ts"
+
+    todos:
+      - marker: "TODO(B): Inject JwtService and ConfigService"
+        guidance: "Add to constructor parameters"
+
+      - marker: "TODO(B): Implement hashPassword"
+        guidance: |
+          - import * as bcrypt from 'bcrypt'
+          - return bcrypt.hash(password, 12)
+
+      - marker: "TODO(B): Implement verifyPassword"
+        guidance: "return bcrypt.compare(password, hash)"
+
+      - marker: "TODO(B): Implement hashRefreshToken"
+        guidance: |
+          - Use crypto.createHash('sha256')
+          - Return hex digest
+
+      - marker: "TODO(B): Implement generateTokens"
+        guidance: |
+          - Access token: jwtService.sign({ sub: userId }, { secret, expiresIn: '15m' })
+          - Refresh token: jwtService.sign({ sub: userId }, { secret: refreshSecret, expiresIn: '7d' })
+          - Get secrets from configService
+
+      - marker: "TODO(B): Implement register"
+        guidance: |
+          1. const existing = await authRepository.findByEmail(dto.email.toLowerCase())
+          2. if (existing) throw new ConflictException('Email already registered')
+          3. const passwordHash = await this.hashPassword(dto.password)
+          4. const user = await authRepository.createUser({ email, passwordHash, name })
+          5. const tokens = await this.generateTokens(user.id)
+          6. await authRepository.saveRefreshToken({ userId, tokenHash, expiresAt })
+          7. return { user, tokens }
+
+      - marker: "TODO(B): Implement login"
+        guidance: |
+          1. Find user by email
+          2. If not found, throw UnauthorizedException
+          3. Verify password
+          4. If invalid, throw UnauthorizedException
+          5. Generate and store tokens
+          6. Return result
+
+      - marker: "TODO(B): Implement refreshTokens"
+        guidance: |
+          1. Hash the incoming refresh token
+          2. Find valid token in database
+          3. If not valid, throw UnauthorizedException
+          4. Delete old token (rotation)
+          5. Generate new tokens
+          6. Store new refresh token
+          7. Return result
+
+      - marker: "TODO(B): Implement logout"
+        guidance: |
+          1. Hash the refresh token
+          2. Delete from database
+
+  - id: "TASK-001-D"
+    title: "Configure AuthModule"
+    priority: 4
+    description: "Complete the module configuration"
+
+    skeleton_file: "apps/backend/src/modules/auth/auth.module.ts"
+
+    todos:
+      - marker: "TODO(B): Add JwtModule.registerAsync configuration"
+        guidance: |
+          Uncomment and complete the JwtModule configuration.
+          Import ConfigModule in the imports array.
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  functional:
+    - "POST /api/v1/auth/register creates user and returns tokens"
+    - "POST /api/v1/auth/login authenticates and returns tokens"
+    - "POST /api/v1/auth/refresh returns new token pair"
+    - "POST /api/v1/auth/logout invalidates refresh token"
+    - "Duplicate email registration returns 409 Conflict"
+    - "Invalid credentials return 401 Unauthorized"
+    - "Invalid/expired refresh token returns 401"
+
+  security:
+    - "Passwords are hashed with bcrypt (cost 12+)"
+    - "Refresh tokens are hashed before storage"
+    - "Refresh token rotation is implemented"
+    - "JWT secrets are loaded from environment"
+
+  code_quality:
+    - "No `any` types used"
+    - "All functions have return types"
+    - "No function exceeds 50 lines"
+    - "Service does not call Prisma directly"
+
+# ============================================================
+# Constraints (MUST FOLLOW)
+# ============================================================
+constraints:
+  - "Do NOT call Prisma directly in Service - use Repository"
+  - "Do NOT hardcode JWT secrets - use ConfigService"
+  - "Do NOT use `any` type anywhere"
+  - "Keep functions under 50 lines"
+  - "Use bcrypt cost factor 12 or higher"
+  - "Hash refresh tokens before storing"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "OAuth login (Google/Apple) - planned for iter-002"
+  - "Email verification"
+  - "Password reset"
+  - "Rate limiting"
+  - "Account lockout"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes: |
+  After implementation, test these scenarios:
+
+  1. Register new user:
+     curl -X POST http://localhost:3000/api/v1/auth/register \
+       -H "Content-Type: application/json" \
+       -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
+
+  2. Login:
+     curl -X POST http://localhost:3000/api/v1/auth/login \
+       -H "Content-Type: application/json" \
+       -d '{"email":"test@example.com","password":"password123"}'
+
+  3. Refresh token:
+     curl -X POST http://localhost:3000/api/v1/auth/refresh \
+       -H "Content-Type: application/json" \
+       -d '{"refreshToken":"<token_from_login>"}'
+
+  4. Logout:
+     curl -X POST http://localhost:3000/api/v1/auth/logout \
+       -H "Content-Type: application/json" \
+       -d '{"refreshToken":"<token>"}'
+
+# ============================================================
+# After Completion
+# ============================================================
+after_completion: |
+  When all TODOs are filled and tests pass:
+  1. Create Implementation Report (IR-001-auth.yaml)
+  2. Commit with message: "feat(auth): implement authentication module
+
+     - User registration with bcrypt password hashing
+     - JWT access/refresh token authentication
+     - Refresh token rotation
+     - Logout functionality
+
+     Closes TASK-001"
+  3. Notify C Session for code review
