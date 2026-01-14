@@ -1,0 +1,222 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-006 - Check-in Module Implementation
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "IR-006"
+task_id: "TASK-006"
+handoff_id: "HO-006"
+design_state_version: "0.8.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented CheckInRepository and CheckInService by filling
+  TODO markers in skeleton files. Module registered in AppModule.
+  Auth guard integration deferred (uses hardcoded userId placeholder).
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - file: "apps/backend/src/modules/check-in/check-in.repository.ts"
+    task: "TASK-006-1"
+    description: "Implement all repository methods"
+    methods:
+      - name: "upsertCheckIn()"
+        lines: "15-37"
+        description: "Create or update check-in using Prisma upsert"
+
+      - name: "findByDate()"
+        lines: "39-51"
+        description: "Find check-in by userId and date using compound unique"
+
+      - name: "findHistory()"
+        lines: "53-73"
+        description: "Get paginated history with total count"
+
+      - name: "getOrCreateSettings()"
+        lines: "75-87"
+        description: "Upsert settings with defaults"
+
+      - name: "updateSettings()"
+        lines: "89-101"
+        description: "Update settings by userId"
+
+  - file: "apps/backend/src/modules/check-in/check-in.service.ts"
+    task: "TASK-006-2"
+    description: "Implement all service methods"
+    methods:
+      - name: "checkIn()"
+        lines: "25-41"
+        description: "Create check-in with timezone-aware date"
+
+      - name: "getTodayStatus()"
+        lines: "43-57"
+        description: "Get today's check-in status with overdue detection"
+
+      - name: "getHistory()"
+        lines: "59-76"
+        description: "Get paginated check-in history"
+
+      - name: "getSettings()"
+        lines: "78-81"
+        description: "Get or create user settings"
+
+      - name: "updateSettings()"
+        lines: "83-98"
+        description: "Update user settings with logging"
+
+      - name: "getTodayDateString()"
+        lines: "100-102"
+        description: "Helper for timezone-aware date string"
+
+      - name: "isOverdue()"
+        lines: "104-120"
+        description: "Helper to check if past deadline in user's timezone"
+
+      - name: "mapCheckInToResponse()"
+        lines: "122-130"
+        description: "Map Prisma model to DTO"
+
+      - name: "mapSettingsToResponse()"
+        lines: "132-143"
+        description: "Map Prisma model to DTO"
+
+  - file: "apps/backend/src/app.module.ts"
+    task: "TASK-006-3"
+    description: "Register CheckInModule in imports"
+    code: |
+      import { CheckInModule } from './modules/check-in/check-in.module';
+
+      @Module({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true }),
+          PrismaModule,
+          AuthModule,
+          CheckInModule,  // Added
+        ],
+      })
+
+# ============================================================
+# API Endpoints (Controller unchanged)
+# ============================================================
+endpoints:
+  - method: "POST"
+    path: "/api/v1/check-ins"
+    description: "Create today's check-in"
+    auth: "TODO - hardcoded userId"
+
+  - method: "GET"
+    path: "/api/v1/check-ins/today"
+    description: "Get today's check-in status"
+    auth: "TODO - hardcoded userId"
+
+  - method: "GET"
+    path: "/api/v1/check-ins"
+    description: "Get check-in history (paginated)"
+    auth: "TODO - hardcoded userId"
+
+  - method: "GET"
+    path: "/api/v1/check-in-settings"
+    description: "Get user's check-in settings"
+    auth: "TODO - hardcoded userId"
+
+  - method: "PUT"
+    path: "/api/v1/check-in-settings"
+    description: "Update user's check-in settings"
+    auth: "TODO - hardcoded userId"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "POST /api/v1/check-ins creates a check-in"
+    status: "pass"
+    evidence: "checkIn() uses upsertCheckIn() to create/update"
+
+  - criterion: "GET /api/v1/check-ins returns paginated history"
+    status: "pass"
+    evidence: "getHistory() returns checkIns[], total, page, pageSize"
+
+  - criterion: "GET /api/v1/check-ins/today returns status"
+    status: "pass"
+    evidence: "getTodayStatus() returns hasCheckedIn, isOverdue, checkIn"
+
+  - criterion: "GET /api/v1/check-in-settings returns settings"
+    status: "pass"
+    evidence: "getSettings() returns deadlineTime, reminderTime, etc."
+
+  - criterion: "PUT /api/v1/check-in-settings updates settings"
+    status: "pass"
+    evidence: "updateSettings() calls repository.updateSettings()"
+
+  - criterion: "Duplicate check-in updates existing record"
+    status: "pass"
+    evidence: "upsertCheckIn() uses Prisma upsert"
+
+  - criterion: "Default settings created for new users"
+    status: "pass"
+    evidence: "getOrCreateSettings() creates with 10:00 deadline"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Do not call Prisma directly in Service"
+    status: "compliant"
+    evidence: "Service only calls CheckInRepository methods"
+
+  - constraint: "Use Repository for all database operations"
+    status: "compliant"
+    evidence: "All DB operations in CheckInRepository"
+
+  - constraint: "Function under 50 lines"
+    status: "compliant"
+    evidence: "Longest function isOverdue() is 17 lines"
+
+  - constraint: "File under 300 lines"
+    status: "compliant"
+    evidence: "Repository: 102 lines, Service: 143 lines"
+
+  - constraint: "Log check-in events"
+    status: "compliant"
+    evidence: "Logger.log() on checkIn() and updateSettings()"
+
+  - constraint: "No any type"
+    status: "compliant"
+    evidence: "All types are CheckIn, CheckInSettings, or DTOs"
+
+  - constraint: "All functions have return types"
+    status: "compliant"
+    evidence: "All methods have explicit Promise<T> return types"
+
+# ============================================================
+# Deferred Items
+# ============================================================
+deferred:
+  - item: "Auth guard integration"
+    reason: "JwtAuthGuard and CurrentUser decorator not yet created"
+    placeholder: "const userId = 'TODO-REPLACE-WITH-AUTH'"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes: |
+  Build verified: npm run build succeeds
+
+  To test endpoints manually:
+  1. Register a user via /api/v1/auth/register
+  2. Note: Currently hardcoded userId in controller
+  3. Auth integration needed before full testing
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

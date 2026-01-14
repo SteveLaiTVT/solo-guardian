@@ -1,13 +1,14 @@
 /**
  * @file app.module.ts
  * @description Root application module
- * @task TASK-000-5
- * @design_state_version 0.4.0
+ * @task TASK-000-5, TASK-006
+ * @design_state_version 0.8.0
  */
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CheckInModule } from './modules/check-in/check-in.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    CheckInModule,
   ],
 })
 export class AppModule {}

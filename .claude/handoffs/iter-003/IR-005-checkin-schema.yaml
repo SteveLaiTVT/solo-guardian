@@ -1,0 +1,139 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-005 - Check-in Database Schema
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "IR-005"
+task_id: "TASK-005"
+handoff_id: "HO-005"
+design_state_version: "0.8.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Added CheckIn and CheckInSettings models to Prisma schema
+  to support daily check-in functionality. Migration applied
+  successfully.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - file: "apps/backend/prisma/schema.prisma"
+    task: "TASK-005-1"
+    description: "Add CheckIn model"
+    code: |
+      model CheckIn {
+        id          String   @id @default(uuid())
+        userId      String   @map("user_id")
+        checkInDate String   @map("check_in_date") // YYYY-MM-DD format
+        checkedInAt DateTime @default(now()) @map("checked_in_at")
+        note        String?  @db.VarChar(500)
+        createdAt   DateTime @default(now()) @map("created_at")
+        updatedAt   DateTime @updatedAt @map("updated_at")
+
+        user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+        @@unique([userId, checkInDate])
+        @@index([userId])
+        @@index([checkInDate])
+        @@map("check_ins")
+      }
+
+  - file: "apps/backend/prisma/schema.prisma"
+    task: "TASK-005-2"
+    description: "Add CheckInSettings model"
+    code: |
+      model CheckInSettings {
+        id              String   @id @default(uuid())
+        userId          String   @unique @map("user_id")
+        deadlineTime    String   @default("10:00") @map("deadline_time")
+        reminderTime    String   @default("09:00") @map("reminder_time")
+        reminderEnabled Boolean  @default(true) @map("reminder_enabled")
+        timezone        String   @default("Asia/Shanghai")
+        createdAt       DateTime @default(now()) @map("created_at")
+        updatedAt       DateTime @updatedAt @map("updated_at")
+
+        user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+        @@map("check_in_settings")
+      }
+
+  - file: "apps/backend/prisma/schema.prisma"
+    task: "TASK-005-3"
+    description: "Update User model with relations"
+    code: |
+      model User {
+        // ... existing fields ...
+        refreshTokens   RefreshToken[]
+        checkIns        CheckIn[]
+        checkInSettings CheckInSettings?
+        // ...
+      }
+
+  - file: "apps/backend/prisma/migrations/20260114145459_add_checkin_models/"
+    task: "TASK-005-4"
+    description: "Migration created and applied"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "CheckIn model added with correct fields"
+    status: "pass"
+    evidence: "Model has id, userId, checkInDate, checkedInAt, note"
+
+  - criterion: "CheckInSettings model added with correct fields"
+    status: "pass"
+    evidence: "Model has deadlineTime, reminderTime, reminderEnabled, timezone"
+
+  - criterion: "Unique constraint on userId + checkInDate"
+    status: "pass"
+    evidence: "@@unique([userId, checkInDate]) in CheckIn model"
+
+  - criterion: "Relations to User model correct"
+    status: "pass"
+    evidence: "User has checkIns[] and checkInSettings?"
+
+  - criterion: "prisma generate succeeds"
+    status: "pass"
+    evidence: "Generated Prisma Client successfully"
+
+  - criterion: "prisma migrate dev succeeds"
+    status: "pass"
+    evidence: "Migration 20260114145459_add_checkin_models applied"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Use snake_case for database column names (@map)"
+    status: "compliant"
+    evidence: "All columns use @map with snake_case"
+
+  - constraint: "Use plural for table names (@map)"
+    status: "compliant"
+    evidence: "check_ins, check_in_settings"
+
+  - constraint: "UUID for primary keys"
+    status: "compliant"
+    evidence: "@id @default(uuid()) on all models"
+
+  - constraint: "Cascade delete when user is deleted"
+    status: "compliant"
+    evidence: "onDelete: Cascade on both relations"
+
+  - constraint: "Index on frequently queried fields"
+    status: "compliant"
+    evidence: "@@index([userId]), @@index([checkInDate])"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"
