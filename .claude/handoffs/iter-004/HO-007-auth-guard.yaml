@@ -1,0 +1,209 @@
+# ============================================================
+# HANDOFF: HO-007 - JWT Auth Guard
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-007"
+design_state_version: "0.9.0"
+priority: "P0"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Create JWT authentication guard and decorators to protect
+  API endpoints. Replace hardcoded userId in check-in controller
+  with actual authenticated user.
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  The check-in module (iter-003) was implemented with hardcoded
+  userId placeholders. Now we need to:
+  1. Create JwtAuthGuard to validate access tokens
+  2. Create CurrentUser decorator to extract user ID
+  3. Apply guard to check-in endpoints
+  4. Keep auth endpoints (login, register, refresh) public
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-007-1"
+    title: "Create JWT Strategy"
+    file: "apps/backend/src/modules/auth/strategies/jwt.strategy.ts"
+    action: |
+      Create Passport JWT strategy:
+
+      ```typescript
+      import { Injectable, UnauthorizedException } from '@nestjs/common';
+      import { PassportStrategy } from '@nestjs/passport';
+      import { ExtractJwt, Strategy } from 'passport-jwt';
+      import { ConfigService } from '@nestjs/config';
+
+      interface JwtPayload {
+        sub: string;  // user ID
+      }
+
+      @Injectable()
+      export class JwtStrategy extends PassportStrategy(Strategy) {
+        constructor(configService: ConfigService) {
+          super({
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+          });
+        }
+
+        validate(payload: JwtPayload): { userId: string } {
+          return { userId: payload.sub };
+        }
+      }
+      ```
+
+  - id: "TASK-007-2"
+    title: "Create JwtAuthGuard"
+    file: "apps/backend/src/modules/auth/guards/jwt-auth.guard.ts"
+    action: |
+      Create auth guard:
+
+      ```typescript
+      import { Injectable } from '@nestjs/common';
+      import { AuthGuard } from '@nestjs/passport';
+
+      @Injectable()
+      export class JwtAuthGuard extends AuthGuard('jwt') {}
+      ```
+
+  - id: "TASK-007-3"
+    title: "Create CurrentUser decorator"
+    file: "apps/backend/src/modules/auth/decorators/current-user.decorator.ts"
+    action: |
+      Create decorator to extract user from request:
+
+      ```typescript
+      import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+      export const CurrentUser = createParamDecorator(
+        (data: unknown, ctx: ExecutionContext): string => {
+          const request = ctx.switchToHttp().getRequest();
+          return request.user.userId;
+        },
+      );
+      ```
+
+  - id: "TASK-007-4"
+    title: "Update AuthModule"
+    file: "apps/backend/src/modules/auth/auth.module.ts"
+    action: |
+      Register strategy and export guard:
+
+      ```typescript
+      import { PassportModule } from '@nestjs/passport';
+      import { JwtStrategy } from './strategies/jwt.strategy';
+      import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
+      @Module({
+        imports: [
+          PassportModule,
+          // ... existing imports
+        ],
+        providers: [
+          // ... existing providers
+          JwtStrategy,
+        ],
+        exports: [JwtAuthGuard],
+      })
+      ```
+
+  - id: "TASK-007-5"
+    title: "Add @nestjs/passport dependency"
+    action: |
+      ```bash
+      cd apps/backend
+      npm install @nestjs/passport passport passport-jwt
+      npm install -D @types/passport-jwt
+      ```
+
+  - id: "TASK-007-6"
+    title: "Update CheckInController"
+    file: "apps/backend/src/modules/check-in/check-in.controller.ts"
+    action: |
+      Apply guard and replace hardcoded userId:
+
+      ```typescript
+      import { UseGuards } from '@nestjs/common';
+      import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+      import { CurrentUser } from '../auth/decorators/current-user.decorator';
+
+      @Controller('api/v1/check-ins')
+      @UseGuards(JwtAuthGuard)  // Protect all endpoints
+      export class CheckInController {
+        @Post()
+        async checkIn(
+          @Body() dto: CreateCheckInDto,
+          @CurrentUser() userId: string,  // From token
+        ): Promise<CheckInResponseDto> {
+          return this.checkInService.checkIn(userId, dto);
+        }
+        // ... update other methods similarly
+      }
+      ```
+
+  - id: "TASK-007-7"
+    title: "Create index exports"
+    files:
+      - "apps/backend/src/modules/auth/guards/index.ts"
+      - "apps/backend/src/modules/auth/decorators/index.ts"
+      - "apps/backend/src/modules/auth/strategies/index.ts"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "Check-in endpoints require valid JWT"
+    verification: "Request without token returns 401"
+
+  - description: "Valid token allows access"
+    verification: "Request with valid token succeeds"
+
+  - description: "Expired token rejected"
+    verification: "Request with expired token returns 401"
+
+  - description: "CurrentUser extracts correct userId"
+    verification: "userId in service matches token payload"
+
+  - description: "Auth endpoints remain public"
+    verification: "Login/register/refresh work without token"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use Passport JWT strategy (standard NestJS pattern)"
+  - "Extract user ID from token's 'sub' claim"
+  - "Return 401 Unauthorized for invalid/missing tokens"
+  - "Do not protect auth endpoints (login, register, refresh)"
+  - "File under 50 lines each"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Role-based access control (RBAC)"
+  - "Refresh token validation guard"
+  - "Rate limiting"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  After this task, the check-in module will be fully protected.
+  Users must:
+  1. Register/login to get access token
+  2. Include token in Authorization header
+  3. Token validates automatically via guard

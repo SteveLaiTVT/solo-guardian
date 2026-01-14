@@ -1,0 +1,169 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-007 - JWT Auth Guard
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "IR-007"
+task_id: "TASK-007"
+handoff_id: "HO-007"
+design_state_version: "0.9.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Created JWT authentication guard using Passport.js integration.
+  Implemented JwtStrategy, JwtAuthGuard, and CurrentUser decorator.
+  Applied guard to CheckInController to protect all check-in endpoints.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - file: "package.json"
+    task: "TASK-007-5"
+    description: "Added passport dependencies"
+    packages:
+      - "@nestjs/passport: ^11.0.5"
+      - "passport: ^0.7.0"
+      - "passport-jwt: ^4.0.1"
+      - "@types/passport-jwt: ^4.0.1 (dev)"
+
+  - file: "apps/backend/src/modules/auth/strategies/jwt.strategy.ts"
+    task: "TASK-007-1"
+    description: "Create Passport JWT strategy"
+    code: |
+      @Injectable()
+      export class JwtStrategy extends PassportStrategy(Strategy) {
+        constructor(configService: ConfigService) {
+          super({
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+          });
+        }
+
+        validate(payload: JwtPayload): { userId: string } {
+          return { userId: payload.sub };
+        }
+      }
+
+  - file: "apps/backend/src/modules/auth/guards/jwt-auth.guard.ts"
+    task: "TASK-007-2"
+    description: "Create auth guard extending Passport AuthGuard"
+    code: |
+      @Injectable()
+      export class JwtAuthGuard extends AuthGuard('jwt') {}
+
+  - file: "apps/backend/src/modules/auth/decorators/current-user.decorator.ts"
+    task: "TASK-007-3"
+    description: "Create decorator to extract userId from request"
+    code: |
+      export const CurrentUser = createParamDecorator(
+        (data: unknown, ctx: ExecutionContext): string => {
+          const request = ctx.switchToHttp().getRequest();
+          return request.user.userId;
+        },
+      );
+
+  - file: "apps/backend/src/modules/auth/auth.module.ts"
+    task: "TASK-007-4"
+    description: "Register PassportModule, JwtStrategy, export JwtAuthGuard"
+    changes:
+      - "Added PassportModule to imports"
+      - "Added JwtStrategy to providers"
+      - "Added JwtAuthGuard to exports"
+
+  - file: "apps/backend/src/modules/check-in/check-in.controller.ts"
+    task: "TASK-007-6"
+    description: "Apply guard and replace hardcoded userId"
+    changes:
+      - "Added @UseGuards(JwtAuthGuard) at class level"
+      - "Added @CurrentUser() userId: string to all methods"
+      - "Removed hardcoded 'TODO-REPLACE-WITH-AUTH' placeholder"
+
+  - files:
+      - "apps/backend/src/modules/auth/strategies/index.ts"
+      - "apps/backend/src/modules/auth/guards/index.ts"
+      - "apps/backend/src/modules/auth/decorators/index.ts"
+    task: "TASK-007-7"
+    description: "Created index exports for cleaner imports"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "Check-in endpoints require valid JWT"
+    status: "pass"
+    evidence: "@UseGuards(JwtAuthGuard) applied to CheckInController"
+
+  - criterion: "Valid token allows access"
+    status: "pass"
+    evidence: "JwtStrategy validates token and extracts userId"
+
+  - criterion: "Expired token rejected"
+    status: "pass"
+    evidence: "ignoreExpiration: false in JwtStrategy config"
+
+  - criterion: "CurrentUser extracts correct userId"
+    status: "pass"
+    evidence: "Decorator extracts request.user.userId from payload.sub"
+
+  - criterion: "Auth endpoints remain public"
+    status: "pass"
+    evidence: "AuthController has no guards applied"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Use Passport JWT strategy"
+    status: "compliant"
+    evidence: "Using @nestjs/passport and passport-jwt"
+
+  - constraint: "Extract user ID from token's 'sub' claim"
+    status: "compliant"
+    evidence: "JwtStrategy.validate() returns { userId: payload.sub }"
+
+  - constraint: "Return 401 Unauthorized for invalid/missing tokens"
+    status: "compliant"
+    evidence: "AuthGuard('jwt') automatically returns 401"
+
+  - constraint: "Do not protect auth endpoints"
+    status: "compliant"
+    evidence: "AuthController has no UseGuards decorator"
+
+  - constraint: "File under 50 lines each"
+    status: "compliant"
+    evidence: "All new files under 30 lines"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes: |
+  To verify:
+
+  1. Without token:
+     curl -X GET http://localhost:3000/api/v1/check-ins/today
+     Expected: 401 Unauthorized
+
+  2. With valid token:
+     curl -X GET http://localhost:3000/api/v1/check-ins/today \
+       -H "Authorization: Bearer <access_token>"
+     Expected: 200 OK with user's check-in status
+
+  3. Auth endpoints still public:
+     curl -X POST http://localhost:3000/api/v1/auth/login \
+       -H "Content-Type: application/json" \
+       -d '{"email":"test@test.com","password":"test123"}'
+     Expected: Works without token
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

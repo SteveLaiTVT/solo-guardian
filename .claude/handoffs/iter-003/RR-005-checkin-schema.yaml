@@ -1,0 +1,143 @@
+# ============================================================
+# REVIEW REPORT: RR-005 - Check-in Database Schema
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "RR-005"
+task_id: "TASK-005"
+implementation_report_id: "IR-005"
+design_state_version: "0.8.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 1
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+    suggestions: 0
+  brief: |
+    CheckIn and CheckInSettings models correctly added to Prisma schema.
+    All acceptance criteria met. Proper indexes, constraints, and relations.
+
+# ============================================================
+# File Review
+# ============================================================
+file_review:
+  - file: "apps/backend/prisma/schema.prisma"
+    status: "pass"
+    lines: 89
+    models_added:
+      - name: "CheckIn"
+        lines: "55-70"
+        fields_verified:
+          - "id (UUID) ✓"
+          - "userId (FK to User) ✓"
+          - "checkInDate (String YYYY-MM-DD) ✓"
+          - "checkedInAt (DateTime) ✓"
+          - "note (String? max 500) ✓"
+          - "timestamps ✓"
+        constraints:
+          - "@@unique([userId, checkInDate]) ✓"
+          - "@@index([userId]) ✓"
+          - "@@index([checkInDate]) ✓"
+          - "onDelete: Cascade ✓"
+
+      - name: "CheckInSettings"
+        lines: "76-89"
+        fields_verified:
+          - "id (UUID) ✓"
+          - "userId (unique FK) ✓"
+          - "deadlineTime (default '10:00') ✓"
+          - "reminderTime (default '09:00') ✓"
+          - "reminderEnabled (default true) ✓"
+          - "timezone (default 'Asia/Shanghai') ✓"
+          - "timestamps ✓"
+        constraints:
+          - "userId @unique ✓"
+          - "onDelete: Cascade ✓"
+
+      - name: "User (updated)"
+        lines: "19-32"
+        relations_added:
+          - "checkIns CheckIn[] ✓"
+          - "checkInSettings CheckInSettings? ✓"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - criterion: "CheckIn model added with correct fields"
+    status: "pass"
+    evidence: "All fields present: id, userId, checkInDate, checkedInAt, note"
+
+  - criterion: "CheckInSettings model added with correct fields"
+    status: "pass"
+    evidence: "All fields present with correct defaults"
+
+  - criterion: "Unique constraint on userId + checkInDate"
+    status: "pass"
+    evidence: "@@unique([userId, checkInDate]) on line 66"
+
+  - criterion: "Relations to User model correct"
+    status: "pass"
+    evidence: "User has checkIns[] and checkInSettings?"
+
+  - criterion: "prisma generate succeeds"
+    status: "pass"
+    evidence: "Reported in IR-005"
+
+  - criterion: "prisma migrate dev succeeds"
+    status: "pass"
+    evidence: "Migration 20260114145459_add_checkin_models applied"
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "Use snake_case for database column names"
+    status: "pass"
+    evidence: "@map() used on all columns"
+
+  - constraint: "Use plural for table names"
+    status: "pass"
+    evidence: "check_ins, check_in_settings"
+
+  - constraint: "UUID for primary keys"
+    status: "pass"
+    evidence: "@id @default(uuid())"
+
+  - constraint: "Cascade delete when user is deleted"
+    status: "pass"
+    evidence: "onDelete: Cascade on both models"
+
+  - constraint: "Index on frequently queried fields"
+    status: "pass"
+    evidence: "Indexes on userId and checkInDate"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Clean, well-documented schema with task references"
+  - "Proper ADR adherence (ADR-004, ADR-005)"
+  - "Sensible defaults for settings (10:00 deadline)"
+  - "Compound unique constraint for date-based check-ins"
+  - "VarChar(500) constraint on note field"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  next_steps:
+    - "Merge TASK-005"
+    - "TASK-006 can proceed"
