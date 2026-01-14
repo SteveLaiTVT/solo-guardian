@@ -64,23 +64,6 @@
 - Refresh Token有效期: 7天
 - 实现刷新令牌轮换机制
 
-## 环境变量需求
-```
-DATABASE_URL=postgresql://...
-JWT_ACCESS_SECRET=your-access-secret-key-min-32-chars
-JWT_REFRESH_SECRET=your-refresh-secret-key-min-32-chars
-```
-
-## 依赖包需求
-```
-@nestjs/jwt
-@nestjs/config
-bcrypt
-@types/bcrypt
-class-validator
-class-transformer
-```
-
 ## 代码规范遵循
 - 无`any`类型
 - 所有函数有返回类型
@@ -90,3 +73,90 @@ class-transformer
 
 ## 待C Session审查
 实现报告已创建: `.claude/handoffs/iter-001/IR-001-auth.yaml`
+
+---
+
+# B Session: 后端基础设施搭建 (TASK-000)
+
+## 任务概述
+搭建NestJS后端项目基础设施，使现有的认证模块代码可以编译和运行。
+
+## 变更清单
+
+### 新建文件
+
+| 文件路径 | 用途 |
+|---------|------|
+| `apps/backend/package.json` | NPM包配置和依赖定义 |
+| `apps/backend/tsconfig.json` | TypeScript编译配置 |
+| `apps/backend/nest-cli.json` | NestJS CLI配置 |
+| `apps/backend/src/main.ts` | 应用入口点 |
+| `apps/backend/src/app.module.ts` | 根模块配置 |
+| `apps/backend/.env.example` | 环境变量模板 |
+| `.claude/handoffs/iter-001/IR-000-infrastructure.yaml` | 实现报告 |
+
+### 修改文件
+
+| 文件路径 | 变更内容 |
+|---------|---------|
+| `auth.repository.ts` | 将路径别名改为相对导入 |
+
+## 依赖包清单
+
+### 生产依赖
+```
+@nestjs/common: ^10.0.0
+@nestjs/config: ^3.0.0
+@nestjs/core: ^10.0.0
+@nestjs/jwt: ^10.0.0
+@nestjs/platform-express: ^10.0.0
+@prisma/client: ^5.0.0
+bcrypt: ^5.1.0
+class-transformer: ^0.5.0
+class-validator: ^0.14.0
+reflect-metadata: ^0.2.0
+rxjs: ^7.8.0
+```
+
+### 开发依赖
+```
+@nestjs/cli: ^10.0.0
+@nestjs/schematics: ^10.0.0
+@types/bcrypt: ^5.0.0
+@types/express: ^4.17.0
+@types/node: ^20.0.0
+prisma: ^5.0.0
+typescript: ^5.0.0
+```
+
+## 可用脚本
+
+| 命令 | 用途 |
+|------|------|
+| `npm run build` | 编译TypeScript |
+| `npm run start` | 启动应用 |
+| `npm run start:dev` | 开发模式 (热重载) |
+| `npm run prisma:generate` | 生成Prisma客户端 |
+| `npm run prisma:migrate` | 运行数据库迁移 |
+
+## 环境变量需求
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/solo_guardian?schema=public
+JWT_ACCESS_SECRET=your-access-secret-key-min-32-chars-here
+JWT_REFRESH_SECRET=your-refresh-secret-key-min-32-chars-here
+PORT=3000
+```
+
+## 启动步骤
+```bash
+cd apps/backend
+npm install
+cp .env.example .env
+# 编辑 .env 配置数据库和密钥
+npm run prisma:generate
+npm run prisma:migrate
+npm run start:dev
+```
+
+## 待C Session审查
+实现报告已创建: `.claude/handoffs/iter-001/IR-000-infrastructure.yaml`

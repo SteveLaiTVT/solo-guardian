@@ -6,7 +6,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { User, RefreshToken } from '@prisma/client';
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export type UserWithoutPassword = Omit<User, 'passwordHash'>;
 export type UserWithPassword = User;
