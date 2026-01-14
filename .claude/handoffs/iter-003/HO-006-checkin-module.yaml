@@ -1,0 +1,169 @@
+# ============================================================
+# HANDOFF: HO-006 - Check-in Module Implementation
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-006"
+design_state_version: "0.8.0"
+priority: "P0"
+depends_on: "TASK-005"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the check-in module by filling in TODO markers
+  in the skeleton files. Enable users to:
+  1. Check in daily (one tap to confirm safety)
+  2. View check-in history
+  3. Check today's status
+  4. Manage check-in settings (deadline, reminder time)
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  Skeleton files have been created with TODO(B) markers.
+  TASK-005 must be completed first (Prisma schema).
+
+  Files to implement:
+  - check-in.repository.ts - Database operations
+  - check-in.service.ts - Business logic
+  - check-in.controller.ts - API endpoints (auth TODO pending)
+
+  API Endpoints:
+  - POST /api/v1/check-ins - Create check-in
+  - GET /api/v1/check-ins - Get history (paginated)
+  - GET /api/v1/check-ins/today - Get today's status
+  - GET /api/v1/check-in-settings - Get settings
+  - PUT /api/v1/check-in-settings - Update settings
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-006-1"
+    title: "Implement CheckInRepository methods"
+    file: "apps/backend/src/modules/check-in/check-in.repository.ts"
+    todos:
+      - "upsertCheckIn() - Create or update daily check-in"
+      - "findByDate() - Find check-in for specific date"
+      - "findHistory() - Get paginated check-in history"
+      - "getOrCreateSettings() - Get or create default settings"
+      - "updateSettings() - Update settings"
+
+  - id: "TASK-006-2"
+    title: "Implement CheckInService methods"
+    file: "apps/backend/src/modules/check-in/check-in.service.ts"
+    todos:
+      - "checkIn() - Create daily check-in with logging"
+      - "getTodayStatus() - Check if user has checked in today"
+      - "getHistory() - Get paginated history"
+      - "getSettings() - Get user settings"
+      - "updateSettings() - Update user settings"
+      - "getTodayDateString() - Helper for date formatting"
+      - "isOverdue() - Helper to check if past deadline"
+
+  - id: "TASK-006-3"
+    title: "Register CheckInModule in AppModule"
+    file: "apps/backend/src/app.module.ts"
+    action: |
+      Import and register CheckInModule:
+
+      ```typescript
+      import { CheckInModule } from './modules/check-in/check-in.module';
+
+      @Module({
+        imports: [
+          ConfigModule.forRoot({ isGlobal: true }),
+          PrismaModule,
+          AuthModule,
+          CheckInModule,  // Add this
+        ],
+      })
+      export class AppModule {}
+      ```
+
+  - id: "TASK-006-4"
+    title: "Note: Auth guard integration (deferred)"
+    note: |
+      The controller has hardcoded userId placeholders.
+      Auth guard integration will be done in a future task
+      after we create JwtAuthGuard and CurrentUser decorator.
+
+      For now, the TODOs mark where auth should be added.
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "POST /api/v1/check-ins creates a check-in"
+    verification: "Returns CheckInResponseDto with id, date, timestamp"
+
+  - description: "GET /api/v1/check-ins returns paginated history"
+    verification: "Returns list with total count, page info"
+
+  - description: "GET /api/v1/check-ins/today returns status"
+    verification: "Returns hasCheckedIn, isOverdue, checkIn (if exists)"
+
+  - description: "GET /api/v1/check-in-settings returns settings"
+    verification: "Returns deadlineTime, reminderTime, reminderEnabled"
+
+  - description: "PUT /api/v1/check-in-settings updates settings"
+    verification: "Can update deadline time, returns updated settings"
+
+  - description: "Duplicate check-in updates existing record"
+    verification: "Second POST same day updates note, not creates new"
+
+  - description: "Default settings created for new users"
+    verification: "First GET settings returns defaults (10:00 deadline)"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Do not call Prisma directly in Service"
+  - "Use Repository for all database operations"
+  - "Function under 50 lines"
+  - "File under 300 lines"
+  - "Log check-in events (use NestJS Logger)"
+  - "No `any` type"
+  - "All functions have return types"
+
+# ============================================================
+# Date/Time Handling
+# ============================================================
+datetime_notes: |
+  Important: Date handling is critical for check-in logic.
+
+  - checkInDate: YYYY-MM-DD string (e.g., "2026-01-14")
+  - deadlineTime: HH:mm string (e.g., "10:00")
+  - timezone: User's timezone (default "Asia/Shanghai")
+
+  To get today's date in user's timezone:
+  ```typescript
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: timezone,
+  }); // Returns YYYY-MM-DD
+  ```
+
+  To check if overdue:
+  ```typescript
+  const now = new Date();
+  const [hour, minute] = deadlineTime.split(':').map(Number);
+  const deadline = new Date(now.toLocaleDateString('en-CA', { timeZone }));
+  deadline.setHours(hour, minute, 0, 0);
+  return now > deadline;
+  ```
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "JWT authentication guard (future task)"
+  - "Missed check-in detection (scheduled job)"
+  - "Push notifications"
+  - "Check-in streak calculation"

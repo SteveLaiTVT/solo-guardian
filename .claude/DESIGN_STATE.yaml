@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "0.7.0"
+  version: "0.8.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
   branch: "main"
@@ -109,6 +109,38 @@ modules:
         priority: "P1"
         status: "pending"
 
+  check_in:
+    status: "in_progress"  # designing | in_progress | done | blocked
+    owner: "B Session"
+    description: "Core check-in functionality - daily safety check-in"
+    skeleton_created: true
+    skeleton_version: "0.8.0"
+    features:
+      - name: "Daily Check-in"
+        priority: "P0"
+        status: "in_progress"
+        description: "User can check in with one tap to confirm safety"
+      - name: "Check-in Settings"
+        priority: "P0"
+        status: "in_progress"
+        description: "User can set daily deadline and reminder time"
+      - name: "Check-in History"
+        priority: "P0"
+        status: "in_progress"
+        description: "View past check-in records"
+      - name: "Today Status"
+        priority: "P0"
+        status: "in_progress"
+        description: "Check if user has checked in today"
+      - name: "Missed Check-in Detection"
+        priority: "P1"
+        status: "pending"
+        description: "Scheduled job to detect missed check-ins (future)"
+      - name: "Check-in Streak"
+        priority: "P2"
+        status: "pending"
+        description: "Track consecutive check-in days (gamification)"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -174,7 +206,53 @@ code_constraints:
 # ============================================================
 # 5. Current Iteration
 # ============================================================
-current_iteration: null  # Ready for next iteration
+current_iteration:
+  id: "iter-003"
+  goal: "Implement check-in module MVP - core safety check-in functionality"
+  started_at: "2026-01-14"
+
+  tasks:
+    - id: "TASK-005"
+      title: "Database: Add CheckIn and CheckInSettings models"
+      assigned_to: "B Session"
+      status: "pending"
+      priority: "P0"
+      handoff_doc: ".claude/handoffs/iter-003/HO-005-checkin-schema.yaml"
+      acceptance_criteria:
+        - "CheckIn model added to schema.prisma"
+        - "CheckInSettings model added to schema.prisma"
+        - "Proper relations to User model"
+        - "prisma generate succeeds"
+        - "prisma migrate dev succeeds"
+      files:
+        - "apps/backend/prisma/schema.prisma"
+
+    - id: "TASK-006"
+      title: "Backend: Check-in module skeleton with TODOs"
+      assigned_to: "B Session"
+      status: "pending"
+      priority: "P0"
+      depends_on: "TASK-005"
+      handoff_doc: ".claude/handoffs/iter-003/HO-006-checkin-module.yaml"
+      acceptance_criteria:
+        - "POST /api/v1/check-ins creates a check-in"
+        - "GET /api/v1/check-ins returns user's check-in history"
+        - "GET /api/v1/check-ins/today returns today's status"
+        - "GET /api/v1/check-in-settings returns user's settings"
+        - "PUT /api/v1/check-in-settings updates settings"
+        - "All endpoints require authentication"
+        - "Follows Controller/Service/Repository pattern"
+      files:
+        - "apps/backend/src/modules/check-in/check-in.module.ts"
+        - "apps/backend/src/modules/check-in/check-in.controller.ts"
+        - "apps/backend/src/modules/check-in/check-in.service.ts"
+        - "apps/backend/src/modules/check-in/check-in.repository.ts"
+        - "apps/backend/src/modules/check-in/dto/create-check-in.dto.ts"
+        - "apps/backend/src/modules/check-in/dto/check-in-settings.dto.ts"
+        - "apps/backend/src/modules/check-in/dto/check-in-response.dto.ts"
+
+  blocked_tasks: []
+  completed_tasks: []
 
 # ============================================================
 # 5.1 Iteration History
@@ -258,6 +336,23 @@ decision_log:
     date: "2026-01-14"
     decision: "Use feature branches for iterations"
     rationale: "Keep main branch stable, feature/iter-XXX for development"
+
+  - id: "ADR-004"
+    date: "2026-01-14"
+    decision: "Check-in uses date-based uniqueness (one per day)"
+    rationale: |
+      - User can only check in once per day (no duplicate check-ins)
+      - Check-in date stored as DATE type (not timestamp) for easy querying
+      - Allows "re-check-in" by updating existing record
+      - Simplifies "did user check in today?" queries
+
+  - id: "ADR-005"
+    date: "2026-01-14"
+    decision: "Check-in settings default to 10:00 deadline if not set"
+    rationale: |
+      - New users should have sensible defaults
+      - 10:00 AM is a reasonable morning deadline
+      - User can customize after registration
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

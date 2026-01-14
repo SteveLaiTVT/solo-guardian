@@ -1,0 +1,151 @@
+# ============================================================
+# HANDOFF: HO-005 - Check-in Database Schema
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-005"
+design_state_version: "0.8.0"
+priority: "P0"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Add CheckIn and CheckInSettings models to the Prisma schema
+  to support the daily check-in functionality.
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  Solo Guardian's core feature is daily check-in. Users check in
+  once per day to confirm they are safe. If they miss a check-in,
+  their emergency contacts get notified.
+
+  Key design decisions (ADR-004, ADR-005):
+  - One check-in per day per user (date-based uniqueness)
+  - Check-in date stored as DATE type for easy querying
+  - Default deadline time: 10:00 AM
+  - Default timezone: Asia/Shanghai
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-005-1"
+    title: "Add CheckIn model"
+    file: "apps/backend/prisma/schema.prisma"
+    action: |
+      Add the CheckIn model:
+
+      ```prisma
+      model CheckIn {
+        id          String   @id @default(uuid())
+        userId      String   @map("user_id")
+        checkInDate String   @map("check_in_date")  // YYYY-MM-DD format
+        checkedInAt DateTime @default(now()) @map("checked_in_at")
+        note        String?  @db.VarChar(500)
+        createdAt   DateTime @default(now()) @map("created_at")
+        updatedAt   DateTime @updatedAt @map("updated_at")
+
+        user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+        @@unique([userId, checkInDate])  // One check-in per day per user
+        @@index([userId])
+        @@index([checkInDate])
+        @@map("check_ins")
+      }
+      ```
+
+  - id: "TASK-005-2"
+    title: "Add CheckInSettings model"
+    file: "apps/backend/prisma/schema.prisma"
+    action: |
+      Add the CheckInSettings model:
+
+      ```prisma
+      model CheckInSettings {
+        id              String   @id @default(uuid())
+        userId          String   @unique @map("user_id")
+        deadlineTime    String   @default("10:00") @map("deadline_time")  // HH:mm format
+        reminderTime    String   @default("09:00") @map("reminder_time")  // HH:mm format
+        reminderEnabled Boolean  @default(true) @map("reminder_enabled")
+        timezone        String   @default("Asia/Shanghai")
+        createdAt       DateTime @default(now()) @map("created_at")
+        updatedAt       DateTime @updatedAt @map("updated_at")
+
+        user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+        @@map("check_in_settings")
+      }
+      ```
+
+  - id: "TASK-005-3"
+    title: "Update User model with relations"
+    file: "apps/backend/prisma/schema.prisma"
+    action: |
+      Add relations to the User model:
+
+      ```prisma
+      model User {
+        // ... existing fields ...
+
+        refreshTokens    RefreshToken[]
+        checkIns         CheckIn[]
+        checkInSettings  CheckInSettings?
+      }
+      ```
+
+  - id: "TASK-005-4"
+    title: "Run Prisma migrate"
+    action: |
+      Generate and apply migration:
+
+      ```bash
+      cd apps/backend
+      npx prisma generate
+      npx prisma migrate dev --name add-checkin-models
+      ```
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "CheckIn model added with correct fields"
+    verification: "Model has id, userId, checkInDate, checkedInAt, note"
+
+  - description: "CheckInSettings model added with correct fields"
+    verification: "Model has deadlineTime, reminderTime, reminderEnabled, timezone"
+
+  - description: "Unique constraint on userId + checkInDate"
+    verification: "Cannot create two check-ins for same user on same day"
+
+  - description: "Relations to User model correct"
+    verification: "User has checkIns[] and checkInSettings?"
+
+  - description: "prisma generate succeeds"
+    verification: "No errors when generating client"
+
+  - description: "prisma migrate dev succeeds"
+    verification: "Migration applies without errors"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use snake_case for database column names (@map)"
+  - "Use plural for table names (@map)"
+  - "UUID for primary keys"
+  - "Cascade delete when user is deleted"
+  - "Index on frequently queried fields"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Check-in streak calculation (future feature)"
+  - "Missed check-in detection job (future feature)"
+  - "Emergency contact notification (future feature)"
