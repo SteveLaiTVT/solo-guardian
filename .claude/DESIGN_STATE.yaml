@@ -9,9 +9,10 @@
 # ============================================================
 
 meta:
-  version: "0.2.0"
+  version: "0.4.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
+  branch: "feature/iter-001"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
 
@@ -169,30 +170,49 @@ current_iteration:
   started_at: "2026-01-14"
 
   tasks:
+    - id: "TASK-000"
+      title: "Backend: Project infrastructure setup"
+      assigned_to: "B Session"
+      status: "pending"
+      priority: "P0"
+      handoff_doc: ".claude/handoffs/iter-001/HO-000-infrastructure.yaml"
+      acceptance_criteria:
+        - "package.json created with all NestJS dependencies"
+        - "tsconfig.json configured for NestJS"
+        - "nest-cli.json configured"
+        - "main.ts entry point created"
+        - "app.module.ts created with AuthModule imported"
+        - ".env.example created with required environment variables"
+        - "npm install runs without errors"
+        - "npm run build compiles without errors"
+      files:
+        - "apps/backend/package.json"
+        - "apps/backend/tsconfig.json"
+        - "apps/backend/nest-cli.json"
+        - "apps/backend/src/main.ts"
+        - "apps/backend/src/app.module.ts"
+        - "apps/backend/.env.example"
+
+  blocked_tasks:
+    - id: "TASK-002"
+      title: "Backend: Auth module - Remove leftover TODO comment"
+      assigned_to: "B Session"
+      status: "blocked"
+      blocked_by: "TASK-000"
+      reason: "Cannot run project without package.json and NestJS configuration"
+      handoff_doc: ".claude/handoffs/iter-001/HO-002-auth-cleanup.yaml"
+      acceptance_criteria:
+        - "Remove TODO comment in register.dto.ts lines 6-11"
+        - "File should have no TODO(B) markers remaining"
+      files:
+        - "apps/backend/src/modules/auth/dto/register.dto.ts"
+
+  completed_tasks:
     - id: "TASK-001"
       title: "Backend: Auth module - Fill TODOs"
-      assigned_to: "B Session"
-      status: "pending"  # pending | in_progress | review | done | blocked
-      skeleton_ready: true
-      handoff_doc: ".claude/handoffs/iter-001/HO-001-auth.yaml"
-      acceptance_criteria:
-        - "POST /api/v1/auth/register returns AuthResult"
-        - "POST /api/v1/auth/login returns AuthResult"
-        - "POST /api/v1/auth/refresh returns new tokens"
-        - "POST /api/v1/auth/logout invalidates token"
-        - "Password encrypted with bcrypt (cost 12+)"
-        - "Refresh token rotation implemented"
-      skeleton_files:
-        - "apps/backend/src/modules/auth/auth.controller.ts"
-        - "apps/backend/src/modules/auth/auth.service.ts"
-        - "apps/backend/src/modules/auth/auth.repository.ts"
-        - "apps/backend/src/modules/auth/auth.module.ts"
-        - "apps/backend/src/modules/auth/dto/register.dto.ts"
-        - "apps/backend/src/modules/auth/dto/login.dto.ts"
-        - "apps/backend/src/modules/auth/dto/auth-result.dto.ts"
-
-  blocked_tasks: []
-  completed_tasks: []
+      completed_at: "2026-01-14"
+      review_verdict: "conditional_pass"
+      review_doc: ".claude/handoffs/iter-001/RR-001-auth.yaml"
 
 # ============================================================
 # 6. Pending Decisions
@@ -214,22 +234,44 @@ decision_log:
     date: "2026-01-14"
     decision: "Use Monorepo structure"
     rationale: "Easier type sharing, better AI context understanding"
-    
+
   - id: "ADR-002"
     date: "2026-01-14"
     decision: "Backend uses NestJS"
     rationale: "Modular design, native TypeScript support, easy type sharing with frontend"
 
+  - id: "ADR-003"
+    date: "2026-01-14"
+    decision: "Use feature branches for iterations"
+    rationale: "Keep main branch stable, feature/iter-XXX for development"
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
-review_history: []
-  # Example:
-  # - iteration: "iter-001"
-  #   task: "TASK-001"
-  #   reviewer: "C Session"
-  #   issues_found:
-  #     - type: "constraint_violation"
-  #       description: "Service directly called Prisma"
-  #       resolution: "Extract to Repository"
-  #   resolved_in_version: "0.1.1"
+review_history:
+  - iteration: "iter-001"
+    task: "TASK-001"
+    reviewer: "C Session"
+    verdict: "conditional_pass"
+    date: "2026-01-14"
+    issues_found:
+      - id: "ISS-001"
+        type: "security"
+        severity: "warning"
+        description: "Missing security event logging"
+        resolution: "Deferred to iter-002"
+      - id: "ISS-002"
+        type: "error_handling"
+        severity: "warning"
+        description: "JWT secrets not validated on startup"
+        resolution: "Deferred to iter-002"
+      - id: "ISS-003"
+        type: "consistency"
+        severity: "warning"
+        description: "Multi-step operations not in transaction"
+        resolution: "Acceptable for MVP"
+      - id: "ISS-004"
+        type: "todo_incomplete"
+        severity: "suggestion"
+        description: "Leftover TODO in register.dto.ts"
+        resolution: "Created TASK-002"

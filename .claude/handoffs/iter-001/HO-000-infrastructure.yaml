@@ -1,0 +1,166 @@
+# ============================================================
+# HANDOFF: HO-000 - Backend Infrastructure Setup
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-000"
+design_state_version: "0.4.0"
+priority: "P0"  # Must complete before other tasks
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Set up the backend project infrastructure so that:
+  1. Dependencies can be installed (npm install)
+  2. Project can be built (npm run build)
+  3. Project can be started (npm run start:dev)
+  4. Existing auth module code compiles correctly
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  The auth module code has been written (auth.service.ts, auth.controller.ts, etc.)
+  but the project is missing essential configuration files:
+  - No package.json (dependencies not defined)
+  - No tsconfig.json (TypeScript not configured)
+  - No nest-cli.json (NestJS CLI not configured)
+  - No main.ts entry point
+  - No app.module.ts root module
+
+  This task sets up the infrastructure so the existing code can run.
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-000-1"
+    title: "Create package.json with NestJS dependencies"
+    file: "apps/backend/package.json"
+    requirements:
+      - name: "@nestjs/common", version: "^10.0.0"
+      - name: "@nestjs/core", version: "^10.0.0"
+      - name: "@nestjs/platform-express", version: "^10.0.0"
+      - name: "@nestjs/config", version: "^3.0.0"
+      - name: "@nestjs/jwt", version: "^10.0.0"
+      - name: "@prisma/client", version: "^5.0.0"
+      - name: "bcrypt", version: "^5.1.0"
+      - name: "class-validator", version: "^0.14.0"
+      - name: "class-transformer", version: "^0.5.0"
+    dev_dependencies:
+      - name: "@nestjs/cli", version: "^10.0.0"
+      - name: "@types/bcrypt", version: "^5.0.0"
+      - name: "@types/node", version: "^20.0.0"
+      - name: "prisma", version: "^5.0.0"
+      - name: "typescript", version: "^5.0.0"
+    scripts:
+      build: "nest build"
+      start: "nest start"
+      start:dev: "nest start --watch"
+      start:debug: "nest start --debug --watch"
+      prisma:generate: "prisma generate"
+      prisma:migrate: "prisma migrate dev"
+
+  - id: "TASK-000-2"
+    title: "Create tsconfig.json"
+    file: "apps/backend/tsconfig.json"
+    requirements:
+      - "target: ES2021"
+      - "module: commonjs"
+      - "strict: true"
+      - "esModuleInterop: true"
+      - "experimentalDecorators: true"
+      - "emitDecoratorMetadata: true"
+      - "outDir: ./dist"
+      - "rootDir: ./src"
+
+  - id: "TASK-000-3"
+    title: "Create nest-cli.json"
+    file: "apps/backend/nest-cli.json"
+    requirements:
+      - "sourceRoot: src"
+      - "compilerOptions.deleteOutDir: true"
+
+  - id: "TASK-000-4"
+    title: "Create main.ts entry point"
+    file: "apps/backend/src/main.ts"
+    requirements:
+      - "Bootstrap NestJS application"
+      - "Enable validation pipe globally"
+      - "Set global prefix /api/v1"
+      - "Listen on port from env or 3000"
+
+  - id: "TASK-000-5"
+    title: "Create app.module.ts root module"
+    file: "apps/backend/src/app.module.ts"
+    requirements:
+      - "Import ConfigModule.forRoot() as global"
+      - "Import PrismaModule"
+      - "Import AuthModule"
+
+  - id: "TASK-000-6"
+    title: "Create .env.example"
+    file: "apps/backend/.env.example"
+    requirements:
+      - "DATABASE_URL=postgresql://..."
+      - "JWT_ACCESS_SECRET=your-access-secret"
+      - "JWT_REFRESH_SECRET=your-refresh-secret"
+      - "PORT=3000"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "npm install completes without errors"
+    verification: "cd apps/backend && npm install"
+
+  - description: "npm run build compiles without errors"
+    verification: "cd apps/backend && npm run build"
+
+  - description: "TypeScript compilation has no type errors"
+    verification: "Check for 0 errors in build output"
+
+  - description: "All existing auth module files are included in compilation"
+    verification: "dist/ contains compiled auth module"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use NestJS 10.x (latest stable)"
+  - "Use Prisma 5.x for ORM"
+  - "Use TypeScript 5.x"
+  - "Do not modify existing auth module code (only add infrastructure)"
+  - "Follow NestJS best practices for project structure"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Docker configuration (future task)"
+  - "CI/CD setup (future task)"
+  - "Testing configuration (future task)"
+  - "Linting/formatting setup (future task)"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  blocks: ["TASK-002"]
+  blocked_by: []
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This is a prerequisite task. The auth module code exists but cannot
+  be compiled or run without proper project configuration.
+
+  After this task is complete:
+  1. B Session can run the project locally
+  2. TASK-002 can be unblocked
+  3. Future development can proceed normally
