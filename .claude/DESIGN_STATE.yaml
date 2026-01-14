@@ -9,12 +9,13 @@
 # ============================================================
 
 meta:
-  version: "0.9.0"
+  version: "1.0.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
+  milestone: "Backend MVP Complete - Ready for E2E Testing"
 
 # ============================================================
 # 1. Technical Architecture
@@ -73,7 +74,7 @@ modules:
     description: "User authentication and authorization"
     skeleton_created: true
     skeleton_version: "0.2.0"
-    completed_iteration: "iter-002"
+    completed_iteration: "iter-004"
     hardened: true
     features:
       - name: "Email/Password Login"
@@ -92,7 +93,7 @@ modules:
         added_in: "iter-002"
       - name: "JWT Auth Guard"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
         added_in: "iter-004"
         description: "Protect endpoints with JWT authentication"
       - name: "OAuth (Google/Apple)"
@@ -216,37 +217,30 @@ code_constraints:
 # ============================================================
 # 5. Current Iteration
 # ============================================================
-current_iteration:
-  id: "iter-004"
-  goal: "Add JWT Auth Guard to protect API endpoints"
-  started_at: "2026-01-14"
-
-  tasks:
-    - id: "TASK-007"
-      title: "Backend: Create JwtAuthGuard and CurrentUser decorator"
-      assigned_to: "B Session"
-      status: "pending"
-      priority: "P0"
-      handoff_doc: ".claude/handoffs/iter-004/HO-007-auth-guard.yaml"
-      acceptance_criteria:
-        - "JwtAuthGuard validates access token"
-        - "CurrentUser decorator extracts user ID from token"
-        - "Guard returns 401 for missing/invalid tokens"
-        - "Check-in endpoints protected with guard"
-        - "Auth endpoints (login, register, refresh) remain public"
-      files:
-        - "apps/backend/src/modules/auth/guards/jwt-auth.guard.ts"
-        - "apps/backend/src/modules/auth/decorators/current-user.decorator.ts"
-        - "apps/backend/src/modules/auth/strategies/jwt.strategy.ts"
-        - "apps/backend/src/modules/check-in/check-in.controller.ts"
-
-  blocked_tasks: []
-  completed_tasks: []
+current_iteration: null  # Backend MVP Complete - Ready for E2E Testing
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-004"
+    goal: "Add JWT Auth Guard to protect API endpoints"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      JWT authentication guard complete:
+      - JwtStrategy with Passport JWT
+      - JwtAuthGuard for protecting routes
+      - CurrentUser decorator for extracting userId
+      - Check-in endpoints now protected
+      - Settings moved to separate controller
+    tasks_completed:
+      - id: "TASK-007"
+        title: "Backend: Create JwtAuthGuard and CurrentUser decorator"
+        review_verdict: "pass"
+    milestone: "Backend MVP Complete"
+
   - id: "iter-003"
     goal: "Implement check-in module MVP - core safety check-in functionality"
     started_at: "2026-01-14"
@@ -384,6 +378,14 @@ review_history:
     date: "2026-01-14"
     issues_found: []
 
+  - iteration: "iter-004"
+    task: "TASK-007"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    notes: "Settings controller separated per ISS-008 suggestion"
+
   - iteration: "iter-003"
     task: "TASK-006"
     reviewer: "C Session"
@@ -394,7 +396,7 @@ review_history:
         type: "consistency"
         severity: "suggestion"
         description: "Consider separate controller for settings"
-        resolution: "Optional improvement"
+        resolution: "Resolved in iter-004 TASK-007"
 
   - iteration: "iter-002"
     task: "TASK-003"

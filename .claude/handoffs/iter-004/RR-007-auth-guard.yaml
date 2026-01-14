@@ -1,0 +1,227 @@
+# ============================================================
+# REVIEW REPORT: RR-007 - JWT Auth Guard
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "RR-007"
+task_id: "TASK-007"
+implementation_report_id: "IR-007"
+design_state_version: "0.9.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 8
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+    suggestions: 0
+  brief: |
+    JWT authentication guard implemented correctly using Passport.js.
+    All check-in endpoints now protected. Auth endpoints remain public.
+    Bonus: Separate CheckInSettingsController created (addressed ISS-008).
+
+# ============================================================
+# File Review
+# ============================================================
+file_review:
+  - file: "apps/backend/src/modules/auth/strategies/jwt.strategy.ts"
+    status: "pass"
+    lines: 29
+    verified:
+      - "Extends PassportStrategy(Strategy) ✓"
+      - "ExtractJwt.fromAuthHeaderAsBearerToken() ✓"
+      - "ignoreExpiration: false ✓"
+      - "configService.getOrThrow() for fail-fast ✓"
+      - "Returns { userId: payload.sub } ✓"
+
+  - file: "apps/backend/src/modules/auth/guards/jwt-auth.guard.ts"
+    status: "pass"
+    lines: 11
+    verified:
+      - "Extends AuthGuard('jwt') ✓"
+      - "Injectable decorator ✓"
+
+  - file: "apps/backend/src/modules/auth/decorators/current-user.decorator.ts"
+    status: "pass"
+    lines: 14
+    verified:
+      - "createParamDecorator pattern ✓"
+      - "Returns request.user.userId ✓"
+      - "Return type: string ✓"
+
+  - file: "apps/backend/src/modules/auth/auth.module.ts"
+    status: "pass"
+    lines: 34
+    verified:
+      - "PassportModule imported ✓"
+      - "JwtStrategy in providers ✓"
+      - "JwtAuthGuard in providers ✓"
+
+  - file: "apps/backend/src/modules/check-in/check-in.controller.ts"
+    status: "pass"
+    lines: 56
+    verified:
+      - "@UseGuards(JwtAuthGuard) at class level ✓"
+      - "@CurrentUser() userId in all methods ✓"
+      - "No hardcoded userId placeholder ✓"
+      - "Uses path alias imports (@/modules/auth/...) ✓"
+
+  - file: "apps/backend/src/modules/check-in/check-in-settings.controller.ts"
+    status: "pass"
+    lines: 41
+    verified:
+      - "Separate controller for settings (addressed ISS-008) ✓"
+      - "@UseGuards(JwtAuthGuard) applied ✓"
+      - "@CurrentUser() userId in all methods ✓"
+      - "Path: /api/v1/check-in-settings ✓"
+
+  - file: "apps/backend/src/modules/auth/auth.controller.ts"
+    status: "pass"
+    lines: 51
+    verified:
+      - "NO UseGuards decorator ✓"
+      - "Endpoints remain public ✓"
+
+  - file: "apps/backend/src/modules/auth/guards/index.ts"
+    status: "pass"
+    lines: 6
+    verified: "Clean re-export"
+
+  - file: "apps/backend/src/modules/auth/decorators/index.ts"
+    status: "pass"
+    lines: 6
+    verified: "Clean re-export"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - criterion: "Check-in endpoints require valid JWT"
+    status: "pass"
+    evidence: "@UseGuards(JwtAuthGuard) on both check-in controllers"
+
+  - criterion: "Valid token allows access"
+    status: "pass"
+    evidence: "JwtStrategy validates and extracts userId"
+
+  - criterion: "Expired token rejected"
+    status: "pass"
+    evidence: "ignoreExpiration: false in JwtStrategy"
+
+  - criterion: "CurrentUser extracts correct userId"
+    status: "pass"
+    evidence: "Returns request.user.userId from payload.sub"
+
+  - criterion: "Auth endpoints remain public"
+    status: "pass"
+    evidence: "AuthController has no UseGuards decorator"
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "Use Passport JWT strategy"
+    status: "pass"
+    evidence: "@nestjs/passport and passport-jwt used"
+
+  - constraint: "Extract user ID from 'sub' claim"
+    status: "pass"
+    evidence: "validate() returns { userId: payload.sub }"
+
+  - constraint: "Return 401 for invalid/missing tokens"
+    status: "pass"
+    evidence: "AuthGuard('jwt') handles this automatically"
+
+  - constraint: "Do not protect auth endpoints"
+    status: "pass"
+    evidence: "AuthController has no guard"
+
+  - constraint: "Files under 50 lines"
+    status: "pass"
+    evidence: "All new files under 50 lines"
+
+# ============================================================
+# Bonus Improvements
+# ============================================================
+bonus_improvements:
+  - title: "Separate CheckInSettingsController"
+    description: |
+      Addressed ISS-008 from RR-006. Settings now have their own
+      controller with clean path /api/v1/check-in-settings instead
+      of relative path navigation.
+    benefit: "Cleaner architecture, easier to maintain"
+
+  - title: "configService.getOrThrow()"
+    description: |
+      JwtStrategy uses getOrThrow() for JWT_ACCESS_SECRET,
+      ensuring fail-fast if secret is missing.
+    benefit: "Consistent with TASK-004 pattern"
+
+  - title: "Path alias imports"
+    description: |
+      Check-in controllers use @/modules/auth/... imports,
+      making code cleaner and more maintainable.
+    benefit: "Better import organization"
+
+# ============================================================
+# Protected Endpoints Summary
+# ============================================================
+protected_endpoints:
+  check_ins:
+    - "POST /api/v1/check-ins"
+    - "GET /api/v1/check-ins"
+    - "GET /api/v1/check-ins/today"
+
+  check_in_settings:
+    - "GET /api/v1/check-in-settings"
+    - "PUT /api/v1/check-in-settings"
+
+public_endpoints:
+  auth:
+    - "POST /api/v1/auth/register"
+    - "POST /api/v1/auth/login"
+    - "POST /api/v1/auth/refresh"
+    - "POST /api/v1/auth/logout"
+
+# ============================================================
+# Issue Resolution
+# ============================================================
+issue_resolution:
+  - original_issue: "ISS-008"
+    from_report: "RR-006-checkin-module.yaml"
+    description: "Consider separate controller for settings"
+    status: "resolved"
+    evidence: "CheckInSettingsController created"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Clean Passport.js integration"
+  - "Proper fail-fast for missing JWT secret"
+  - "All check-in endpoints protected"
+  - "Auth endpoints correctly remain public"
+  - "Separate settings controller (cleaner architecture)"
+  - "Path alias imports for cleaner code"
+  - "Index exports for better module organization"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+
+  next_steps:
+    - "Merge TASK-007"
+    - "iter-004 complete"
+    - "All API endpoints now properly protected"
+    - "Application ready for end-to-end testing"
