@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "0.4.0"
+  version: "0.5.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
   branch: "feature/iter-001"
@@ -170,36 +170,10 @@ current_iteration:
   started_at: "2026-01-14"
 
   tasks:
-    - id: "TASK-000"
-      title: "Backend: Project infrastructure setup"
-      assigned_to: "B Session"
-      status: "pending"
-      priority: "P0"
-      handoff_doc: ".claude/handoffs/iter-001/HO-000-infrastructure.yaml"
-      acceptance_criteria:
-        - "package.json created with all NestJS dependencies"
-        - "tsconfig.json configured for NestJS"
-        - "nest-cli.json configured"
-        - "main.ts entry point created"
-        - "app.module.ts created with AuthModule imported"
-        - ".env.example created with required environment variables"
-        - "npm install runs without errors"
-        - "npm run build compiles without errors"
-      files:
-        - "apps/backend/package.json"
-        - "apps/backend/tsconfig.json"
-        - "apps/backend/nest-cli.json"
-        - "apps/backend/src/main.ts"
-        - "apps/backend/src/app.module.ts"
-        - "apps/backend/.env.example"
-
-  blocked_tasks:
     - id: "TASK-002"
       title: "Backend: Auth module - Remove leftover TODO comment"
       assigned_to: "B Session"
-      status: "blocked"
-      blocked_by: "TASK-000"
-      reason: "Cannot run project without package.json and NestJS configuration"
+      status: "pending"
       handoff_doc: ".claude/handoffs/iter-001/HO-002-auth-cleanup.yaml"
       acceptance_criteria:
         - "Remove TODO comment in register.dto.ts lines 6-11"
@@ -207,7 +181,15 @@ current_iteration:
       files:
         - "apps/backend/src/modules/auth/dto/register.dto.ts"
 
+  blocked_tasks: []
+
   completed_tasks:
+    - id: "TASK-000"
+      title: "Backend: Project infrastructure setup"
+      completed_at: "2026-01-14"
+      review_verdict: "pass"
+      review_doc: ".claude/handoffs/iter-001/RR-000-infrastructure.yaml"
+
     - id: "TASK-001"
       title: "Backend: Auth module - Fill TODOs"
       completed_at: "2026-01-14"
@@ -249,6 +231,23 @@ decision_log:
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-001"
+    task: "TASK-000"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found:
+      - id: "ISS-006"
+        type: "consistency"
+        severity: "suggestion"
+        description: "Consider using NestJS Logger instead of console.log"
+        resolution: "Optional improvement"
+      - id: "ISS-007"
+        type: "consistency"
+        severity: "suggestion"
+        description: "Consider adding global API prefix"
+        resolution: "Optional improvement"
+
   - iteration: "iter-001"
     task: "TASK-001"
     reviewer: "C Session"
