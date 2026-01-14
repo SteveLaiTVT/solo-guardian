@@ -13,8 +13,11 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { Prisma } from '@prisma/client';
 import { AuthRepository } from './auth.repository';
 import { RegisterDto, LoginDto, AuthResult, AuthTokens } from './dto';
+
+const PRISMA_UNIQUE_CONSTRAINT_ERROR = 'P2002';
 
 const BCRYPT_COST_FACTOR = 12;
 const ACCESS_TOKEN_EXPIRES_IN = '15m';
@@ -32,6 +35,7 @@ export class AuthService {
   ) {}
 
   // DONE(B): Implement register - TASK-001-C
+  // FIX: Handle unique constraint race condition
   async register(dto: RegisterDto): Promise<AuthResult> {
     const existingUser = await this.authRepository.findByEmail(dto.email);
     if (existingUser) {
@@ -40,11 +44,23 @@ export class AuthService {
 
     const passwordHash = await this.hashPassword(dto.password);
 
-    const user = await this.authRepository.createUser({
-      email: dto.email.toLowerCase(),
-      passwordHash,
-      name: dto.name,
-    });
+    let user;
+    try {
+      user = await this.authRepository.createUser({
+        email: dto.email.toLowerCase(),
+        passwordHash,
+        name: dto.name,
+      });
+    } catch (error) {
+      // Handle race condition: concurrent registration with same email
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === PRISMA_UNIQUE_CONSTRAINT_ERROR
+      ) {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
+    }
 
     const tokens = await this.generateTokens(user.id);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
