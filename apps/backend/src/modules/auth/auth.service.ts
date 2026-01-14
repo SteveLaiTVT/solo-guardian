@@ -1,13 +1,15 @@
 /**
  * @file auth.service.ts
  * @description Authentication service - handles login/register logic
- * @task TASK-001-C
- * @design_state_version 0.2.0
+ * @task TASK-001-C, TASK-003, TASK-004
+ * @design_state_version 0.6.0
  */
 import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  Logger,
+  OnModuleInit,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -26,19 +28,25 @@ const REFRESH_TOKEN_EXPIRES_IN = '7d';
 const REFRESH_TOKEN_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Injectable()
-export class AuthService {
-  // DONE(B): Inject JwtService and ConfigService - TASK-001-C
+export class AuthService implements OnModuleInit {
+  // DONE(B): Add NestJS Logger - TASK-003
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
-  // DONE(B): Implement register - TASK-001-C
-  // FIX: Handle unique constraint race condition
+  // DONE(B): Validate JWT secrets on startup - TASK-004
+  onModuleInit(): void {
+    this.validateJwtSecrets();
+  }
+
   async register(dto: RegisterDto): Promise<AuthResult> {
     const existingUser = await this.authRepository.findByEmail(dto.email);
     if (existingUser) {
+      this.logger.warn(`Registration attempt with existing email: ${dto.email}`);
       throw new ConflictException('Email already registered');
     }
 
@@ -52,11 +60,11 @@ export class AuthService {
         name: dto.name,
       });
     } catch (error) {
-      // Handle race condition: concurrent registration with same email
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === PRISMA_UNIQUE_CONSTRAINT_ERROR
       ) {
+        this.logger.warn(`Registration race condition - duplicate email: ${dto.email}`);
         throw new ConflictException('Email already registered');
       }
       throw error;
@@ -71,6 +79,8 @@ export class AuthService {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
+    this.logger.log(`User registered: ${user.email}`);
+
     return {
       user: {
         id: user.id,
@@ -82,10 +92,10 @@ export class AuthService {
     };
   }
 
-  // DONE(B): Implement login - TASK-001-C
   async login(dto: LoginDto): Promise<AuthResult> {
     const user = await this.authRepository.findByEmail(dto.email);
     if (!user) {
+      this.logger.warn(`Login failed - user not found: ${dto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -94,6 +104,7 @@ export class AuthService {
       user.passwordHash,
     );
     if (!isPasswordValid) {
+      this.logger.warn(`Login failed - invalid password: ${dto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -106,6 +117,8 @@ export class AuthService {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
+    this.logger.log(`User logged in: ${user.email}`);
+
     return {
       user: {
         id: user.id,
@@ -117,17 +130,14 @@ export class AuthService {
     };
   }
 
-  // DONE(B): Implement refreshTokens - TASK-001-C
-  // FIX: Use atomic consume to prevent race condition token reuse
   async refreshTokens(refreshToken: string): Promise<AuthResult> {
     const tokenHash = this.hashRefreshToken(refreshToken);
 
-    // Atomic delete + return: prevents race condition where two concurrent
-    // requests could both read the same token before either deletes it
     const consumedToken =
       await this.authRepository.consumeRefreshToken(tokenHash);
 
     if (!consumedToken) {
+      this.logger.warn('Token refresh failed - invalid or expired token');
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
@@ -140,6 +150,8 @@ export class AuthService {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
+    this.logger.log(`Token refreshed for user: ${consumedToken.user.email}`);
+
     return {
       user: {
         id: consumedToken.user.id,
@@ -151,18 +163,37 @@ export class AuthService {
     };
   }
 
-  // DONE(B): Implement logout - TASK-001-C
   async logout(refreshToken: string): Promise<void> {
     const tokenHash = this.hashRefreshToken(refreshToken);
     await this.authRepository.deleteRefreshToken(tokenHash);
   }
 
-  // DONE(B): Implement hashPassword - TASK-001-C
+  // DONE(B): Validate JWT secrets on module init - TASK-004
+  private validateJwtSecrets(): void {
+    const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!accessSecret) {
+      throw new Error(
+        'JWT_ACCESS_SECRET is not configured. ' +
+          'Please set it in your environment variables.',
+      );
+    }
+
+    if (!refreshSecret) {
+      throw new Error(
+        'JWT_REFRESH_SECRET is not configured. ' +
+          'Please set it in your environment variables.',
+      );
+    }
+
+    this.logger.log('JWT secrets validated successfully');
+  }
+
   private async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, BCRYPT_COST_FACTOR);
   }
 
-  // DONE(B): Implement verifyPassword - TASK-001-C
   private async verifyPassword(
     password: string,
     hash: string,
@@ -170,7 +201,6 @@ export class AuthService {
     return bcrypt.compare(password, hash);
   }
 
-  // DONE(B): Implement generateTokens - TASK-001-C
   private async generateTokens(userId: string): Promise<AuthTokens> {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
@@ -193,7 +223,6 @@ export class AuthService {
     };
   }
 
-  // DONE(B): Implement hashRefreshToken - TASK-001-C
   private hashRefreshToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
