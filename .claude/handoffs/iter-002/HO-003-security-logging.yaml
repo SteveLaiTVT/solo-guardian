@@ -1,0 +1,155 @@
+# ============================================================
+# HANDOFF: HO-003 - Security Event Logging
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-003"
+design_state_version: "0.6.0"
+priority: "P0"
+source_issue: "ISS-001"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Add security event logging to the auth module to enable:
+  1. Detection of brute force attacks (failed login attempts)
+  2. Audit trail for successful authentications
+  3. Monitoring of registration events
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  From review RR-001-auth.yaml (ISS-001):
+  "Login failures and success events are not logged. This makes it
+  difficult to detect brute force attacks or audit authentication events."
+
+  Current state:
+  - auth.service.ts has no logging
+  - NestJS Logger should be used (not console.log per ISS-006)
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-003-1"
+    title: "Add Logger to AuthService"
+    file: "apps/backend/src/modules/auth/auth.service.ts"
+    action: |
+      Add NestJS Logger to the service:
+
+      ```typescript
+      import { Logger } from '@nestjs/common';
+
+      @Injectable()
+      export class AuthService {
+        private readonly logger = new Logger(AuthService.name);
+        // ... existing code
+      }
+      ```
+
+  - id: "TASK-003-2"
+    title: "Log registration events"
+    file: "apps/backend/src/modules/auth/auth.service.ts"
+    location: "register() method"
+    action: |
+      Add logging for:
+      - Successful registration: this.logger.log()
+      - Duplicate email attempt: this.logger.warn()
+
+      Example:
+      ```typescript
+      // After successful user creation
+      this.logger.log(`User registered: ${user.email}`);
+
+      // On duplicate email (in catch block)
+      this.logger.warn(`Registration attempt with existing email: ${dto.email}`);
+      ```
+
+  - id: "TASK-003-3"
+    title: "Log login events"
+    file: "apps/backend/src/modules/auth/auth.service.ts"
+    location: "login() method"
+    action: |
+      Add logging for:
+      - Successful login: this.logger.log()
+      - Failed login (user not found): this.logger.warn()
+      - Failed login (wrong password): this.logger.warn()
+
+      Example:
+      ```typescript
+      // On user not found
+      this.logger.warn(`Login failed - user not found: ${dto.email}`);
+
+      // On invalid password
+      this.logger.warn(`Login failed - invalid password: ${dto.email}`);
+
+      // On success
+      this.logger.log(`User logged in: ${user.email}`);
+      ```
+
+  - id: "TASK-003-4"
+    title: "Log token refresh events"
+    file: "apps/backend/src/modules/auth/auth.service.ts"
+    location: "refreshTokens() method"
+    action: |
+      Add logging for:
+      - Successful refresh: this.logger.log()
+      - Invalid token attempt: this.logger.warn()
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "Login failures logged with email"
+    verification: "Login with wrong password shows warn log"
+
+  - description: "Successful logins logged"
+    verification: "Successful login shows log message"
+
+  - description: "Registration events logged"
+    verification: "New registration shows log message"
+
+  - description: "Use NestJS Logger"
+    verification: "No console.log in auth.service.ts"
+
+  - description: "Appropriate log levels"
+    verification: "warn for failures, log for success"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Never log passwords or tokens"
+  - "Use NestJS Logger (not console.log)"
+  - "Log level: warn for security events (failures), log for success"
+  - "Keep function size under 50 lines"
+  - "Email is safe to log (for audit/detection purposes)"
+
+# ============================================================
+# Security Considerations
+# ============================================================
+security_notes: |
+  DO log:
+  - Email addresses (needed for audit trail)
+  - Event type (login, register, refresh)
+  - Success/failure status
+
+  DO NOT log:
+  - Passwords (even hashed)
+  - JWT tokens
+  - Refresh tokens
+  - Full stack traces for auth failures
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Rate limiting implementation"
+  - "IP address logging (requires request context)"
+  - "Log aggregation/monitoring setup"
+  - "Alerting configuration"

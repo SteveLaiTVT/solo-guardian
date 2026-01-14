@@ -9,10 +9,10 @@
 # ============================================================
 
 meta:
-  version: "0.5.0"
+  version: "0.6.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
-  branch: "feature/iter-001"
+  branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
 
@@ -68,18 +68,19 @@ architecture:
 # ============================================================
 modules:
   auth:
-    status: "in_progress"  # designing | in_progress | done | blocked
+    status: "done"  # designing | in_progress | done | blocked
     owner: "B Session"
     description: "User authentication and authorization"
     skeleton_created: true
     skeleton_version: "0.2.0"
+    completed_iteration: "iter-001"
     features:
       - name: "Email/Password Login"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
       - name: "JWT Token Management"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
       - name: "OAuth (Google/Apple)"
         priority: "P1"
         status: "pending"
@@ -165,36 +166,73 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-001"
-  goal: "Complete user authentication MVP"
+  id: "iter-002"
+  goal: "Auth module hardening - security logging and config validation"
   started_at: "2026-01-14"
 
   tasks:
-    - id: "TASK-002"
-      title: "Backend: Auth module - Remove leftover TODO comment"
+    - id: "TASK-003"
+      title: "Backend: Add security event logging to auth module"
       assigned_to: "B Session"
       status: "pending"
-      handoff_doc: ".claude/handoffs/iter-001/HO-002-auth-cleanup.yaml"
+      priority: "P0"
+      source_issue: "ISS-001"
+      handoff_doc: ".claude/handoffs/iter-002/HO-003-security-logging.yaml"
       acceptance_criteria:
-        - "Remove TODO comment in register.dto.ts lines 6-11"
-        - "File should have no TODO(B) markers remaining"
+        - "Login failures logged with email (no password)"
+        - "Successful logins logged for audit trail"
+        - "Registration events logged"
+        - "Use NestJS Logger (not console.log)"
+        - "Log level appropriate (warn for failures, log for success)"
       files:
-        - "apps/backend/src/modules/auth/dto/register.dto.ts"
+        - "apps/backend/src/modules/auth/auth.service.ts"
+
+    - id: "TASK-004"
+      title: "Backend: Add JWT secret validation on startup"
+      assigned_to: "B Session"
+      status: "pending"
+      priority: "P0"
+      source_issue: "ISS-002"
+      handoff_doc: ".claude/handoffs/iter-002/HO-004-jwt-validation.yaml"
+      acceptance_criteria:
+        - "App fails fast if JWT_ACCESS_SECRET is missing/empty"
+        - "App fails fast if JWT_REFRESH_SECRET is missing/empty"
+        - "Clear error message indicating which secret is missing"
+        - "Validation happens in onModuleInit or constructor"
+      files:
+        - "apps/backend/src/modules/auth/auth.service.ts"
 
   blocked_tasks: []
+  completed_tasks: []
 
-  completed_tasks:
-    - id: "TASK-000"
-      title: "Backend: Project infrastructure setup"
-      completed_at: "2026-01-14"
-      review_verdict: "pass"
-      review_doc: ".claude/handoffs/iter-001/RR-000-infrastructure.yaml"
-
-    - id: "TASK-001"
-      title: "Backend: Auth module - Fill TODOs"
-      completed_at: "2026-01-14"
-      review_verdict: "conditional_pass"
-      review_doc: ".claude/handoffs/iter-001/RR-001-auth.yaml"
+# ============================================================
+# 5.1 Iteration History
+# ============================================================
+iteration_history:
+  - id: "iter-001"
+    goal: "Complete user authentication MVP"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      Successfully implemented auth module MVP:
+      - Email/password registration and login
+      - JWT access/refresh token management
+      - Refresh token rotation
+      - Password hashing with bcrypt (cost 12)
+    tasks_completed:
+      - id: "TASK-000"
+        title: "Backend: Project infrastructure setup"
+        review_verdict: "pass"
+      - id: "TASK-001"
+        title: "Backend: Auth module - Fill TODOs"
+        review_verdict: "conditional_pass"
+      - id: "TASK-002"
+        title: "Backend: Auth module - Remove leftover TODO"
+        review_verdict: "pass"
+    deferred_issues:
+      - "ISS-001: Security event logging → iter-002 TASK-003"
+      - "ISS-002: JWT secret validation → iter-002 TASK-004"
 
 # ============================================================
 # 6. Pending Decisions
