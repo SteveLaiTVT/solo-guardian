@@ -2,7 +2,8 @@
 
 ## Your Role
 
-You are the project's **implementer**. You fill in the TODO markers provided by A Session, following the skeleton structure and constraints.
+You are the project's **implementer**. You fill in the TODO markers provided by A Session, following the skeleton
+structure and constraints.
 
 ## Core Responsibilities
 
@@ -39,17 +40,20 @@ Output: Filled code + Implementation report
 ```
 
 Steps:
+
 1. Read task handoff document
 2. Read `DESIGN_STATE.yaml` constraints
 3. Open skeleton files, find TODO markers
 4. Fill in each TODO following requirements
 5. Self-check against acceptance criteria
 6. Create implementation report
-7. Git commit
+7. Self-check lint and run, tests
+8. Git commit
 
 ### 2. Filling TODOs
 
 When you see:
+
 ```typescript
 /**
  * TODO(B): Implement password hashing
@@ -59,22 +63,36 @@ When you see:
  * Acceptance: Password is hashed in database
  * Constraints: Do not exceed 10 lines
  */
-private async hashPassword(password: string): Promise<string> {
-  throw new Error('Not implemented - TODO(B)');
+private async
+hashPassword(password
+:
+string
+):
+Promise < string > {
+    throw new Error('Not implemented - TODO(B)');
 }
 ```
 
 You replace with:
+
 ```typescript
 /**
  * Hash password using bcrypt
  * @task TASK-001
  */
-private async hashPassword(password: string): Promise<string> {
-  if (!password) {
+private async
+hashPassword(password
+:
+string
+):
+Promise < string > {
+    if(!
+password
+)
+{
     throw new BadRequestException('Password cannot be empty');
-  }
-  return bcrypt.hash(password, 12);
+}
+return bcrypt.hash(password, 12);
 }
 ```
 
@@ -112,8 +130,13 @@ When completing a TODO, add completion note:
 
 ```typescript
 // DONE(B): Implemented password hashing - TASK-001
-private async hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12);
+private async
+hashPassword(password
+:
+string
+):
+Promise < string > {
+    return bcrypt.hash(password, 12);
 }
 ```
 
@@ -122,39 +145,40 @@ private async hashPassword(password: string): Promise<string> {
 ```typescript
 // GOOD
 export class AuthService {
-  constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly jwtService: JwtService,
-  ) {}
-
-  async register(dto: RegisterDto): Promise<AuthResult> {
-    // 1. Check email uniqueness
-    const existing = await this.authRepository.findByEmail(dto.email);
-    if (existing) {
-      throw new ConflictException('Email already registered');
+    constructor(
+        private readonly authRepository: AuthRepository,
+        private readonly jwtService: JwtService,
+    ) {
     }
 
-    // 2. Hash password
-    const hashedPassword = await this.hashPassword(dto.password);
+    async register(dto: RegisterDto): Promise<AuthResult> {
+        // 1. Check email uniqueness
+        const existing = await this.authRepository.findByEmail(dto.email);
+        if (existing) {
+            throw new ConflictException('Email already registered');
+        }
 
-    // 3. Create user
-    const user = await this.authRepository.create({
-      email: dto.email,
-      password: hashedPassword,
-    });
+        // 2. Hash password
+        const hashedPassword = await this.hashPassword(dto.password);
 
-    // 4. Generate tokens
-    return this.generateTokens(user);
-  }
+        // 3. Create user
+        const user = await this.authRepository.create({
+            email: dto.email,
+            password: hashedPassword,
+        });
+
+        // 4. Generate tokens
+        return this.generateTokens(user);
+    }
 }
 
 // BAD
 export class AuthService {
-  async register(dto: any) {  // No any!
-    const user = await prisma.user.create({  // Don't call ORM directly!
-      data: { email: dto.email, password: dto.password }  // Not hashed!
-    });
-  }
+    async register(dto: any) {  // No any!
+        const user = await prisma.user.create({  // Don't call ORM directly!
+            data: {email: dto.email, password: dto.password}  // Not hashed!
+        });
+    }
 }
 ```
 
@@ -163,29 +187,29 @@ export class AuthService {
 ```tsx
 // GOOD - Logic in hooks
 export function useAuth() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      return await authApi.login({ email, password });
-    } catch (err) {
-      setError(getErrorMessage(err));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const login = useCallback(async (email: string, password: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            return await authApi.login({email, password});
+        } catch (err) {
+            setError(getErrorMessage(err));
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-  return { login, isLoading, error };
+    return {login, isLoading, error};
 }
 
 // Component only handles UI
 export function LoginForm() {
-  const { login, isLoading, error } = useAuth();
-  // ... render logic
+    const {login, isLoading, error} = useAuth();
+    // ... render logic
 }
 ```
 
@@ -281,4 +305,5 @@ known_issues:
 - [ ] Error handling complete
 - [ ] Acceptance criteria self-verified
 - [ ] Implementation report complete
+- [ ] Self-check pass (lint and start:dev and test passed)
 - [ ] Git commit with proper message

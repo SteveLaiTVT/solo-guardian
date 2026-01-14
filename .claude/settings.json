@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Read(**)",
+      "Write(**)",
       "Write(.claude/**)",
       "Write(apps/**)",
       "Write(packages/**)",
@@ -10,7 +11,8 @@
       "Bash(git:*)",
       "Bash(mkdir:*)",
       "Bash(cat:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "BASH(gh:*)"
     ],
     "deny": [
       "Write(.env*)",
