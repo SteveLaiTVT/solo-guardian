@@ -102,32 +102,34 @@ export class AuthService {
   }
 
   // DONE(B): Implement refreshTokens - TASK-001-C
+  // FIX: Use atomic consume to prevent race condition token reuse
   async refreshTokens(refreshToken: string): Promise<AuthResult> {
     const tokenHash = this.hashRefreshToken(refreshToken);
-    const storedToken =
-      await this.authRepository.findValidRefreshToken(tokenHash);
 
-    if (!storedToken) {
+    // Atomic delete + return: prevents race condition where two concurrent
+    // requests could both read the same token before either deletes it
+    const consumedToken =
+      await this.authRepository.consumeRefreshToken(tokenHash);
+
+    if (!consumedToken) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    await this.authRepository.deleteRefreshToken(tokenHash);
-
-    const tokens = await this.generateTokens(storedToken.user.id);
+    const tokens = await this.generateTokens(consumedToken.user.id);
     const newTokenHash = this.hashRefreshToken(tokens.refreshToken);
 
     await this.authRepository.saveRefreshToken({
-      userId: storedToken.user.id,
+      userId: consumedToken.user.id,
       tokenHash: newTokenHash,
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
     return {
       user: {
-        id: storedToken.user.id,
-        email: storedToken.user.email,
-        name: storedToken.user.name,
-        createdAt: storedToken.user.createdAt,
+        id: consumedToken.user.id,
+        email: consumedToken.user.email,
+        name: consumedToken.user.name,
+        createdAt: consumedToken.user.createdAt,
       },
       tokens,
     };

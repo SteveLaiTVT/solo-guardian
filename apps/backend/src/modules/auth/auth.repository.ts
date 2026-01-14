@@ -103,4 +103,34 @@ export class AuthRepository {
       where: { tokenHash },
     });
   }
+
+  // DONE(B): Atomic consume refresh token - prevents race condition
+  async consumeRefreshToken(
+    tokenHash: string,
+  ): Promise<RefreshTokenWithUser | null> {
+    try {
+      const token = await this.prisma.refreshToken.delete({
+        where: { tokenHash },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
+      });
+
+      if (token.expiresAt < new Date()) {
+        return null;
+      }
+
+      return token as RefreshTokenWithUser;
+    } catch {
+      return null;
+    }
+  }
 }
