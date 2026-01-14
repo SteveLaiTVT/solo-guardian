@@ -1,200 +1,182 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
-// TODO(B): Import JwtService from '@nestjs/jwt'
-// TODO(B): Import ConfigService from '@nestjs/config'
-import { AuthRepository } from './auth.repository';
-import { RegisterDto, LoginDto, AuthResult } from './dto';
-
 /**
- * Service for authentication business logic
- *
- * This layer contains all business logic for auth operations.
- * It orchestrates the repository but NEVER calls Prisma directly.
+ * @file auth.service.ts
+ * @description Authentication service - handles login/register logic
+ * @task TASK-001-C
+ * @design_state_version 0.2.0
  */
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { AuthRepository } from './auth.repository';
+import { RegisterDto, LoginDto, AuthResult, AuthTokens } from './dto';
+
+const BCRYPT_COST_FACTOR = 12;
+const ACCESS_TOKEN_EXPIRES_IN = '15m';
+const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
+const REFRESH_TOKEN_EXPIRES_IN = '7d';
+const REFRESH_TOKEN_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
+  // DONE(B): Inject JwtService and ConfigService - TASK-001-C
   constructor(
     private readonly authRepository: AuthRepository,
-    // TODO(B): Inject JwtService
-    // private readonly jwtService: JwtService,
-    // TODO(B): Inject ConfigService
-    // private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  /**
-   * Register a new user
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Check if email already exists (throw ConflictException if yes)
-   * - Hash password using bcrypt (cost factor 12)
-   * - Create user via repository
-   * - Generate JWT access token and refresh token
-   * - Store refresh token hash in database
-   * - Return AuthResult with user and tokens
-   *
-   * Acceptance:
-   * - POST /api/v1/auth/register works
-   * - Duplicate email returns 409 Conflict
-   * - Password is hashed in database (not plaintext)
-   * - Returns valid JWT tokens
-   *
-   * Constraints:
-   * - Do NOT call Prisma directly (use repository)
-   * - Function must be under 50 lines
-   * - Use bcrypt cost factor 12 or higher
-   */
+  // DONE(B): Implement register - TASK-001-C
   async register(dto: RegisterDto): Promise<AuthResult> {
-    // TODO(B): Implement registration flow
-    // 1. Check email uniqueness
-    // 2. Hash password
-    // 3. Create user via repository
-    // 4. Generate tokens
-    // 5. Store refresh token
-    // 6. Return result
-    throw new Error('Not implemented - TODO(B)');
+    const existingUser = await this.authRepository.findByEmail(dto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const passwordHash = await this.hashPassword(dto.password);
+
+    const user = await this.authRepository.createUser({
+      email: dto.email.toLowerCase(),
+      passwordHash,
+      name: dto.name,
+    });
+
+    const tokens = await this.generateTokens(user.id);
+    const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
+
+    await this.authRepository.saveRefreshToken({
+      userId: user.id,
+      tokenHash: refreshTokenHash,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        createdAt: user.createdAt,
+      },
+      tokens,
+    };
   }
 
-  /**
-   * Login with email and password
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Find user by email
-   * - Verify password against stored hash
-   * - Generate new JWT tokens
-   * - Store new refresh token
-   * - Return AuthResult
-   *
-   * Acceptance:
-   * - POST /api/v1/auth/login works
-   * - Invalid credentials return 401 Unauthorized
-   * - Returns valid JWT tokens on success
-   *
-   * Constraints:
-   * - Do NOT call Prisma directly
-   * - Function must be under 50 lines
-   * - Use constant-time comparison for password
-   */
+  // DONE(B): Implement login - TASK-001-C
   async login(dto: LoginDto): Promise<AuthResult> {
-    // TODO(B): Implement login flow
-    // 1. Find user by email
-    // 2. Verify password
-    // 3. Generate tokens
-    // 4. Store refresh token
-    // 5. Return result
-    throw new Error('Not implemented - TODO(B)');
+    const user = await this.authRepository.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await this.verifyPassword(
+      dto.password,
+      user.passwordHash,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const tokens = await this.generateTokens(user.id);
+    const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
+
+    await this.authRepository.saveRefreshToken({
+      userId: user.id,
+      tokenHash: refreshTokenHash,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        createdAt: user.createdAt,
+      },
+      tokens,
+    };
   }
 
-  /**
-   * Refresh access token using refresh token
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Validate refresh token
-   * - Generate new access token
-   * - Optionally rotate refresh token
-   * - Return new tokens
-   *
-   * Acceptance:
-   * - POST /api/v1/auth/refresh works
-   * - Invalid/expired refresh token returns 401
-   * - Returns new valid tokens
-   *
-   * Constraints:
-   * - Do NOT call Prisma directly
-   * - Implement refresh token rotation for security
-   */
+  // DONE(B): Implement refreshTokens - TASK-001-C
   async refreshTokens(refreshToken: string): Promise<AuthResult> {
-    // TODO(B): Implement token refresh flow
-    throw new Error('Not implemented - TODO(B)');
+    const tokenHash = this.hashRefreshToken(refreshToken);
+    const storedToken =
+      await this.authRepository.findValidRefreshToken(tokenHash);
+
+    if (!storedToken) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    await this.authRepository.deleteRefreshToken(tokenHash);
+
+    const tokens = await this.generateTokens(storedToken.user.id);
+    const newTokenHash = this.hashRefreshToken(tokens.refreshToken);
+
+    await this.authRepository.saveRefreshToken({
+      userId: storedToken.user.id,
+      tokenHash: newTokenHash,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+    });
+
+    return {
+      user: {
+        id: storedToken.user.id,
+        email: storedToken.user.email,
+        name: storedToken.user.name,
+        createdAt: storedToken.user.createdAt,
+      },
+      tokens,
+    };
   }
 
-  /**
-   * Logout user (invalidate refresh token)
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Delete refresh token from database
-   *
-   * Acceptance:
-   * - POST /api/v1/auth/logout works
-   * - Refresh token no longer valid after logout
-   */
+  // DONE(B): Implement logout - TASK-001-C
   async logout(refreshToken: string): Promise<void> {
-    // TODO(B): Implement logout
-    throw new Error('Not implemented - TODO(B)');
+    const tokenHash = this.hashRefreshToken(refreshToken);
+    await this.authRepository.deleteRefreshToken(tokenHash);
   }
 
-  /**
-   * Hash a password using bcrypt
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Use bcrypt library
-   * - Cost factor: 12 (minimum)
-   *
-   * Constraints:
-   * - Must use async bcrypt.hash
-   */
+  // DONE(B): Implement hashPassword - TASK-001-C
   private async hashPassword(password: string): Promise<string> {
-    // TODO(B): Implement password hashing
-    throw new Error('Not implemented - TODO(B)');
+    return bcrypt.hash(password, BCRYPT_COST_FACTOR);
   }
 
-  /**
-   * Verify password against hash
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Use bcrypt.compare
-   * - Return boolean
-   *
-   * Constraints:
-   * - Must use constant-time comparison (bcrypt.compare does this)
-   */
-  private async verifyPassword(password: string, hash: string): Promise<boolean> {
-    // TODO(B): Implement password verification
-    throw new Error('Not implemented - TODO(B)');
+  // DONE(B): Implement verifyPassword - TASK-001-C
+  private async verifyPassword(
+    password: string,
+    hash: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 
-  /**
-   * Generate JWT access and refresh tokens
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Access token: short-lived (15 minutes)
-   * - Refresh token: long-lived (7 days)
-   * - Include user ID in payload
-   * - Use different secrets for access/refresh tokens
-   *
-   * Acceptance:
-   * - Tokens are valid JWT format
-   * - Access token expires in 15 minutes
-   * - Refresh token expires in 7 days
-   *
-   * Constraints:
-   * - Get secrets from ConfigService
-   * - Never hardcode secrets
-   */
-  private async generateTokens(userId: string): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-  }> {
-    // TODO(B): Implement token generation
-    throw new Error('Not implemented - TODO(B)');
+  // DONE(B): Implement generateTokens - TASK-001-C
+  private async generateTokens(userId: string): Promise<AuthTokens> {
+    const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId },
+        { secret: accessSecret, expiresIn: ACCESS_TOKEN_EXPIRES_IN },
+      ),
+      this.jwtService.signAsync(
+        { sub: userId },
+        { secret: refreshSecret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
+    };
   }
 
-  /**
-   * Hash refresh token for storage
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Hash token before storing (security best practice)
-   * - Use SHA-256 or similar
-   */
+  // DONE(B): Implement hashRefreshToken - TASK-001-C
   private hashRefreshToken(token: string): string {
-    // TODO(B): Implement refresh token hashing
-    throw new Error('Not implemented - TODO(B)');
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 }

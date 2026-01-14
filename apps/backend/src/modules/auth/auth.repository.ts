@@ -1,134 +1,106 @@
-import { Injectable } from '@nestjs/common';
-// TODO(B): Import PrismaService from '@/prisma/prisma.service'
-
 /**
- * Repository for authentication-related database operations
- *
- * This layer handles all direct database access via Prisma.
- * Service layer should NEVER call Prisma directly.
+ * @file auth.repository.ts
+ * @description Repository for authentication-related database operations
+ * @task TASK-001-B
+ * @design_state_version 0.2.0
  */
+import { Injectable } from '@nestjs/common';
+import { User, RefreshToken } from '@prisma/client';
+import { PrismaService } from '@/prisma/prisma.service';
+
+export type UserWithoutPassword = Omit<User, 'passwordHash'>;
+export type UserWithPassword = User;
+export type RefreshTokenWithUser = RefreshToken & { user: UserWithoutPassword };
+
 @Injectable()
 export class AuthRepository {
-  constructor(
-    // TODO(B): Inject PrismaService
-    // private readonly prisma: PrismaService,
-  ) {}
+  // DONE(B): Inject PrismaService - TASK-001-B
+  constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Find user by email
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Query user table by email
-   * - Return full user record or null if not found
-   *
-   * Acceptance:
-   * - Returns User | null
-   * - Email lookup is case-insensitive
-   *
-   * Constraints:
-   * - Use Prisma findUnique
-   * - Include password hash in result (needed for login verification)
-   */
-  async findByEmail(email: string): Promise<unknown> {
-    // TODO(B): Implement - return user or null
-    throw new Error('Not implemented - TODO(B)');
+  // DONE(B): Implement findByEmail - TASK-001-B
+  async findByEmail(email: string): Promise<UserWithPassword | null> {
+    return this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
   }
 
-  /**
-   * Find user by ID
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Query user table by ID
-   * - Return user without password hash
-   *
-   * Acceptance:
-   * - Returns User | null
-   * - Password hash is NOT included in result
-   */
-  async findById(id: string): Promise<unknown> {
-    // TODO(B): Implement - return user without password
-    throw new Error('Not implemented - TODO(B)');
+  // DONE(B): Implement findById - TASK-001-B
+  async findById(id: string): Promise<UserWithoutPassword | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
   }
 
-  /**
-   * Create a new user
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Insert user record with email, hashed password, and name
-   * - Return the created user (without password hash)
-   *
-   * Acceptance:
-   * - User record created in database
-   * - Returns created user object
-   *
-   * Constraints:
-   * - Password must already be hashed before calling this method
-   * - Use Prisma create
-   */
+  // DONE(B): Implement createUser - TASK-001-B
   async createUser(data: {
     email: string;
     passwordHash: string;
     name: string;
-  }): Promise<unknown> {
-    // TODO(B): Implement - create and return user
-    throw new Error('Not implemented - TODO(B)');
+  }): Promise<UserWithoutPassword> {
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email.toLowerCase(),
+        passwordHash: data.passwordHash,
+        name: data.name,
+      },
+    });
+
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
-  /**
-   * Store refresh token for user
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Store hashed refresh token associated with user
-   * - Include expiration timestamp
-   * - Support multiple tokens per user (different devices)
-   *
-   * Acceptance:
-   * - Token stored in database
-   * - Can be retrieved later for validation
-   */
+  // DONE(B): Implement saveRefreshToken - TASK-001-B
   async saveRefreshToken(data: {
     userId: string;
     tokenHash: string;
     expiresAt: Date;
   }): Promise<void> {
-    // TODO(B): Implement - store refresh token
-    throw new Error('Not implemented - TODO(B)');
+    await this.prisma.refreshToken.create({
+      data: {
+        userId: data.userId,
+        tokenHash: data.tokenHash,
+        expiresAt: data.expiresAt,
+      },
+    });
   }
 
-  /**
-   * Find and validate refresh token
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Find token by hash
-   * - Check if expired
-   * - Return associated user if valid
-   *
-   * Acceptance:
-   * - Returns user if token valid and not expired
-   * - Returns null if token invalid or expired
-   */
-  async findValidRefreshToken(tokenHash: string): Promise<unknown> {
-    // TODO(B): Implement - find and validate token
-    throw new Error('Not implemented - TODO(B)');
+  // DONE(B): Implement findValidRefreshToken - TASK-001-B
+  async findValidRefreshToken(
+    tokenHash: string,
+  ): Promise<RefreshTokenWithUser | null> {
+    const token = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    if (!token || token.expiresAt < new Date()) {
+      return null;
+    }
+
+    return token as RefreshTokenWithUser;
   }
 
-  /**
-   * Delete refresh token (for logout)
-   *
-   * TODO(B): Implement this method
-   * Requirements:
-   * - Remove specific refresh token
-   *
-   * Acceptance:
-   * - Token removed from database
-   */
+  // DONE(B): Implement deleteRefreshToken - TASK-001-B
   async deleteRefreshToken(tokenHash: string): Promise<void> {
-    // TODO(B): Implement - delete token
-    throw new Error('Not implemented - TODO(B)');
+    await this.prisma.refreshToken.deleteMany({
+      where: { tokenHash },
+    });
   }
 }
