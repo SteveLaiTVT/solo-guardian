@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "0.6.0"
+  version: "0.7.0"
   updated_at: "2026-01-14"
   updated_by: "A Session"
   branch: "main"
@@ -73,7 +73,8 @@ modules:
     description: "User authentication and authorization"
     skeleton_created: true
     skeleton_version: "0.2.0"
-    completed_iteration: "iter-001"
+    completed_iteration: "iter-002"
+    hardened: true
     features:
       - name: "Email/Password Login"
         priority: "P0"
@@ -81,6 +82,14 @@ modules:
       - name: "JWT Token Management"
         priority: "P0"
         status: "done"
+      - name: "Security Event Logging"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-002"
+      - name: "Config Validation"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-002"
       - name: "OAuth (Google/Apple)"
         priority: "P1"
         status: "pending"
@@ -165,50 +174,35 @@ code_constraints:
 # ============================================================
 # 5. Current Iteration
 # ============================================================
-current_iteration:
-  id: "iter-002"
-  goal: "Auth module hardening - security logging and config validation"
-  started_at: "2026-01-14"
-
-  tasks:
-    - id: "TASK-003"
-      title: "Backend: Add security event logging to auth module"
-      assigned_to: "B Session"
-      status: "pending"
-      priority: "P0"
-      source_issue: "ISS-001"
-      handoff_doc: ".claude/handoffs/iter-002/HO-003-security-logging.yaml"
-      acceptance_criteria:
-        - "Login failures logged with email (no password)"
-        - "Successful logins logged for audit trail"
-        - "Registration events logged"
-        - "Use NestJS Logger (not console.log)"
-        - "Log level appropriate (warn for failures, log for success)"
-      files:
-        - "apps/backend/src/modules/auth/auth.service.ts"
-
-    - id: "TASK-004"
-      title: "Backend: Add JWT secret validation on startup"
-      assigned_to: "B Session"
-      status: "pending"
-      priority: "P0"
-      source_issue: "ISS-002"
-      handoff_doc: ".claude/handoffs/iter-002/HO-004-jwt-validation.yaml"
-      acceptance_criteria:
-        - "App fails fast if JWT_ACCESS_SECRET is missing/empty"
-        - "App fails fast if JWT_REFRESH_SECRET is missing/empty"
-        - "Clear error message indicating which secret is missing"
-        - "Validation happens in onModuleInit or constructor"
-      files:
-        - "apps/backend/src/modules/auth/auth.service.ts"
-
-  blocked_tasks: []
-  completed_tasks: []
+current_iteration: null  # Ready for next iteration
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-002"
+    goal: "Auth module hardening - security logging and config validation"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      Auth module hardening complete:
+      - Security event logging for login/register/refresh
+      - JWT secret validation on startup (fail-fast)
+      - All deferred issues from iter-001 resolved
+    tasks_completed:
+      - id: "TASK-003"
+        title: "Backend: Add security event logging"
+        review_verdict: "pass"
+        resolves: "ISS-001"
+      - id: "TASK-004"
+        title: "Backend: Add JWT secret validation"
+        review_verdict: "pass"
+        resolves: "ISS-002"
+    issues_resolved:
+      - "ISS-001: Security event logging"
+      - "ISS-002: JWT secret validation"
+
   - id: "iter-001"
     goal: "Complete user authentication MVP"
     started_at: "2026-01-14"
@@ -269,6 +263,22 @@ decision_log:
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-002"
+    task: "TASK-003"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    resolves: "ISS-001"
+
+  - iteration: "iter-002"
+    task: "TASK-004"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    resolves: "ISS-002"
+
   - iteration: "iter-001"
     task: "TASK-000"
     reviewer: "C Session"
@@ -279,7 +289,7 @@ review_history:
         type: "consistency"
         severity: "suggestion"
         description: "Consider using NestJS Logger instead of console.log"
-        resolution: "Optional improvement"
+        resolution: "Resolved in iter-002 TASK-003"
       - id: "ISS-007"
         type: "consistency"
         severity: "suggestion"
@@ -296,12 +306,12 @@ review_history:
         type: "security"
         severity: "warning"
         description: "Missing security event logging"
-        resolution: "Deferred to iter-002"
+        resolution: "Resolved in iter-002 TASK-003"
       - id: "ISS-002"
         type: "error_handling"
         severity: "warning"
         description: "JWT secrets not validated on startup"
-        resolution: "Deferred to iter-002"
+        resolution: "Resolved in iter-002 TASK-004"
       - id: "ISS-003"
         type: "consistency"
         severity: "warning"
@@ -311,4 +321,4 @@ review_history:
         type: "todo_incomplete"
         severity: "suggestion"
         description: "Leftover TODO in register.dto.ts"
-        resolution: "Created TASK-002"
+        resolution: "Resolved in iter-001 TASK-002"

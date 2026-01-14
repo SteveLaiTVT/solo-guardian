@@ -1,0 +1,179 @@
+# ============================================================
+# REVIEW REPORT: RR-004 - JWT Secret Validation
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect)
+# Created: 2026-01-14
+# ============================================================
+
+report_id: "RR-004"
+task_id: "TASK-004"
+implementation_report_id: "IR-004"
+design_state_version: "0.6.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 2
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+    suggestions: 0
+  brief: |
+    JWT secret validation implemented correctly.
+    App now fails fast with clear error messages if secrets are missing.
+    OnModuleInit lifecycle hook used appropriately.
+    Bonus: Repository improved with atomic consumeRefreshToken method.
+
+# ============================================================
+# File Review
+# ============================================================
+file_review:
+  - file: "apps/backend/src/modules/auth/auth.service.ts"
+    status: "pass"
+    lines: 229
+    changes_verified:
+      - location: "Line 12"
+        change: "OnModuleInit imported"
+        verified: true
+
+      - location: "Line 31"
+        change: "AuthService implements OnModuleInit"
+        verified: true
+
+      - location: "Lines 42-44"
+        change: "onModuleInit lifecycle hook"
+        code: |
+          onModuleInit(): void {
+            this.validateJwtSecrets();
+          }
+        verified: true
+
+      - location: "Lines 172-191"
+        change: "validateJwtSecrets method"
+        verified: true
+        details:
+          - "Checks JWT_ACCESS_SECRET"
+          - "Checks JWT_REFRESH_SECRET"
+          - "Throws Error with clear message if missing"
+          - "Logs success message"
+
+  - file: "apps/backend/src/modules/auth/auth.repository.ts"
+    status: "pass"
+    lines: 146
+    bonus_improvement:
+      - location: "Lines 109-145"
+        change: "Added consumeRefreshToken method"
+        description: |
+          Atomic token consumption that prevents race conditions.
+          Delete + return in single operation.
+          Properly handles P2025 (record not found) error.
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - criterion: "App fails fast if JWT_ACCESS_SECRET is missing/empty"
+    status: "pass"
+    evidence: |
+      Lines 176-181: throws Error if !accessSecret
+      Message: "JWT_ACCESS_SECRET is not configured..."
+
+  - criterion: "App fails fast if JWT_REFRESH_SECRET is missing/empty"
+    status: "pass"
+    evidence: |
+      Lines 183-188: throws Error if !refreshSecret
+      Message: "JWT_REFRESH_SECRET is not configured..."
+
+  - criterion: "Clear error message indicating which secret is missing"
+    status: "pass"
+    evidence: |
+      Each error message specifies:
+      - Which secret is missing
+      - How to fix it ("Please set it in your environment variables")
+
+  - criterion: "Validation happens in onModuleInit or constructor"
+    status: "pass"
+    evidence: "onModuleInit() calls validateJwtSecrets() on startup"
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "Use OnModuleInit lifecycle hook"
+    status: "pass"
+    evidence: "AuthService implements OnModuleInit"
+
+  - constraint: "Throw Error (not custom exception) for startup failures"
+    status: "pass"
+    evidence: "Uses standard Error class"
+
+  - constraint: "Error message must be clear and actionable"
+    status: "pass"
+    evidence: "Messages specify what is missing and how to fix"
+
+  - constraint: "Keep function size under 50 lines"
+    status: "pass"
+    evidence: "validateJwtSecrets is 19 lines"
+
+  - constraint: "Do not log secret values"
+    status: "pass"
+    evidence: "Only logs 'JWT secrets validated successfully'"
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    evidence: "auth.service.ts is 229 lines"
+
+# ============================================================
+# Bonus Improvements Found
+# ============================================================
+bonus_improvements:
+  - title: "Atomic refresh token consumption"
+    file: "auth.repository.ts"
+    description: |
+      New consumeRefreshToken() method combines find + delete into
+      single atomic operation, preventing race conditions where
+      the same refresh token could be used multiple times.
+    benefit: "Improved security for token rotation"
+
+  - title: "Race condition handling in registration"
+    file: "auth.service.ts"
+    description: |
+      Register now catches Prisma P2002 unique constraint error
+      and logs it as race condition. Handles concurrent registrations.
+    benefit: "Prevents duplicate user creation edge cases"
+
+# ============================================================
+# Issue Resolution
+# ============================================================
+issue_resolution:
+  - original_issue: "ISS-002"
+    from_report: "RR-001-auth.yaml"
+    description: "JWT secrets not validated on startup"
+    status: "resolved"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Clean OnModuleInit implementation"
+  - "Clear, actionable error messages"
+  - "No secret values logged"
+  - "Success message for debugging"
+  - "Atomic token consumption (bonus improvement)"
+  - "Race condition handling (bonus improvement)"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  next_steps:
+    - "Merge TASK-004"
+    - "ISS-002 fully resolved"
+    - "iter-002 complete"
