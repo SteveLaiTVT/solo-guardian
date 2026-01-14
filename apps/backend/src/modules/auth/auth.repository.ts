@@ -5,8 +5,10 @@
  * @design_state_version 0.2.0
  */
 import { Injectable } from '@nestjs/common';
-import { User, RefreshToken } from '@prisma/client';
+import { User, RefreshToken, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+
+const PRISMA_RECORD_NOT_FOUND = 'P2025';
 
 export type UserWithoutPassword = Omit<User, 'passwordHash'>;
 export type UserWithPassword = User;
@@ -102,5 +104,43 @@ export class AuthRepository {
     await this.prisma.refreshToken.deleteMany({
       where: { tokenHash },
     });
+  }
+
+  // DONE(B): Atomic consume refresh token - prevents race condition
+  async consumeRefreshToken(
+    tokenHash: string,
+  ): Promise<RefreshTokenWithUser | null> {
+    try {
+      const token = await this.prisma.refreshToken.delete({
+        where: { tokenHash },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
+      });
+
+      if (token.expiresAt < new Date()) {
+        return null;
+      }
+
+      return token as RefreshTokenWithUser;
+    } catch (error) {
+      // Only swallow "record not found" error (token already consumed or never existed)
+      // Rethrow other errors (DB connection issues, etc.) for proper error handling
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === PRISMA_RECORD_NOT_FOUND
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 }

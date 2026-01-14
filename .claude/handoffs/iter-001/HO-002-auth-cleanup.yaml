@@ -1,0 +1,105 @@
+# ============================================================
+# HANDOFF: HO-002 - Auth Module Cleanup
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-14
+# ============================================================
+
+handoff_id: "HO-002"
+design_state_version: "0.5.0"
+priority: "P1"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Remove leftover TODO comment in register.dto.ts that was identified
+  during code review (ISS-004 in RR-001-auth.yaml).
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  During C Session review of TASK-001, a leftover TODO comment was found
+  in register.dto.ts. The validation decorators are already sufficient,
+  so the TODO should be removed to keep the code clean.
+
+  Current file has lines 6-11 containing:
+  ```
+  * TODO(B): Add any additional validation decorators if needed
+  * Constraints:
+  * - Email must be valid format
+  * - Password: 8-100 characters
+  * - Name: 2-50 characters
+  ```
+
+  The constraints are already implemented via decorators, so this
+  comment is no longer needed.
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-002-1"
+    title: "Remove leftover TODO comment"
+    file: "apps/backend/src/modules/auth/dto/register.dto.ts"
+    action: |
+      Replace the JSDoc comment (lines 3-11) with a cleaner version:
+
+      Before:
+      ```typescript
+      /**
+       * DTO for user registration
+       *
+       * TODO(B): Add any additional validation decorators if needed
+       * Constraints:
+       * - Email must be valid format
+       * - Password: 8-100 characters
+       * - Name: 2-50 characters
+       */
+      ```
+
+      After:
+      ```typescript
+      /**
+       * DTO for user registration
+       * DONE(B): Validation implemented - TASK-001
+       */
+      ```
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "No TODO(B) markers in register.dto.ts"
+    verification: "grep -c 'TODO(B)' register.dto.ts returns 0"
+
+  - description: "DONE(B) marker present for traceability"
+    verification: "File contains DONE(B) comment"
+
+  - description: "File still compiles"
+    verification: "npm run build succeeds"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Do not change any validation decorators"
+  - "Keep the DONE(B) marker for audit trail"
+  - "File must remain under 50 lines"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Adding new validation rules"
+  - "Changing class structure"
+  - "Modifying other files"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This is a quick cleanup task from review feedback.
+  After completion, auth module MVP will be complete.
