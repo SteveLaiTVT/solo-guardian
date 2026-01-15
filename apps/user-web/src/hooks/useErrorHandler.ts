@@ -7,14 +7,14 @@
 
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/components/ui/use-toast';
-import { parseApiError, ParsedError } from '@solo-guardian/api-client';
+import { parseApiError, type ParsedError } from '@solo-guardian/api-client';
 
-// TODO(B): Define hook options interface
+// DONE(B): Define hook options interface
 interface HandleErrorOptions {
   silent?: boolean;
 }
 
-// TODO(B): Implement useErrorHandler hook
+// DONE(B): Implement useErrorHandler hook
 // - Use useTranslation('error') for error messages
 // - Use useToast for showing notifications
 // - Return handleError function and parseApiError
@@ -26,7 +26,7 @@ export function useErrorHandler(): {
   const { t } = useTranslation('error');
   const { toast } = useToast();
 
-  // TODO(B): Implement handleError function
+  // DONE(B): Implement handleError function
   // - Parse the error using parseApiError
   // - If silent option is true, just return parsed error
   // - Get translated title based on isUserError
@@ -54,7 +54,7 @@ export function useErrorHandler(): {
       ...parsed.details,
     });
 
-    // TODO(B): Show toast with appropriate variant
+    // DONE(B): Show toast with appropriate variant
     // - User errors: 'default' variant
     // - System errors: 'destructive' variant
     // - Network errors: add retry action

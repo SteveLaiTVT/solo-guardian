@@ -6,7 +6,7 @@
  */
 
 import {
-  ApiErrorResponse,
+  type ApiErrorResponse,
   ErrorCategory,
   isUserError,
 } from '@solo-guardian/types';
@@ -25,7 +25,7 @@ export interface ParsedError {
   isNetworkError: boolean;
 }
 
-// TODO(B): Implement parseApiError function
+// DONE(B): Implement parseApiError function
 // - Handle network errors (no response from server)
 // - Handle Axios errors with ApiErrorResponse
 // - Handle unknown error formats
@@ -35,7 +35,7 @@ export interface ParsedError {
  * Parse API error response into a structured format
  */
 export function parseApiError(error: unknown): ParsedError {
-  // TODO(B): Check for network error
+  // DONE(B): Check for network error
   // - If error is Error and doesn't have 'response' property
   // - Return network error ParsedError
 
@@ -51,7 +51,7 @@ export function parseApiError(error: unknown): ParsedError {
     };
   }
 
-  // TODO(B): Check for Axios error with response
+  // DONE(B): Check for Axios error with response
   // - If error has response.data with ApiErrorResponse structure
   // - Extract error info and return ParsedError
 
@@ -73,7 +73,7 @@ export function parseApiError(error: unknown): ParsedError {
     }
   }
 
-  // TODO(B): Handle unknown error format
+  // DONE(B): Handle unknown error format
   // - Return generic system error ParsedError
 
   // Unknown error format
@@ -87,7 +87,7 @@ export function parseApiError(error: unknown): ParsedError {
   };
 }
 
-// TODO(B): Implement isAxiosError type guard
+// DONE(B): Implement isAxiosError type guard
 function isAxiosError(
   error: unknown,
 ): error is { response?: { data?: unknown } } {

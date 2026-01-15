@@ -5,12 +5,12 @@
  * @design_state_version 1.6.1
  */
 
-import { Component, ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
-// TODO(B): Define Props and State interfaces
+// DONE(B): Define Props and State interfaces
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
@@ -20,7 +20,7 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-// TODO(B): Implement ErrorBoundary class component
+// DONE(B): Implement ErrorBoundary class component
 // - Use static getDerivedStateFromError to set hasError
 // - Use componentDidCatch to log errors
 // - Render fallback or ErrorFallback when hasError is true
@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    // TODO(B): Log error for debugging
+    // DONE(B): Log error for debugging
     // Consider sending to error tracking service in production
     console.error('ErrorBoundary caught:', error, info);
   }
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<
   }
 }
 
-// TODO(B): Implement ErrorFallback component
+// DONE(B): Implement ErrorFallback component
 // - Show friendly error message
 // - Show retry button
 // - Show go back button

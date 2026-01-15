@@ -8,15 +8,17 @@
 /**
  * Error categories for classification
  */
-export enum ErrorCategory {
-  VALIDATION = 'VALIDATION',
-  AUTH = 'AUTH',
-  BUSINESS = 'BUSINESS',
-  NOT_FOUND = 'NOT_FOUND',
-  CONFLICT = 'CONFLICT',
-  RATE_LIMIT = 'RATE_LIMIT',
-  SYSTEM = 'SYSTEM',
-}
+export const ErrorCategory = {
+  VALIDATION: 'VALIDATION',
+  AUTH: 'AUTH',
+  BUSINESS: 'BUSINESS',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  RATE_LIMIT: 'RATE_LIMIT',
+  SYSTEM: 'SYSTEM',
+} as const;
+
+export type ErrorCategory = (typeof ErrorCategory)[keyof typeof ErrorCategory];
 
 /**
  * Error code definition structure
