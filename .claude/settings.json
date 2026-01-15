@@ -3,20 +3,59 @@
     "allow": [
       "Read(**)",
       "Write(**)",
-      "Write(.claude/**)",
-      "Write(apps/**)",
-      "Write(packages/**)",
+      "Edit",
+      "MultiEdit",
+
       "Bash(npm:*)",
       "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(yarn:*)",
+      "Bash(bun:*)",
+
       "Bash(git:*)",
-      "Bash(mkdir:*)",
+      "Bash(gh:*)",
+
       "Bash(cat:*)",
       "Bash(ls:*)",
-      "BASH(gh:*)"
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(cd:*)",
+      "Bash(chmod:*)",
+      "Bash(which:*)",
+      "Bash(env:*)",
+      "Bash(export:*)",
+
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+
+      "Bash(code:*)",
+      "Bash(open:*)",
+
+      "WebFetch(*)"
     ],
     "deny": [
-      "Write(.env*)",
-      "Bash(rm -rf /)"
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(sudo rm -rf:*)"
     ]
   }
 }

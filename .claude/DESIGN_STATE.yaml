@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "1.1.0"
+  version: "1.2.0"
   updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "main"
@@ -247,14 +247,14 @@ current_iteration:
   tasks:
     - id: "TASK-008"
       title: "Frontend: User-web infrastructure setup"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-008-user-web-infra.yaml"
       description: "Vite + React + TypeScript + Tailwind + shadcn/ui"
 
     - id: "TASK-009"
       title: "Frontend: Shared API client package"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-009-api-client.yaml"
       depends_on: []
