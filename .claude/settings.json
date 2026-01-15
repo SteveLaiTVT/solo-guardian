@@ -50,7 +50,7 @@
       "Bash(code:*)",
       "Bash(open:*)",
 
-      "WebFetch(*)"
+      "WebFetch"
     ],
     "deny": [
       "Bash(rm -rf /)",
