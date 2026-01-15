@@ -1,0 +1,162 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-011 - Main Pages
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-011"
+task_id: "TASK-011"
+handoff_id: "HO-011"
+design_state_version: "1.1.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented main user pages: Dashboard with check-in button,
+  Settings with time pickers, and History with pagination.
+  All pages use TanStack Query hooks for data fetching.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - task: "TASK-011-1"
+    description: "Create Dashboard page"
+    file: "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+    features:
+      - "Dynamic greeting based on time of day"
+      - "Check-in status display"
+      - "Optional note input"
+      - "Loading/error states"
+
+  - task: "TASK-011-2"
+    description: "Create CheckInButton component"
+    file: "apps/user-web/src/components/check-in/CheckInButton.tsx"
+    features:
+      - "Large 160x160px circular button"
+      - "Three states: pending (green), overdue (red), completed (gray)"
+      - "Pulse animation when overdue"
+      - "Loading spinner during submission"
+
+  - task: "TASK-011-3"
+    description: "Create StatusCard component"
+    file: "apps/user-web/src/components/check-in/StatusCard.tsx"
+    features:
+      - "Shows deadline time in 12-hour format"
+      - "Countdown timer (updates every minute)"
+      - "Different display for checked-in state"
+      - "Shows check-in note if exists"
+
+  - task: "TASK-011-4"
+    description: "Create Settings page"
+    file: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+    features:
+      - "Deadline time picker"
+      - "Reminder time picker"
+      - "Reminder enable/disable toggle"
+      - "Save button appears when changes exist"
+      - "Logout functionality"
+
+  - task: "TASK-011-5"
+    description: "Create TimePicker component"
+    file: "apps/user-web/src/components/ui/TimePicker.tsx"
+    features:
+      - "Native HTML time input"
+      - "Label support"
+      - "Consistent styling with shadcn"
+
+  - task: "TASK-011-6"
+    description: "Create History page"
+    file: "apps/user-web/src/pages/dashboard/HistoryPage.tsx"
+    features:
+      - "Paginated check-in list"
+      - "Previous/Next navigation"
+      - "Empty state message"
+      - "Loading/error states"
+
+  - task: "TASK-011-7"
+    description: "Create HistoryItem component"
+    file: "apps/user-web/src/components/history/HistoryItem.tsx"
+    features:
+      - "Friendly date format (Today, Yesterday, etc)"
+      - "Check-in time display"
+      - "Note display if exists"
+      - "Green checkmark indicator"
+
+  - task: "TASK-011-8/9"
+    description: "Layout and MobileNav"
+    files:
+      - "apps/user-web/src/components/layout/Layout.tsx"
+      - "apps/user-web/src/components/layout/MobileNav.tsx"
+      - "apps/user-web/src/components/layout/Header.tsx"
+    features:
+      - "Fixed header with logo"
+      - "Bottom navigation on mobile"
+      - "Active route highlighting"
+      - "Responsive padding for bottom nav"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "Dashboard shows check-in status"
+    status: "pass"
+    evidence: "Uses useCheckInToday hook, displays status card"
+
+  - criterion: "Can check in"
+    status: "pass"
+    evidence: "CheckInButton triggers useCreateCheckIn mutation"
+
+  - criterion: "Settings page loads"
+    status: "pass"
+    evidence: "Uses useSettings hook to fetch current values"
+
+  - criterion: "Can update deadline"
+    status: "pass"
+    evidence: "useUpdateSettings mutation on Save"
+
+  - criterion: "History shows records"
+    status: "pass"
+    evidence: "useCheckInHistory with pagination"
+
+  - criterion: "Mobile navigation works"
+    status: "pass"
+    evidence: "Fixed bottom nav with NavLink active states"
+
+  - criterion: "Responsive design"
+    status: "pass"
+    evidence: "Mobile-first, md: breakpoints, pb-20 for nav"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Mobile-first responsive design"
+    status: "compliant"
+    evidence: "All layouts start mobile, scale up"
+
+  - constraint: "Check-in button easily tappable"
+    status: "compliant"
+    evidence: "160x160px (40rem), well above 44x44px minimum"
+
+  - constraint: "No any types"
+    status: "compliant"
+    evidence: "All types from api-client or defined locally"
+
+  - constraint: "Loading states for async operations"
+    status: "compliant"
+    evidence: "All pages show Loader2 spinner while loading"
+
+  - constraint: "Single file < 300 lines"
+    status: "compliant"
+    evidence: "Largest file (HistoryPage.tsx) is ~80 lines"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

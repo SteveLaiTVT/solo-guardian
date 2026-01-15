@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios"
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axios"
 import type { AuthTokens } from "./types"
 
 export interface ApiClientConfig {
