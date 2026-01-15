@@ -1,0 +1,207 @@
+# ============================================================
+# HANDOFF: HO-019 - Frontend Error Handling
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-019"
+title: "Frontend: Error handling hooks and i18n"
+priority: "P0"
+estimated_complexity: "medium"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create frontend error handling infrastructure with useErrorHandler hook,
+    error i18n translations, and ErrorBoundary component.
+
+  goals:
+    - Parse API errors into structured format
+    - Show user-friendly toast messages
+    - Support i18n error messages (en, zh, ja)
+    - ErrorBoundary for unexpected React errors
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "parseApiError function in api-client package"
+  - "useErrorHandler hook shows toast with translated message"
+  - "error.json translations for all 3 languages"
+  - "ErrorBoundary component with retry option"
+  - "User errors get friendly tone, system errors get apologetic tone"
+  - "Network errors detected and shown appropriately"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_create:
+  - path: "packages/api-client/src/error-handler.ts"
+    description: "Parse API errors"
+
+  - path: "apps/user-web/src/hooks/useErrorHandler.ts"
+    description: "Error handler hook with toast"
+
+  - path: "apps/user-web/src/components/ErrorBoundary.tsx"
+    description: "React error boundary"
+
+  - path: "apps/user-web/src/i18n/locales/en/error.json"
+    description: "English error messages"
+
+  - path: "apps/user-web/src/i18n/locales/zh/error.json"
+    description: "Chinese error messages"
+
+  - path: "apps/user-web/src/i18n/locales/ja/error.json"
+    description: "Japanese error messages"
+
+files_to_modify:
+  - path: "packages/api-client/src/index.ts"
+    description: "Export error-handler"
+
+  - path: "apps/user-web/src/i18n/i18n.ts"
+    description: "Add error namespace"
+
+  - path: "apps/user-web/src/App.tsx"
+    description: "Wrap with ErrorBoundary"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  error_handler_api_client:
+    file: "packages/api-client/src/error-handler.ts"
+    exports:
+      - name: "ParsedError"
+        type: "interface"
+        fields:
+          - "code: string"
+          - "category: ErrorCategory"
+          - "i18nKey: string"
+          - "message: string"
+          - "field?: string"
+          - "details?: Record<string, unknown>"
+          - "isUserError: boolean"
+          - "isNetworkError: boolean"
+
+      - name: "parseApiError"
+        type: "function"
+        signature: "(error: unknown) => ParsedError"
+        handles:
+          - "Network error (no response)"
+          - "Axios error with ApiErrorResponse"
+          - "Unknown error format"
+
+  use_error_handler_hook:
+    file: "apps/user-web/src/hooks/useErrorHandler.ts"
+    returns:
+      - "handleError: (error: unknown, options?: { silent?: boolean }) => ParsedError"
+      - "parseApiError: from api-client"
+
+    behavior:
+      - "Get translated message using i18n"
+      - "Show toast with appropriate variant"
+      - "User errors: default variant"
+      - "System errors: destructive variant"
+      - "Network errors: show retry action"
+
+  error_boundary:
+    file: "apps/user-web/src/components/ErrorBoundary.tsx"
+    features:
+      - "Catch React rendering errors"
+      - "Show friendly error page"
+      - "Retry button to clear error"
+      - "Go back button"
+      - "Log error for debugging"
+
+  i18n_structure:
+    namespace: "error"
+    keys:
+      title:
+        userError: "Please check your input"
+        systemError: "Something went wrong"
+      action:
+        retry: "Try again"
+        goBack: "Go back"
+      auth:
+        invalidCredentials: "Email or password is incorrect..."
+        tokenExpired: "Your session has expired..."
+        tokenInvalid: "Your session is invalid..."
+        unauthorized: "You don't have permission..."
+      validation:
+        failed: "Please check your input..."
+        emailInvalid: "Please enter a valid email..."
+        requiredField: "This field is required"
+      user:
+        notFound: "User not found"
+        emailExists: "This email is already registered..."
+      contact:
+        notFound: "Contact not found"
+        limitReached: "You can add up to {{maxAllowed}} contacts..."
+        emailExists: "This email is already in your contacts"
+      checkin:
+        alreadyToday: "You've already checked in today..."
+        settingsNotFound: "Please set up your check-in settings..."
+      preferences:
+        notFound: "Preferences not found..."
+      network:
+        failed: "Unable to connect..."
+      system:
+        internal: "We're sorry, something went wrong..."
+        unavailable: "Service is temporarily unavailable..."
+        rateLimited: "Too many requests..."
+        unknown: "An unexpected error occurred..."
+
+# ============================================================
+# Usage Example
+# ============================================================
+usage_example: |
+  // In component
+  import { useErrorHandler } from '@/hooks/useErrorHandler';
+
+  function ContactForm({ onSuccess }) {
+    const { handleError } = useErrorHandler();
+    const createContact = hooks.useCreateContact();
+
+    const onSubmit = async (data) => {
+      try {
+        await createContact.mutateAsync(data);
+        onSuccess();
+      } catch (error) {
+        const parsed = handleError(error);
+
+        // Highlight specific field if validation error
+        if (parsed.field) {
+          setError(parsed.field, { message: parsed.message });
+        }
+      }
+    };
+  }
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "No `any` type"
+  - "All components have JSX.Element return type"
+  - "Use useTranslation('error') hook"
+  - "Interpolate details in translations (e.g., {{maxAllowed}})"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: ["TASK-017"]
+  blocks: ["TASK-022"]
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "Tone matters: user errors are informative, system errors are apologetic"
+  - "Chinese and Japanese translations should feel natural, not literal"
+  - "Consider adding error tracking service integration (future)"

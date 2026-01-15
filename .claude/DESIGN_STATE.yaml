@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.5.0"
+  version: "1.6.0"
   updated_at: "2026-01-15"
   updated_by: "A Session"
-  branch: "feature/iter-006-emergency-contacts"
+  branch: "feature/iter-007-preferences-errors"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Emergency Contacts Complete"
+  milestone: "User Preferences & Error Handling"
 
 # ============================================================
 # 1. Technical Architecture
@@ -221,6 +221,52 @@ modules:
         description: "Manage emergency contacts in user-web"
         completed_task: "TASK-016"
 
+  user_preferences:
+    status: "in_progress"
+    owner: "B Session"
+    description: "User preferences and feature toggles"
+    started_iteration: "iter-007"
+    features:
+      - name: "Feature Toggle System"
+        priority: "P0"
+        status: "in_progress"
+        description: "Users can enable/disable optional features"
+      - name: "Visual Preferences"
+        priority: "P0"
+        status: "in_progress"
+        description: "Font size, high contrast, reduced motion"
+      - name: "Onboarding Flow"
+        priority: "P0"
+        status: "pending"
+        description: "First-time user setup with feature selection"
+      - name: "Settings Page"
+        priority: "P0"
+        status: "pending"
+        description: "Features and visual preferences sections"
+
+  error_handling:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Standardized error handling across backend and frontend"
+    started_iteration: "iter-007"
+    features:
+      - name: "Error Codes"
+        priority: "P0"
+        status: "in_progress"
+        description: "Shared error codes in packages/types"
+      - name: "Backend Exception Filter"
+        priority: "P0"
+        status: "in_progress"
+        description: "BusinessException + GlobalExceptionFilter"
+      - name: "Frontend Error Handler"
+        priority: "P0"
+        status: "in_progress"
+        description: "useErrorHandler hook with i18n messages"
+      - name: "Error Boundary"
+        priority: "P0"
+        status: "pending"
+        description: "React error boundary for unexpected errors"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -287,38 +333,58 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-006"
-  goal: "Implement emergency contacts module - core safety feature"
+  id: "iter-007"
+  goal: "User preferences system and error handling infrastructure"
   started_at: "2026-01-15"
-  completed_at: "2026-01-15"
-  status: "completed"
+  status: "in_progress"
   tasks:
-    - id: "TASK-014"
-      title: "Database: Add EmergencyContact model"
-      status: "completed"
+    - id: "TASK-017"
+      title: "Shared: Error codes and types"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-014-emergency-contact-db.yaml"
+      handoff: "HO-017-error-codes.yaml"
       depends_on: []
-      description: "Prisma schema for emergency contacts"
-      review_verdict: "pass"
+      description: "Shared error codes, categories, and types in packages/types"
 
-    - id: "TASK-015"
-      title: "Backend: Emergency contacts module"
-      status: "completed"
+    - id: "TASK-018"
+      title: "Backend: Error handling infrastructure"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-015-emergency-contacts-backend.yaml"
-      depends_on: ["TASK-014"]
-      description: "NestJS module with CRUD operations for emergency contacts"
-      review_verdict: "pass"
+      handoff: "HO-018-backend-errors.yaml"
+      depends_on: ["TASK-017"]
+      description: "BusinessException, GlobalExceptionFilter, i18n-ready error responses"
 
-    - id: "TASK-016"
-      title: "Frontend: Emergency contacts page"
-      status: "completed"
+    - id: "TASK-019"
+      title: "Frontend: Error handling hooks and i18n"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-016-emergency-contacts-frontend.yaml"
-      depends_on: ["TASK-015"]
-      description: "User-web page for managing emergency contacts"
-      review_verdict: "pass"
+      handoff: "HO-019-frontend-errors.yaml"
+      depends_on: ["TASK-017"]
+      description: "useErrorHandler hook, error.json translations, ErrorBoundary"
+
+    - id: "TASK-020"
+      title: "Database: UserPreferences model"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-020-preferences-db.yaml"
+      depends_on: []
+      description: "Prisma schema for user preferences with feature toggles"
+
+    - id: "TASK-021"
+      title: "Backend: User preferences module"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-021-preferences-backend.yaml"
+      depends_on: ["TASK-020", "TASK-018"]
+      description: "CRUD endpoints for user preferences"
+
+    - id: "TASK-022"
+      title: "Frontend: Preferences and onboarding"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-022-preferences-frontend.yaml"
+      depends_on: ["TASK-021", "TASK-019"]
+      description: "Onboarding flow, settings page, theme system"
 
 # ============================================================
 # 5.1 Iteration History
@@ -584,6 +650,50 @@ decision_log:
         - "isActive: Boolean (default true)"
         - "createdAt, updatedAt, deletedAt"
 
+  - id: "ADR-011"
+    date: "2026-01-15"
+    decision: "Feature toggle system with preferFeaturesOn flag"
+    rationale: |
+      - No user labeling (no "elder"/"young" mode)
+      - Users choose features they want
+      - preferFeaturesOn: auto-enable new features on upgrade or not
+      - Core features as DB columns (queryable)
+      - Optional features in JSON field (flexible, no schema changes)
+    schema:
+      fields:
+        - "id: UUID primary key"
+        - "userId: FK to User (unique)"
+        - "preferFeaturesOn: Boolean (default false)"
+        - "fontSize: Int (14-24, default 16)"
+        - "highContrast: Boolean (default false)"
+        - "reducedMotion: Boolean (default false)"
+        - "hobbyCheckIn: Boolean (default false)"
+        - "familyAccess: Boolean (default false)"
+        - "optionalFeatures: JSON (flexible storage)"
+        - "onboardingCompleted: Boolean (default false)"
+        - "createdAt, updatedAt"
+
+  - id: "ADR-012"
+    date: "2026-01-15"
+    decision: "Standardized error handling with i18n support"
+    rationale: |
+      - Error codes shared between backend and frontend (packages/types)
+      - Error categories: VALIDATION, AUTH, BUSINESS, NOT_FOUND, CONFLICT, RATE_LIMIT, SYSTEM
+      - Backend: BusinessException + GlobalExceptionFilter
+      - Frontend: useErrorHandler hook + i18n error messages
+      - User errors get friendly messages, system errors get apologetic messages
+      - Error response includes i18nKey for frontend translation
+    error_response_format:
+      success: false
+      error:
+        code: "AUTH_1001"
+        category: "AUTH"
+        message: "English default message"
+        i18nKey: "error.auth.invalidCredentials"
+        details: {}
+        field: "email"
+        timestamp: "2026-01-15T10:00:00Z"
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
@@ -746,3 +856,106 @@ review_history:
         severity: "suggestion"
         description: "Leftover TODO in register.dto.ts"
         resolution: "Resolved in iter-001 TASK-002"
+
+# ============================================================
+# 9. Bugfix History (Post-Review Fixes)
+# ============================================================
+bugfix_history:
+  - id: "BUGFIX-001"
+    iteration: "iter-006"
+    date: "2026-01-15"
+    source: "PR code review"
+    status: "completed"
+    bugs_fixed:
+      - id: "BUG-001"
+        title: "Route shadowing in emergency-contacts controller"
+        severity: "P0"
+        description: "@Put(':id') shadowed @Put('reorder'), making reorder endpoint inaccessible"
+        fix: "Moved @Put('reorder') before @Put(':id')"
+        file: "emergency-contacts.controller.ts"
+
+      - id: "BUG-002"
+        title: "Soft delete unique constraint conflict"
+        severity: "P0"
+        description: "Standard unique constraints on userId+email and userId+priority don't exclude soft-deleted records"
+        fix: "Created partial unique indexes with WHERE deleted_at IS NULL"
+        files:
+          - "schema.prisma"
+          - "migrations/20260115140000_fix_emergency_contact_unique_constraints/migration.sql"
+
+      - id: "BUG-003"
+        title: "Auto-priority conflict with sparse priorities"
+        severity: "P1"
+        description: "Using count+1 for auto-priority fails when priorities are sparse (e.g., [1,2,4,5])"
+        fix: "Changed to use max(priority)+1"
+        files:
+          - "emergency-contacts.repository.ts"
+          - "emergency-contacts.service.ts"
+
+      - id: "BUG-004"
+        title: "Reorder unique constraint violation"
+        severity: "P1"
+        description: "Sequential UPDATEs during priority swap cause constraint violations"
+        fix: "Use atomic UPDATE with CASE expression for all priorities at once"
+        file: "emergency-contacts.repository.ts"
+
+      - id: "BUG-005"
+        title: "Auto-priority exceeds valid range"
+        severity: "P1"
+        description: "max+1 can produce priority > 5 when priorities are sparse"
+        fix: "Find lowest available slot in 1-5 range instead"
+        file: "emergency-contacts.service.ts"
+
+# ============================================================
+# 10. E2E Test Recommendations
+# ============================================================
+e2e_test_recommendations:
+  module: "emergency_contacts"
+  priority: "P1"
+  rationale: "Multiple edge cases discovered during review that should be regression-tested"
+
+  test_cases:
+    - id: "E2E-EC-001"
+      scenario: "Create contact after soft delete"
+      description: "User can create contact with same email after soft-deleting previous one"
+      steps:
+        - "Create contact with email A"
+        - "Delete contact"
+        - "Create new contact with email A"
+        - "Verify success (no unique constraint error)"
+
+    - id: "E2E-EC-002"
+      scenario: "Reorder contacts with swap"
+      description: "Swapping priorities of two contacts works atomically"
+      steps:
+        - "Create contacts with priorities 1, 2, 3"
+        - "Reorder: swap priority 1 and 3"
+        - "Verify priorities updated correctly"
+
+    - id: "E2E-EC-003"
+      scenario: "Auto-priority after deletion"
+      description: "New contact gets correct priority after deleting middle contact"
+      steps:
+        - "Create contacts with priorities 1, 2, 3"
+        - "Delete contact with priority 2"
+        - "Create new contact (no explicit priority)"
+        - "Verify new contact gets priority 2 (lowest available)"
+
+    - id: "E2E-EC-004"
+      scenario: "Max contacts limit"
+      description: "Cannot exceed 5 contacts per user"
+      steps:
+        - "Create 5 contacts"
+        - "Attempt to create 6th contact"
+        - "Verify appropriate error returned"
+
+    - id: "E2E-EC-005"
+      scenario: "Reorder endpoint accessible"
+      description: "PUT /emergency-contacts/reorder is not shadowed by :id route"
+      steps:
+        - "Create contacts with priorities 1, 2"
+        - "Call PUT /emergency-contacts/reorder"
+        - "Verify 200 response (not 404 or validation error)"
+
+  suggested_iteration: "iter-008 or dedicated testing iteration"
+  tools: "Jest + Supertest for backend API E2E"

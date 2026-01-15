@@ -1,0 +1,222 @@
+# ============================================================
+# HANDOFF: HO-021 - Backend User Preferences Module
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-021"
+title: "Backend: User preferences module"
+priority: "P0"
+estimated_complexity: "medium"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create NestJS module for user preferences with CRUD operations.
+    Handles feature toggles, visual preferences, and onboarding status.
+
+  goals:
+    - Get user preferences (create with defaults if not exists)
+    - Update preferences
+    - Update specific optional feature
+    - Mark onboarding completed
+    - Use BusinessException for errors
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "GET /preferences - Returns user preferences"
+  - "PATCH /preferences - Update preferences"
+  - "PATCH /preferences/features/:featureName - Toggle optional feature"
+  - "POST /preferences/onboarding/complete - Mark onboarding done"
+  - "Auto-create preferences on first GET"
+  - "Validate fontSize range (14-24)"
+  - "Use BusinessException for errors"
+  - "All endpoints protected by JwtAuthGuard"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_create:
+  - path: "apps/backend/src/modules/user-preferences/user-preferences.module.ts"
+    description: "Module definition"
+
+  - path: "apps/backend/src/modules/user-preferences/user-preferences.controller.ts"
+    description: "REST endpoints"
+
+  - path: "apps/backend/src/modules/user-preferences/user-preferences.service.ts"
+    description: "Business logic"
+
+  - path: "apps/backend/src/modules/user-preferences/user-preferences.repository.ts"
+    description: "Database operations"
+
+  - path: "apps/backend/src/modules/user-preferences/dto/update-preferences.dto.ts"
+    description: "Update preferences DTO"
+
+  - path: "apps/backend/src/modules/user-preferences/dto/preferences-response.dto.ts"
+    description: "Response DTO"
+
+  - path: "apps/backend/src/modules/user-preferences/dto/index.ts"
+    description: "Export DTOs"
+
+files_to_modify:
+  - path: "apps/backend/src/app.module.ts"
+    description: "Import UserPreferencesModule"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  endpoints:
+    - method: "GET"
+      path: "/api/v1/preferences"
+      description: "Get user preferences (auto-create if not exists)"
+      auth: "JwtAuthGuard"
+      response: "PreferencesResponseDto"
+
+    - method: "PATCH"
+      path: "/api/v1/preferences"
+      description: "Update user preferences"
+      auth: "JwtAuthGuard"
+      body: "UpdatePreferencesDto"
+      response: "PreferencesResponseDto"
+
+    - method: "PATCH"
+      path: "/api/v1/preferences/features/:featureName"
+      description: "Toggle optional feature on/off"
+      auth: "JwtAuthGuard"
+      params:
+        featureName: "string"
+      body: "{ enabled: boolean }"
+      response: "PreferencesResponseDto"
+
+    - method: "POST"
+      path: "/api/v1/preferences/onboarding/complete"
+      description: "Mark onboarding as completed"
+      auth: "JwtAuthGuard"
+      response: "PreferencesResponseDto"
+
+  dtos:
+    update_preferences:
+      fields:
+        - name: "preferFeaturesOn"
+          type: "boolean"
+          optional: true
+        - name: "fontSize"
+          type: "number"
+          optional: true
+          validation: "@Min(14) @Max(24)"
+        - name: "highContrast"
+          type: "boolean"
+          optional: true
+        - name: "reducedMotion"
+          type: "boolean"
+          optional: true
+        - name: "warmColors"
+          type: "boolean"
+          optional: true
+        - name: "hobbyCheckIn"
+          type: "boolean"
+          optional: true
+        - name: "familyAccess"
+          type: "boolean"
+          optional: true
+
+    preferences_response:
+      fields:
+        - "id: string"
+        - "userId: string"
+        - "preferFeaturesOn: boolean"
+        - "fontSize: number"
+        - "highContrast: boolean"
+        - "reducedMotion: boolean"
+        - "warmColors: boolean"
+        - "hobbyCheckIn: boolean"
+        - "familyAccess: boolean"
+        - "optionalFeatures: Record<string, boolean>"
+        - "onboardingCompleted: boolean"
+        - "createdAt: Date"
+        - "updatedAt: Date"
+
+  service_methods:
+    - name: "getOrCreate"
+      params: ["userId: string"]
+      returns: "UserPreferences"
+      description: "Get preferences, create with defaults if not exists"
+
+    - name: "update"
+      params: ["userId: string", "dto: UpdatePreferencesDto"]
+      returns: "UserPreferences"
+      description: "Update preferences"
+
+    - name: "updateOptionalFeature"
+      params: ["userId: string", "featureName: string", "enabled: boolean"]
+      returns: "UserPreferences"
+      description: "Toggle specific optional feature"
+
+    - name: "completeOnboarding"
+      params: ["userId: string"]
+      returns: "UserPreferences"
+      description: "Mark onboarding as completed"
+
+  business_rules:
+    - "fontSize must be between 14 and 24"
+    - "Auto-create preferences on first access"
+    - "optionalFeatures is JSON, merge updates"
+    - "Use BusinessException for validation errors"
+
+# ============================================================
+# Usage Example
+# ============================================================
+usage_example: |
+  // Controller
+  @Controller('preferences')
+  @UseGuards(JwtAuthGuard)
+  export class UserPreferencesController {
+    @Get()
+    async getPreferences(@CurrentUser() userId: string): Promise<PreferencesResponseDto> {
+      return this.service.getOrCreate(userId);
+    }
+
+    @Patch('features/:featureName')
+    async toggleFeature(
+      @CurrentUser() userId: string,
+      @Param('featureName') featureName: string,
+      @Body('enabled') enabled: boolean,
+    ): Promise<PreferencesResponseDto> {
+      return this.service.updateOptionalFeature(userId, featureName, enabled);
+    }
+  }
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "No `any` type"
+  - "All functions < 50 lines"
+  - "All files < 300 lines"
+  - "Controller only validates and calls service"
+  - "Service has business logic"
+  - "Repository handles database"
+  - "Use BusinessException for errors"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: ["TASK-020", "TASK-018"]
+  blocks: ["TASK-022"]
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "Consider creating preferences during user registration"
+  - "optionalFeatures JSON allows flexible feature additions"
+  - "Future: Add feature registry to validate feature names"

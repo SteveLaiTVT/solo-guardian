@@ -1,0 +1,196 @@
+# ============================================================
+# HANDOFF: HO-020 - UserPreferences Database Model
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-020"
+title: "Database: UserPreferences model"
+priority: "P0"
+estimated_complexity: "low"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create Prisma schema for UserPreferences model with feature toggles
+    and visual preferences. Uses JSON field for flexible optional features.
+
+  goals:
+    - Store user preferences with feature toggles
+    - preferFeaturesOn flag for new feature behavior
+    - Core features as columns, optional features as JSON
+    - Support visual preferences (font size, contrast, etc.)
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "UserPreferences model created in schema.prisma"
+  - "One-to-one relation with User"
+  - "preferFeaturesOn boolean field"
+  - "Visual preference fields (fontSize, highContrast, reducedMotion)"
+  - "Core feature toggles as boolean columns"
+  - "optionalFeatures JSON field"
+  - "Migration created and applied"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_modify:
+  - path: "apps/backend/prisma/schema.prisma"
+    description: "Add UserPreferences model"
+
+files_to_create:
+  - path: "apps/backend/prisma/migrations/[timestamp]_add_user_preferences/migration.sql"
+    description: "Migration file (auto-generated)"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  model:
+    name: "UserPreferences"
+    table_name: "user_preferences"
+
+    fields:
+      - name: "id"
+        type: "String"
+        attributes: "@id @default(uuid())"
+
+      - name: "userId"
+        type: "String"
+        attributes: "@unique @map(\"user_id\")"
+        description: "One-to-one with User"
+
+      - name: "user"
+        type: "User"
+        attributes: "@relation(fields: [userId], references: [id])"
+
+      # New feature behavior
+      - name: "preferFeaturesOn"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"prefer_features_on\")"
+        description: "Auto-enable new features on upgrade"
+
+      # Visual preferences
+      - name: "fontSize"
+        type: "Int"
+        attributes: "@default(16) @map(\"font_size\")"
+        description: "Font size 14-24"
+
+      - name: "highContrast"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"high_contrast\")"
+
+      - name: "reducedMotion"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"reduced_motion\")"
+
+      - name: "warmColors"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"warm_colors\")"
+        description: "Softer, warmer color palette"
+
+      # Core feature toggles (queryable)
+      - name: "hobbyCheckIn"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"hobby_check_in\")"
+        description: "Enable hobby selection on check-in"
+
+      - name: "familyAccess"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"family_access\")"
+        description: "Enable family member access feature"
+
+      # Flexible optional features
+      - name: "optionalFeatures"
+        type: "Json"
+        attributes: "@default(\"{}\") @map(\"optional_features\")"
+        description: "JSON for flexible feature storage"
+        example: '{"detailedStats": true, "streaks": false}'
+
+      # Onboarding
+      - name: "onboardingCompleted"
+        type: "Boolean"
+        attributes: "@default(false) @map(\"onboarding_completed\")"
+
+      # Timestamps
+      - name: "createdAt"
+        type: "DateTime"
+        attributes: "@default(now()) @map(\"created_at\")"
+
+      - name: "updatedAt"
+        type: "DateTime"
+        attributes: "@updatedAt @map(\"updated_at\")"
+
+    model_attributes:
+      - "@@map(\"user_preferences\")"
+
+  user_model_update:
+    add_relation: |
+      preferences UserPreferences?
+
+# ============================================================
+# Prisma Schema
+# ============================================================
+prisma_schema: |
+  model UserPreferences {
+    id                   String   @id @default(uuid())
+    userId               String   @unique @map("user_id")
+    user                 User     @relation(fields: [userId], references: [id])
+
+    // New feature behavior
+    preferFeaturesOn     Boolean  @default(false) @map("prefer_features_on")
+
+    // Visual preferences
+    fontSize             Int      @default(16) @map("font_size")
+    highContrast         Boolean  @default(false) @map("high_contrast")
+    reducedMotion        Boolean  @default(false) @map("reduced_motion")
+    warmColors           Boolean  @default(false) @map("warm_colors")
+
+    // Core feature toggles
+    hobbyCheckIn         Boolean  @default(false) @map("hobby_check_in")
+    familyAccess         Boolean  @default(false) @map("family_access")
+
+    // Flexible optional features
+    optionalFeatures     Json     @default("{}") @map("optional_features")
+
+    // Onboarding
+    onboardingCompleted  Boolean  @default(false) @map("onboarding_completed")
+
+    // Timestamps
+    createdAt            DateTime @default(now()) @map("created_at")
+    updatedAt            DateTime @updatedAt @map("updated_at")
+
+    @@map("user_preferences")
+  }
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "Use snake_case for database columns (@map)"
+  - "Use camelCase for Prisma model fields"
+  - "All fields must have sensible defaults"
+  - "fontSize must be validated in service (14-24 range)"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: []
+  blocks: ["TASK-021"]
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "optionalFeatures JSON allows adding new features without migrations"
+  - "Core features as columns allow efficient querying if needed"
+  - "preferFeaturesOn determines default for new features"
+  - "After migration, run: npx prisma generate"
