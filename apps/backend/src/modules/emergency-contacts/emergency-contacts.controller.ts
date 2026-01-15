@@ -31,16 +31,7 @@ import { JwtAuthGuard } from '@/modules/auth/guards';
 export class EmergencyContactsController {
   constructor(private readonly contactsService: EmergencyContactsService) {}
 
-  /**
-   * TODO(B): Implement list all contacts endpoint
-   * Requirements:
-   * - Return all active (non-deleted) contacts for the current user
-   * - Order by priority ascending
-   * Acceptance:
-   * - GET /api/v1/emergency-contacts returns array of contacts
-   * Constraints:
-   * - Only return contacts belonging to current user
-   */
+  // DONE(B): Implemented list all contacts endpoint - TASK-015
   @Get()
   async findAll(
     @CurrentUser() userId: string,
@@ -48,16 +39,7 @@ export class EmergencyContactsController {
     return this.contactsService.findAll(userId);
   }
 
-  /**
-   * TODO(B): Implement get single contact endpoint
-   * Requirements:
-   * - Return contact by ID
-   * - Throw NotFoundException if not found or doesn't belong to user
-   * Acceptance:
-   * - GET /api/v1/emergency-contacts/:id returns single contact
-   * Constraints:
-   * - Verify contact belongs to current user
-   */
+  // DONE(B): Implemented get single contact endpoint - TASK-015
   @Get(':id')
   async findOne(
     @Param('id') id: string,
@@ -66,18 +48,7 @@ export class EmergencyContactsController {
     return this.contactsService.findOne(id, userId);
   }
 
-  /**
-   * TODO(B): Implement create contact endpoint
-   * Requirements:
-   * - Validate max 5 contacts limit
-   * - Validate email uniqueness within user's contacts
-   * - Auto-assign priority if not provided
-   * Acceptance:
-   * - POST /api/v1/emergency-contacts creates new contact
-   * - Returns 400 if limit reached or email duplicate
-   * Constraints:
-   * - Max 5 contacts per user
-   */
+  // DONE(B): Implemented create contact endpoint - TASK-015
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -87,17 +58,7 @@ export class EmergencyContactsController {
     return this.contactsService.create(userId, dto);
   }
 
-  /**
-   * TODO(B): Implement update contact endpoint
-   * Requirements:
-   * - Update contact fields (name, email, phone, isActive)
-   * - Validate email uniqueness if changed
-   * - Throw NotFoundException if contact not found
-   * Acceptance:
-   * - PUT /api/v1/emergency-contacts/:id updates contact
-   * Constraints:
-   * - Verify contact belongs to current user
-   */
+  // DONE(B): Implemented update contact endpoint - TASK-015
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -107,16 +68,7 @@ export class EmergencyContactsController {
     return this.contactsService.update(id, userId, dto);
   }
 
-  /**
-   * TODO(B): Implement soft delete contact endpoint
-   * Requirements:
-   * - Set deletedAt timestamp instead of hard delete
-   * - Do NOT reorder remaining contacts
-   * Acceptance:
-   * - DELETE /api/v1/emergency-contacts/:id soft-deletes contact
-   * Constraints:
-   * - Verify contact belongs to current user
-   */
+  // DONE(B): Implemented soft delete contact endpoint - TASK-015
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
@@ -126,17 +78,7 @@ export class EmergencyContactsController {
     return this.contactsService.remove(id, userId);
   }
 
-  /**
-   * TODO(B): Implement reorder contacts endpoint
-   * Requirements:
-   * - Accept array of contact IDs in new order
-   * - Update priority (1, 2, 3...) based on array position
-   * - Validate all IDs belong to current user
-   * Acceptance:
-   * - PUT /api/v1/emergency-contacts/reorder updates all priorities
-   * Constraints:
-   * - All contact IDs must exist and belong to user
-   */
+  // DONE(B): Implemented reorder contacts endpoint - TASK-015
   @Put('reorder')
   async reorder(
     @Body() dto: ReorderContactsDto,

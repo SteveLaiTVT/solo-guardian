@@ -12,16 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class EmergencyContactsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * TODO(B): Implement findAllByUserId
-   * Requirements:
-   * - Find all contacts for user where deletedAt is null
-   * - Order by priority ascending
-   * Acceptance:
-   * - Returns array of EmergencyContact
-   * Constraints:
-   * - Exclude soft-deleted contacts
-   */
+  // DONE(B): Implemented findAllByUserId - TASK-015
   async findAllByUserId(userId: string): Promise<EmergencyContact[]> {
     return this.prisma.emergencyContact.findMany({
       where: {
@@ -34,27 +25,14 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement findById
-   * Requirements:
-   * - Find contact by ID
-   * Acceptance:
-   * - Returns EmergencyContact or null
-   */
+  // DONE(B): Implemented findById - TASK-015
   async findById(id: string): Promise<EmergencyContact | null> {
     return this.prisma.emergencyContact.findUnique({
       where: { id },
     });
   }
 
-  /**
-   * TODO(B): Implement findByEmail
-   * Requirements:
-   * - Find contact by userId and email
-   * - Exclude soft-deleted contacts
-   * Acceptance:
-   * - Returns EmergencyContact or null
-   */
+  // DONE(B): Implemented findByEmail - TASK-015
   async findByEmail(
     userId: string,
     email: string,
@@ -68,15 +46,7 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement countByUserId
-   * Requirements:
-   * - Count active contacts for user
-   * Acceptance:
-   * - Returns number of contacts
-   * Constraints:
-   * - Exclude soft-deleted contacts
-   */
+  // DONE(B): Implemented countByUserId - TASK-015
   async countByUserId(userId: string): Promise<number> {
     return this.prisma.emergencyContact.count({
       where: {
@@ -86,13 +56,7 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement create
-   * Requirements:
-   * - Create new emergency contact
-   * Acceptance:
-   * - Returns created EmergencyContact
-   */
+  // DONE(B): Implemented create - TASK-015
   async create(data: {
     userId: string;
     name: string;
@@ -111,13 +75,7 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement update
-   * Requirements:
-   * - Update contact fields
-   * Acceptance:
-   * - Returns updated EmergencyContact
-   */
+  // DONE(B): Implemented update - TASK-015
   async update(
     id: string,
     data: {
@@ -134,15 +92,7 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement softDelete
-   * Requirements:
-   * - Set deletedAt to current timestamp
-   * Acceptance:
-   * - Contact has deletedAt set
-   * Constraints:
-   * - Do NOT hard delete
-   */
+  // DONE(B): Implemented softDelete - TASK-015
   async softDelete(id: string): Promise<EmergencyContact> {
     return this.prisma.emergencyContact.update({
       where: { id },
@@ -152,15 +102,7 @@ export class EmergencyContactsRepository {
     });
   }
 
-  /**
-   * TODO(B): Implement updatePriorities
-   * Requirements:
-   * - Update priorities for multiple contacts in transaction
-   * Acceptance:
-   * - All contacts updated with new priorities
-   * Constraints:
-   * - Use transaction for atomicity
-   */
+  // DONE(B): Implemented updatePriorities - TASK-015
   async updatePriorities(
     updates: Array<{ id: string; priority: number }>,
   ): Promise<EmergencyContact[]> {
