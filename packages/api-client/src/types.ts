@@ -76,3 +76,36 @@ export interface UpdateSettingsRequest {
   reminderTime?: string
   reminderEnabled?: boolean
 }
+
+// Emergency Contact types
+export interface EmergencyContact {
+  id: string
+  userId: string
+  name: string
+  email: string
+  phone: string | null
+  priority: number
+  isVerified: boolean
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateContactRequest {
+  name: string
+  email: string
+  phone?: string
+  priority?: number
+}
+
+export interface UpdateContactRequest {
+  name?: string
+  email?: string
+  phone?: string
+  priority?: number
+  isActive?: boolean
+}
+
+export interface ReorderContactsRequest {
+  contactIds: string[]
+}

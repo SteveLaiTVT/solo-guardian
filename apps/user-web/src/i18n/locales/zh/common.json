@@ -6,9 +6,11 @@
   "cancel": "取消",
   "save": "保存更改",
   "saving": "保存中...",
+  "delete": "删除",
   "nav": {
     "home": "首页",
     "history": "历史",
+    "contacts": "联系人",
     "settings": "设置"
   },
   "greeting": {

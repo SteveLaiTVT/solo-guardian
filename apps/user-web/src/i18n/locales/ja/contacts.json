@@ -1,0 +1,38 @@
+{
+  "title": "緊急連絡先",
+  "subtitle": "チェックインを逃した際に通知される方",
+  "addContact": "連絡先を追加",
+  "editContact": "連絡先を編集",
+  "deleteContact": "連絡先を削除",
+  "addContactDescription": "チェックインを逃した際に通知する方を追加してください",
+  "editContactDescription": "連絡先情報を更新",
+  "contactCount": "{{count}}/5 件",
+  "maxContactsReached": "連絡先は最大5件です",
+  "emptyState": "緊急連絡先がありません",
+  "emptyStateHint": "チェックインを逃した際に通知する方を追加してください",
+  "inactive": "無効",
+  "form": {
+    "name": "名前",
+    "namePlaceholder": "連絡先の名前",
+    "email": "メール",
+    "emailPlaceholder": "contact@example.com",
+    "phone": "電話（任意）",
+    "phonePlaceholder": "+81 90 1234 5678"
+  },
+  "deleteConfirm": "{{name}}を緊急連絡先から削除しますか？",
+  "errors": {
+    "nameRequired": "名前は必須です",
+    "emailRequired": "メールは必須です",
+    "emailInvalid": "無効なメール形式です",
+    "duplicateEmail": "このメールは既に追加されています"
+  },
+  "error": {
+    "loadFailed": "連絡先の読み込みに失敗しました"
+  },
+  "success": {
+    "created": "連絡先を追加しました",
+    "updated": "連絡先を更新しました",
+    "deleted": "連絡先を削除しました",
+    "reordered": "連絡先の順序を更新しました"
+  }
+}

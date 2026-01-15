@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "1.4.1"
+  version: "1.4.2"
   updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "feature/iter-006-emergency-contacts"
@@ -164,20 +164,23 @@ modules:
     features:
       - name: "Contact CRUD"
         priority: "P0"
-        status: "pending"
+        status: "done"
         description: "Add, edit, delete emergency contacts"
+        completed_task: "TASK-015"
       - name: "Contact List"
         priority: "P0"
-        status: "pending"
+        status: "done"
         description: "View all emergency contacts"
+        completed_task: "TASK-015"
       - name: "Contact Verification"
         priority: "P1"
         status: "pending"
         description: "Verify contact email/phone before activation"
       - name: "Contact Limit"
         priority: "P0"
-        status: "pending"
+        status: "done"
         description: "Maximum 5 emergency contacts per user"
+        completed_task: "TASK-015"
 
   user_web:
     status: "in_progress"
@@ -212,7 +215,7 @@ modules:
         completed_task: "TASK-013"
       - name: "Emergency Contacts Page"
         priority: "P0"
-        status: "pending"
+        status: "in_progress"
         description: "Manage emergency contacts in user-web"
         added_in: "iter-006"
 
@@ -297,7 +300,7 @@ current_iteration:
 
     - id: "TASK-015"
       title: "Backend: Emergency contacts module"
-      status: "in_progress"
+      status: "completed"
       priority: "P0"
       handoff: "HO-015-emergency-contacts-backend.yaml"
       depends_on: ["TASK-014"]
@@ -305,7 +308,7 @@ current_iteration:
 
     - id: "TASK-016"
       title: "Frontend: Emergency contacts page"
-      status: "pending"
+      status: "in_progress"
       priority: "P0"
       handoff: "HO-016-emergency-contacts-frontend.yaml"
       depends_on: ["TASK-015"]

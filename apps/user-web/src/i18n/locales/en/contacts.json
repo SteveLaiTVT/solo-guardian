@@ -1,0 +1,38 @@
+{
+  "title": "Emergency Contacts",
+  "subtitle": "People who will be notified if you miss a check-in",
+  "addContact": "Add Contact",
+  "editContact": "Edit Contact",
+  "deleteContact": "Delete Contact",
+  "addContactDescription": "Add someone who should be notified if you miss a check-in",
+  "editContactDescription": "Update contact information",
+  "contactCount": "{{count}}/5 contacts",
+  "maxContactsReached": "Maximum 5 contacts reached",
+  "emptyState": "No emergency contacts yet",
+  "emptyStateHint": "Add someone who should be notified if you miss a check-in",
+  "inactive": "Inactive",
+  "form": {
+    "name": "Name",
+    "namePlaceholder": "Contact's name",
+    "email": "Email",
+    "emailPlaceholder": "contact@example.com",
+    "phone": "Phone (optional)",
+    "phonePlaceholder": "+1 234 567 8900"
+  },
+  "deleteConfirm": "Are you sure you want to remove {{name}} from your emergency contacts?",
+  "errors": {
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email format",
+    "duplicateEmail": "This email is already added"
+  },
+  "error": {
+    "loadFailed": "Failed to load contacts"
+  },
+  "success": {
+    "created": "Contact added successfully",
+    "updated": "Contact updated successfully",
+    "deleted": "Contact removed successfully",
+    "reordered": "Contact order updated"
+  }
+}

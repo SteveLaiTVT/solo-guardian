@@ -11,6 +11,10 @@ import type {
   CheckIn,
   CheckInSettings,
   AuthResult,
+  EmergencyContact,
+  CreateContactRequest,
+  UpdateContactRequest,
+  ReorderContactsRequest,
 } from "./types"
 
 export function createHooks(client: AxiosInstance) {
@@ -78,6 +82,57 @@ export function createHooks(client: AxiosInstance) {
         mutationFn: (data: RegisterRequest) =>
           api.auth.register(data).then((r: AxiosResponse<AuthResult>) => r.data),
       }),
+
+    // Emergency Contacts hooks
+    useContacts: () =>
+      useQuery({
+        queryKey: ["contacts"],
+        queryFn: () =>
+          api.contacts.getAll().then((r: AxiosResponse<EmergencyContact[]>) => r.data),
+      }),
+
+    useCreateContact: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (data: CreateContactRequest) =>
+          api.contacts.create(data).then((r: AxiosResponse<EmergencyContact>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
+
+    useUpdateContact: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: UpdateContactRequest }) =>
+          api.contacts.update(id, data).then((r: AxiosResponse<EmergencyContact>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
+
+    useDeleteContact: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (id: string) => api.contacts.delete(id),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
+
+    useReorderContacts: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (data: ReorderContactsRequest) =>
+          api.contacts.reorder(data).then((r: AxiosResponse<EmergencyContact[]>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
   }
 }
 

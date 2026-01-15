@@ -6,9 +6,11 @@
   "cancel": "Cancel",
   "save": "Save Changes",
   "saving": "Saving...",
+  "delete": "Delete",
   "nav": {
     "home": "Home",
     "history": "History",
+    "contacts": "Contacts",
     "settings": "Settings"
   },
   "greeting": {
