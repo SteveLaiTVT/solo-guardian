@@ -56,6 +56,20 @@ export class EmergencyContactsRepository {
     });
   }
 
+  // Get the maximum priority value for a user's active contacts
+  async getMaxPriority(userId: string): Promise<number> {
+    const result = await this.prisma.emergencyContact.aggregate({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+      _max: {
+        priority: true,
+      },
+    });
+    return result._max.priority ?? 0;
+  }
+
   // DONE(B): Implemented create - TASK-015
   async create(data: {
     userId: string;

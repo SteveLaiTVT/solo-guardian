@@ -92,6 +92,9 @@ model CheckInSettings {
 // ============================================================
 // EmergencyContact Model - Emergency contacts for alert notifications
 // @task TASK-014
+// NOTE: Unique constraints on (userId, email) and (userId, priority) are
+//       implemented as partial indexes in migration to exclude soft-deleted
+//       records. See migration: fix_emergency_contact_unique_constraints
 // ============================================================
 model EmergencyContact {
   id         String    @id @default(uuid())
@@ -108,8 +111,9 @@ model EmergencyContact {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, email])
-  @@unique([userId, priority])
+  // Unique constraints are partial indexes (see migration)
+  // Only active (non-deleted) contacts have uniqueness enforced
   @@index([userId, isActive])
+  @@index([userId, deletedAt]) // For efficient queries on active contacts
   @@map("emergency_contacts")
 }

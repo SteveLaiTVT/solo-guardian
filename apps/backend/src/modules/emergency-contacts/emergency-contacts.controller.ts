@@ -58,6 +58,16 @@ export class EmergencyContactsController {
     return this.contactsService.create(userId, dto);
   }
 
+  // DONE(B): Implemented reorder contacts endpoint - TASK-015
+  // NOTE: Must be before @Put(':id') to avoid route shadowing
+  @Put('reorder')
+  async reorder(
+    @Body() dto: ReorderContactsDto,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto[]> {
+    return this.contactsService.reorder(userId, dto.contactIds);
+  }
+
   // DONE(B): Implemented update contact endpoint - TASK-015
   @Put(':id')
   async update(
@@ -76,14 +86,5 @@ export class EmergencyContactsController {
     @CurrentUser() userId: string,
   ): Promise<void> {
     return this.contactsService.remove(id, userId);
-  }
-
-  // DONE(B): Implemented reorder contacts endpoint - TASK-015
-  @Put('reorder')
-  async reorder(
-    @Body() dto: ReorderContactsDto,
-    @CurrentUser() userId: string,
-  ): Promise<ContactResponseDto[]> {
-    return this.contactsService.reorder(userId, dto.contactIds);
   }
 }

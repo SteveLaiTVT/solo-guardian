@@ -60,8 +60,12 @@ export class EmergencyContactsService {
       throw new BadRequestException('Email already exists in contacts');
     }
 
-    // Auto-assign priority
-    const priority = dto.priority ?? (count + 1);
+    // Auto-assign priority using max + 1 (not count + 1) to handle sparse priorities after deletions
+    let priority = dto.priority;
+    if (priority === undefined) {
+      const maxPriority = await this.contactsRepository.getMaxPriority(userId);
+      priority = maxPriority + 1;
+    }
 
     // Create contact via repository
     const contact = await this.contactsRepository.create({
