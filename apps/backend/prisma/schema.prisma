@@ -1,7 +1,7 @@
 // ============================================================
 // Prisma Schema for Solo Guardian
-// @task TASK-001-A, TASK-005, TASK-014
-// @design_state_version 1.4.0
+// @task TASK-001-A, TASK-005, TASK-014, TASK-020
+// @design_state_version 1.6.0
 // ============================================================
 
 generator client {
@@ -28,6 +28,7 @@ model User {
   checkIns          CheckIn[]
   checkInSettings   CheckInSettings?
   emergencyContacts EmergencyContact[]
+  preferences       UserPreferences?
 
   @@map("users")
 }
@@ -116,4 +117,40 @@ model EmergencyContact {
   @@index([userId, isActive])
   @@index([userId, deletedAt]) // For efficient queries on active contacts
   @@map("emergency_contacts")
+}
+
+// ============================================================
+// UserPreferences Model - User preferences and feature toggles
+// @task TASK-020
+// @design_state_version 1.6.0
+// ============================================================
+model UserPreferences {
+  id                  String   @id @default(uuid())
+  userId              String   @unique @map("user_id")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // New feature behavior
+  preferFeaturesOn    Boolean  @default(false) @map("prefer_features_on")
+
+  // Visual preferences
+  fontSize            Int      @default(16) @map("font_size")
+  highContrast        Boolean  @default(false) @map("high_contrast")
+  reducedMotion       Boolean  @default(false) @map("reduced_motion")
+  warmColors          Boolean  @default(false) @map("warm_colors")
+
+  // Core feature toggles
+  hobbyCheckIn        Boolean  @default(false) @map("hobby_check_in")
+  familyAccess        Boolean  @default(false) @map("family_access")
+
+  // Flexible optional features
+  optionalFeatures    Json     @default("{}") @map("optional_features")
+
+  // Onboarding
+  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+
+  // Timestamps
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("user_preferences")
 }
