@@ -48,9 +48,9 @@ export class EmergencyContactsService {
     userId: string,
     dto: CreateContactDto,
   ): Promise<ContactResponseDto> {
-    // Check contact count
-    const count = await this.contactsRepository.countByUserId(userId);
-    if (count >= MAX_CONTACTS) {
+    // Get existing contacts for count check and priority calculation
+    const contacts = await this.contactsRepository.findAllByUserId(userId);
+    if (contacts.length >= MAX_CONTACTS) {
       throw new BadRequestException(`Maximum ${MAX_CONTACTS} contacts allowed`);
     }
 
@@ -60,11 +60,18 @@ export class EmergencyContactsService {
       throw new BadRequestException('Email already exists in contacts');
     }
 
-    // Auto-assign priority using max + 1 (not count + 1) to handle sparse priorities after deletions
+    // Auto-assign priority: find lowest available slot in 1-5
     let priority = dto.priority;
     if (priority === undefined) {
-      const maxPriority = await this.contactsRepository.getMaxPriority(userId);
-      priority = maxPriority + 1;
+      const usedPriorities = new Set(contacts.map((c) => c.priority));
+      for (let p = 1; p <= MAX_CONTACTS; p++) {
+        if (!usedPriorities.has(p)) {
+          priority = p;
+          break;
+        }
+      }
+      // Fallback: if somehow no slot found (shouldn't happen since count < MAX), use count + 1
+      priority = priority ?? contacts.length + 1;
     }
 
     // Create contact via repository
