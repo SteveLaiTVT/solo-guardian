@@ -15,11 +15,12 @@ report_type: "bugfix"
 # Summary
 # ============================================================
 summary: |
-  Fixed three critical bugs identified in code review for the
+  Fixed four critical bugs identified in code review for the
   emergency contacts module:
   1. Route shadowing causing /reorder endpoint to be unreachable
   2. Unique constraints blocking re-addition of soft-deleted contacts
   3. Auto-priority collision when contacts have sparse priorities
+  4. Reorder unique constraint violations when swapping priorities (P1)
 
 # ============================================================
 # Bug 1: Route Shadowing
@@ -113,6 +114,52 @@ bug_3:
       }
 
 # ============================================================
+# Bug 4: Reorder Unique Constraint Violation (P1)
+# ============================================================
+bug_4:
+  id: "BUG-015-4"
+  severity: "P1"
+  title: "Reorder causes unique constraint violation when swapping priorities"
+
+  problem: |
+    The updatePriorities method used separate UPDATE statements inside a
+    $transaction. When swapping priorities (e.g., A:1→2, B:2→1), the first
+    UPDATE would violate the unique constraint on (user_id, priority) before
+    the second UPDATE could complete, causing a 500 error for most reorder
+    operations.
+
+  fix: |
+    1. Replaced multiple UPDATE statements with single atomic UPDATE using CASE
+    2. Uses Prisma.sql tagged template for parameterized query (SQL injection safe)
+    3. Single UPDATE sets all priorities atomically, avoiding transient conflicts
+
+  files_changed:
+    - "emergency-contacts.repository.ts"
+
+  code_change:
+    before: |
+      return this.prisma.$transaction(
+        updates.map((u) =>
+          this.prisma.emergencyContact.update({
+            where: { id: u.id },
+            data: { priority: u.priority },
+          }),
+        ),
+      );
+    after: |
+      const caseFragments = updates.map(
+        (u) => Prisma.sql`WHEN id = ${u.id}::uuid THEN ${u.priority}`,
+      );
+      const caseExpression = Prisma.sql`CASE ${Prisma.join(caseFragments, ' ')} END`;
+
+      await this.prisma.$executeRaw`
+        UPDATE emergency_contacts
+        SET priority = ${caseExpression},
+            updated_at = NOW()
+        WHERE id IN (${idList})
+      `;
+
+# ============================================================
 # Files Changed
 # ============================================================
 files_changed:
@@ -122,7 +169,7 @@ files_changed:
 
   - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
     change_type: "modified"
-    description: "Added getMaxPriority() method"
+    description: "Added getMaxPriority() method; rewrote updatePriorities() with atomic UPDATE"
 
   - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
     change_type: "modified"
@@ -167,14 +214,19 @@ test_scenarios:
     expected: "New contact gets priority 6 (max+1), not 5"
     status: "should_work (max priority logic)"
 
+  - scenario: "Swap priorities via reorder (A:1→2, B:2→1)"
+    expected: "Both contacts updated atomically, no constraint violation"
+    status: "should_work (atomic UPDATE with CASE)"
+
 # ============================================================
 # Conclusion
 # ============================================================
 conclusion: |
-  All three bugs from code review have been fixed. The emergency
+  All four bugs from code review have been fixed. The emergency
   contacts module now correctly handles:
   - Reorder endpoint routing
   - Re-adding soft-deleted contacts
   - Auto-priority assignment with sparse priorities
+  - Priority swapping without unique constraint violations
 
   Ready for re-review by C Session.
