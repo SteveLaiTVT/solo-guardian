@@ -5,7 +5,7 @@
  * @design_state_version 1.4.1
  */
 import { Injectable } from '@nestjs/common';
-import { EmergencyContact } from '@prisma/client';
+import { EmergencyContact, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -117,16 +117,38 @@ export class EmergencyContactsRepository {
   }
 
   // DONE(B): Implemented updatePriorities - TASK-015
+  // Uses single UPDATE with CASE to avoid unique constraint violations during swap
   async updatePriorities(
     updates: Array<{ id: string; priority: number }>,
   ): Promise<EmergencyContact[]> {
-    return this.prisma.$transaction(
-      updates.map((u) =>
-        this.prisma.emergencyContact.update({
-          where: { id: u.id },
-          data: { priority: u.priority },
-        }),
-      ),
+    if (updates.length === 0) {
+      return [];
+    }
+
+    const ids = updates.map((u) => u.id);
+
+    // Build parameterized CASE expression for atomic priority update
+    const caseFragments = updates.map(
+      (u) => Prisma.sql`WHEN id = ${u.id}::uuid THEN ${u.priority}`,
     );
+    const caseExpression = Prisma.sql`CASE ${Prisma.join(caseFragments, ' ')} END`;
+    const idList = Prisma.join(
+      ids.map((id) => Prisma.sql`${id}::uuid`),
+      ', ',
+    );
+
+    // Single UPDATE avoids transient unique constraint violations
+    await this.prisma.$executeRaw`
+      UPDATE emergency_contacts
+      SET priority = ${caseExpression},
+          updated_at = NOW()
+      WHERE id IN (${idList})
+    `;
+
+    // Return updated contacts in priority order
+    return this.prisma.emergencyContact.findMany({
+      where: { id: { in: ids } },
+      orderBy: { priority: 'asc' },
+    });
   }
 }
