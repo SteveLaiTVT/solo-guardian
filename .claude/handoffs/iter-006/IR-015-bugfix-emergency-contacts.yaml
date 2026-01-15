@@ -1,0 +1,180 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-015-bugfix - Emergency Contacts Bug Fixes
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-015-bugfix"
+task_id: "TASK-015"
+design_state_version: "1.4.1"
+report_type: "bugfix"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Fixed three critical bugs identified in code review for the
+  emergency contacts module:
+  1. Route shadowing causing /reorder endpoint to be unreachable
+  2. Unique constraints blocking re-addition of soft-deleted contacts
+  3. Auto-priority collision when contacts have sparse priorities
+
+# ============================================================
+# Bug 1: Route Shadowing
+# ============================================================
+bug_1:
+  id: "BUG-015-1"
+  severity: "P2"
+  title: "Reorder endpoint shadowed by :id PUT route"
+
+  problem: |
+    @Put(':id') was defined before @Put('reorder') in the controller.
+    In NestJS/Express routing, the first matching route wins, so
+    PUT /api/v1/emergency-contacts/reorder was captured by the :id
+    handler with id='reorder', returning "Contact not found".
+
+  fix: |
+    Moved @Put('reorder') before @Put(':id') in the controller.
+    Added comment explaining route order requirement.
+
+  file_changed: "emergency-contacts.controller.ts"
+  lines_changed: "61-69"
+
+# ============================================================
+# Bug 2: Unique Constraint with Soft Delete
+# ============================================================
+bug_2:
+  id: "BUG-015-2"
+  severity: "P2"
+  title: "Unique constraints prevent re-adding soft-deleted contacts"
+
+  problem: |
+    Database had @@unique([userId, email]) and @@unique([userId, priority])
+    constraints that didn't consider deletedAt. When a user deleted a
+    contact and tried to re-add the same email, the service checks passed
+    (findByEmail excludes deleted), but Prisma threw a unique constraint
+    error at the database level (500 error).
+
+  fix: |
+    1. Removed standard unique constraints from Prisma schema
+    2. Created migration with partial unique indexes:
+       - WHERE deleted_at IS NULL
+    3. This allows same email/priority to be reused after deletion
+
+  files_changed:
+    - "prisma/schema.prisma"
+    - "migrations/20260115140000_fix_emergency_contact_unique_constraints/migration.sql"
+
+  migration_sql: |
+    DROP INDEX IF EXISTS "emergency_contacts_user_id_email_key";
+    DROP INDEX IF EXISTS "emergency_contacts_user_id_priority_key";
+
+    CREATE UNIQUE INDEX "emergency_contacts_user_id_email_active_key"
+    ON "emergency_contacts" ("user_id", "email")
+    WHERE "deleted_at" IS NULL;
+
+    CREATE UNIQUE INDEX "emergency_contacts_user_id_priority_active_key"
+    ON "emergency_contacts" ("user_id", "priority")
+    WHERE "deleted_at" IS NULL;
+
+# ============================================================
+# Bug 3: Auto-Priority Collision
+# ============================================================
+bug_3:
+  id: "BUG-015-3"
+  severity: "P2"
+  title: "Auto-priority can collide after deletions"
+
+  problem: |
+    Priority was auto-assigned as count + 1, assuming priorities are
+    contiguous. After a soft delete, priorities can be sparse (e.g.,
+    1,2,4,5). With count=4, new contact gets priority=5, colliding
+    with existing contact and triggering unique constraint error.
+
+  fix: |
+    1. Added getMaxPriority() method to repository using aggregate
+    2. Changed service to use max(priority) + 1 instead of count + 1
+    3. Example: priorities 1,2,4,5 → next is 6, not 5
+
+  files_changed:
+    - "emergency-contacts.repository.ts"
+    - "emergency-contacts.service.ts"
+
+  code_change:
+    before: |
+      const priority = dto.priority ?? (count + 1);
+    after: |
+      let priority = dto.priority;
+      if (priority === undefined) {
+        const maxPriority = await this.contactsRepository.getMaxPriority(userId);
+        priority = maxPriority + 1;
+      }
+
+# ============================================================
+# Files Changed
+# ============================================================
+files_changed:
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+    change_type: "modified"
+    description: "Reordered routes - @Put('reorder') before @Put(':id')"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    change_type: "modified"
+    description: "Added getMaxPriority() method"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+    change_type: "modified"
+    description: "Use max priority + 1 for auto-assignment"
+
+  - path: "apps/backend/prisma/schema.prisma"
+    change_type: "modified"
+    description: "Removed @@unique constraints, added documentation"
+
+  - path: "apps/backend/prisma/migrations/20260115140000_fix_emergency_contact_unique_constraints/migration.sql"
+    change_type: "created"
+    description: "Migration for partial unique indexes"
+
+# ============================================================
+# Verification Results
+# ============================================================
+verification:
+  typescript_build:
+    status: "pass"
+    command: "npm run build"
+
+  migration:
+    status: "applied"
+    name: "20260115140000_fix_emergency_contact_unique_constraints"
+
+  prisma_generate:
+    status: "pass"
+
+# ============================================================
+# Test Scenarios
+# ============================================================
+test_scenarios:
+  - scenario: "PUT /api/v1/emergency-contacts/reorder"
+    expected: "Returns reordered contacts"
+    status: "should_work (route not shadowed)"
+
+  - scenario: "Delete contact, re-add same email"
+    expected: "Contact created successfully"
+    status: "should_work (partial unique index)"
+
+  - scenario: "Delete contact priority 3, add new contact"
+    expected: "New contact gets priority 6 (max+1), not 5"
+    status: "should_work (max priority logic)"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion: |
+  All three bugs from code review have been fixed. The emergency
+  contacts module now correctly handles:
+  - Reorder endpoint routing
+  - Re-adding soft-deleted contacts
+  - Auto-priority assignment with sparse priorities
+
+  Ready for re-review by C Session.
