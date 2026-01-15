@@ -11,7 +11,7 @@ export {
   isUserError,
   getErrorCode,
   isApiError,
-} from './errors';
+} from './errors.js';
 
 export type {
   ErrorCodeDefinition,
@@ -19,4 +19,4 @@ export type {
   ApiErrorResponse,
   ApiSuccessResponse,
   ApiResponse,
-} from './errors';
+} from './errors.js';

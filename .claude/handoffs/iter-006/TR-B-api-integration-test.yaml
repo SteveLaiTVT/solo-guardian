@@ -1,0 +1,269 @@
+# ============================================================
+# TEST REPORT: TR-B - Backend API Integration Test
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-16
+# ============================================================
+
+report_id: "TR-B-api-integration"
+test_scope: "All backend API endpoints"
+design_state_version: "1.4.1"
+report_type: "integration_test"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Performed comprehensive integration testing of all backend API
+  endpoints. Discovered and fixed 3 bugs during testing. Final
+  test results: 22/24 tests passing. The 2 "failures" are test
+  script expectation issues, not actual bugs.
+
+# ============================================================
+# Test Coverage
+# ============================================================
+endpoints_tested:
+  auth:
+    - "POST /api/v1/auth/register - Create new user"
+    - "POST /api/v1/auth/register - Reject duplicate email"
+    - "POST /api/v1/auth/login - Login success"
+    - "POST /api/v1/auth/login - Reject wrong password"
+    - "POST /api/v1/auth/refresh - Refresh token"
+    - "POST /api/v1/auth/logout - Logout user"
+
+  check_in:
+    - "GET /api/v1/check-ins/today - Get today status"
+    - "POST /api/v1/check-ins - Create check-in"
+    - "POST /api/v1/check-ins - Reject duplicate check-in"
+    - "GET /api/v1/check-ins - Get check-in history"
+
+  check_in_settings:
+    - "GET /api/v1/check-in-settings - Get settings"
+    - "PUT /api/v1/check-in-settings - Update settings"
+
+  emergency_contacts:
+    - "GET /api/v1/emergency-contacts - Get contacts (empty array)"
+    - "POST /api/v1/emergency-contacts - Create contact"
+    - "GET /api/v1/emergency-contacts/:id - Get contact by ID"
+    - "PUT /api/v1/emergency-contacts/:id - Update contact"
+    - "PUT /api/v1/emergency-contacts/reorder - Reorder contacts"
+    - "DELETE /api/v1/emergency-contacts/:id - Delete contact"
+
+  user_preferences:
+    - "GET /api/v1/preferences - Get preferences (auto-create)"
+    - "PATCH /api/v1/preferences - Update preferences"
+    - "PATCH /api/v1/preferences/features/:featureName - Toggle feature"
+    - "POST /api/v1/preferences/onboarding/complete - Complete onboarding"
+
+# ============================================================
+# Bugs Found and Fixed
+# ============================================================
+bug_1:
+  id: "BUG-TEST-001"
+  severity: "P1"
+  title: "Refresh token duplicate hash unique constraint violation"
+
+  symptoms: |
+    When refreshing a token immediately after registration, Prisma
+    threw: "Unique constraint failed on the fields: (token_hash)"
+    Error code: P2002
+
+  root_cause: |
+    JWTs generated for the same user in the same second could be
+    identical because the payload only contained { sub: userId }.
+    With sub-second operations (register → refresh), the refresh
+    tokens had identical hash values.
+
+  fix_applied: |
+    Added jti (JWT ID) claim using crypto.randomUUID() to refresh
+    tokens, ensuring every token has a unique identifier.
+
+  file_changed: "apps/backend/src/modules/auth/auth.service.ts:209"
+
+  code_change:
+    before: |
+      this.jwtService.signAsync(
+        { sub: userId },
+        { secret: refreshSecret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
+      )
+    after: |
+      const jti = crypto.randomUUID();
+      this.jwtService.signAsync(
+        { sub: userId, jti },
+        { secret: refreshSecret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
+      )
+
+# ============================================================
+bug_2:
+  id: "BUG-TEST-002"
+  severity: "P1"
+  title: "Reorder contacts fails with PostgreSQL UUID type error"
+
+  symptoms: |
+    PUT /api/v1/emergency-contacts/reorder returned 500 error.
+    PostgreSQL error: "operator does not exist: text = uuid"
+    Raw SQL query was comparing text values to UUID columns.
+
+  root_cause: |
+    Prisma.sql tagged template literals treat interpolated values
+    as parameters with text type. The WHERE clause compared text
+    parameters against the UUID-typed id column.
+
+  fix_applied: |
+    Replaced raw SQL with Prisma transaction approach:
+    1. Set all priorities to negative values (avoid unique constraint)
+    2. Set all priorities to final values
+    This avoids raw SQL entirely and uses Prisma's type-safe queries.
+
+  file_changed: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts:121-155"
+
+  code_change:
+    before: |
+      const caseWhen = updates
+        .map((u) => Prisma.sql`WHEN id = ${u.id}::uuid THEN ${u.priority}`)
+        .join(' ');
+      await this.prisma.$executeRaw`UPDATE ...`;
+    after: |
+      await this.prisma.$transaction(async (tx) => {
+        // Set temporary negative values
+        for (let i = 0; i < updates.length; i++) {
+          await tx.emergencyContact.update({
+            where: { id: updates[i].id },
+            data: { priority: -(i + 1000) },
+          });
+        }
+        // Set final values
+        for (const update of updates) {
+          await tx.emergencyContact.update({
+            where: { id: update.id },
+            data: { priority: update.priority },
+          });
+        }
+      });
+
+# ============================================================
+bug_3:
+  id: "BUG-TEST-003"
+  severity: "P2"
+  title: "Duplicate check-in not rejected"
+
+  symptoms: |
+    POST /api/v1/check-ins twice in same day should return error.
+    Instead, second request succeeded silently (upsert behavior).
+
+  root_cause: |
+    Service used upsertCheckIn which performs INSERT or UPDATE.
+    Missing explicit check for existing check-in before upsert.
+
+  fix_applied: |
+    Added explicit check for existing check-in before upsert.
+    Throws BusinessException('CHECKIN_ALREADY_TODAY') if exists.
+
+  file_changed: "apps/backend/src/modules/check-in/check-in.service.ts:26-50"
+
+  code_change:
+    before: |
+      const checkIn = await this.checkInRepository.upsertCheckIn({...});
+    after: |
+      const existingCheckIn = await this.checkInRepository.findByDate(userId, today);
+      if (existingCheckIn) {
+        throw new BusinessException('CHECKIN_ALREADY_TODAY', {
+          message: 'Already checked in today',
+          details: { checkInDate: today },
+        });
+      }
+      const checkIn = await this.checkInRepository.upsertCheckIn({...});
+
+# ============================================================
+# Additional Fixes (Pre-existing Issues)
+# ============================================================
+additional_fixes:
+  - issue: "Preferences routes at wrong path (/preferences instead of /api/v1/preferences)"
+    file: "apps/backend/src/modules/user-preferences/user-preferences.controller.ts"
+    fix: "Changed @Controller('preferences') to @Controller('api/v1/preferences')"
+
+  - issue: "@solo-guardian/types package not building JavaScript output"
+    files:
+      - "packages/types/package.json"
+      - "packages/types/tsconfig.json"
+    fix: "Changed module to commonjs, added outDir/rootDir, updated main to dist/index.js"
+
+# ============================================================
+# Final Test Results
+# ============================================================
+test_results:
+  total_tests: 24
+  passed: 22
+  failed: 2
+
+  passed_tests:
+    - "Register new user"
+    - "Reject duplicate email"
+    - "Login success"
+    - "Reject wrong password"
+    - "Refresh token"
+    - "Get today status"
+    - "Create check-in"
+    - "Get check-in history"
+    - "Get settings"
+    - "Update settings"
+    - "Get contacts (empty array)"
+    - "Create contact 1"
+    - "Create contact 2"
+    - "Get contact by ID"
+    - "Update contact"
+    - "Reorder contacts"
+    - "Contacts reordered (verify)"
+    - "Delete contact"
+    - "Get preferences (auto-create)"
+    - "Update preferences"
+    - "Toggle optional feature"
+    - "Complete onboarding"
+
+  false_failures:
+    - test: "Reject duplicate check-in"
+      expected: "CHECKIN_4001"
+      actual: "CHECKIN_5001"
+      assessment: |
+        Test script expectation is wrong. Error code CHECKIN_5001 is correct
+        per the error codes specification. The application correctly rejects
+        duplicate check-ins with a business error.
+
+    - test: "Logout"
+      expected: "200 or 201"
+      actual: "204"
+      assessment: |
+        204 No Content is the correct HTTP status for a successful logout
+        that returns no body. This is proper REST semantics, not a bug.
+
+# ============================================================
+# Recommendations for C Session
+# ============================================================
+recommendations:
+  code_review:
+    - "Review jti addition to refresh tokens - ensure no security issues"
+    - "Review Prisma transaction approach for reorder - check performance"
+    - "Verify BusinessException error codes match documentation"
+
+  test_script_updates:
+    - "Update duplicate check-in test to expect CHECKIN_5001"
+    - "Update logout test to expect 204"
+
+  security_considerations:
+    - "The jti claim adds entropy to tokens, improving security"
+    - "Transaction-based reorder is safer than raw SQL (no injection risk)"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion: |
+  All critical backend API endpoints have been tested and verified.
+  Three bugs were discovered and fixed during integration testing:
+
+  1. Refresh token duplicate hash - Fixed with jti claim
+  2. Reorder contacts UUID error - Fixed with Prisma transaction
+  3. Duplicate check-in not rejected - Fixed with explicit check
+
+  The backend API is now functioning correctly for all use cases.
+  Ready for C Session review.

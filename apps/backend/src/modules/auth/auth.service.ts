@@ -205,13 +205,16 @@ export class AuthService implements OnModuleInit {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
 
+    // Add unique jti to ensure tokens are unique even if generated in same second
+    const jti = crypto.randomUUID();
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub: userId },
         { secret: accessSecret, expiresIn: ACCESS_TOKEN_EXPIRES_IN },
       ),
       this.jwtService.signAsync(
-        { sub: userId },
+        { sub: userId, jti },
         { secret: refreshSecret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
       ),
     ]);

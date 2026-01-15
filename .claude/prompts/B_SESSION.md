@@ -48,7 +48,8 @@ Steps:
 5. Self-check against acceptance criteria
 6. Create implementation report
 7. Self-check lint and run, tests
-8. Git commit
+8. backend should run the server in background and mock some data to compare the results and expected results
+9. Git commit
 
 ### 2. Filling TODOs
 

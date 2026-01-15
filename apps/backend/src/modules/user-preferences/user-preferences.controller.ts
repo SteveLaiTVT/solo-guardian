@@ -18,7 +18,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserPreferencesService } from './user-preferences.service';
 import { UpdatePreferencesDto, PreferencesResponseDto } from './dto';
 
-@Controller('preferences')
+@Controller('api/v1/preferences')
 @UseGuards(JwtAuthGuard)
 export class UserPreferencesController {
   constructor(private readonly preferencesService: UserPreferencesService) {}

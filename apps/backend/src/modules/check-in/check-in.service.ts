@@ -7,6 +7,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CheckIn, CheckInSettings } from '@prisma/client';
 import { CheckInRepository } from './check-in.repository';
+import { BusinessException } from '../../common/exceptions';
 import {
   CreateCheckInDto,
   UpdateCheckInSettingsDto,
@@ -28,6 +29,15 @@ export class CheckInService {
   ): Promise<CheckInResponseDto> {
     const settings = await this.checkInRepository.getOrCreateSettings(userId);
     const today = this.getTodayDateString(settings.timezone);
+
+    // Check if user has already checked in today
+    const existingCheckIn = await this.checkInRepository.findByDate(userId, today);
+    if (existingCheckIn) {
+      throw new BusinessException('CHECKIN_ALREADY_TODAY', {
+        message: 'Already checked in today',
+        details: { checkInDate: today },
+      });
+    }
 
     const checkIn = await this.checkInRepository.upsertCheckIn({
       userId,

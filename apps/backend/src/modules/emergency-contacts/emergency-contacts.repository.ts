@@ -117,7 +117,7 @@ export class EmergencyContactsRepository {
   }
 
   // DONE(B): Implemented updatePriorities - TASK-015
-  // Uses single UPDATE with CASE to avoid unique constraint violations during swap
+  // Uses transaction to update priorities atomically
   async updatePriorities(
     updates: Array<{ id: string; priority: number }>,
   ): Promise<EmergencyContact[]> {
@@ -127,23 +127,25 @@ export class EmergencyContactsRepository {
 
     const ids = updates.map((u) => u.id);
 
-    // Build parameterized CASE expression for atomic priority update
-    const caseFragments = updates.map(
-      (u) => Prisma.sql`WHEN id = ${u.id}::uuid THEN ${u.priority}`,
-    );
-    const caseExpression = Prisma.sql`CASE ${Prisma.join(caseFragments, ' ')} END`;
-    const idList = Prisma.join(
-      ids.map((id) => Prisma.sql`${id}::uuid`),
-      ', ',
-    );
-
-    // Single UPDATE avoids transient unique constraint violations
-    await this.prisma.$executeRaw`
-      UPDATE emergency_contacts
-      SET priority = ${caseExpression},
-          updated_at = NOW()
-      WHERE id IN (${idList})
-    `;
+    // Use transaction to update all priorities atomically
+    // First set all to negative values to avoid unique constraint violations
+    // Then set to final values
+    await this.prisma.$transaction(async (tx) => {
+      // Temporarily set priorities to negative values (offset by 1000)
+      for (let i = 0; i < updates.length; i++) {
+        await tx.emergencyContact.update({
+          where: { id: updates[i].id },
+          data: { priority: -(i + 1000) },
+        });
+      }
+      // Now set to final values
+      for (const update of updates) {
+        await tx.emergencyContact.update({
+          where: { id: update.id },
+          data: { priority: update.priority },
+        });
+      }
+    });
 
     // Return updated contacts in priority order
     return this.prisma.emergencyContact.findMany({

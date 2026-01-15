@@ -1,0 +1,248 @@
+# ============================================================
+# REVIEW REPORT: RR-022 - Frontend Preferences and Onboarding (Updated)
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect)
+# Created: 2026-01-16
+# Updated: 2026-01-16 (Re-reviewed after ISS-019-1 fix)
+# ============================================================
+
+report_id: "RR-022"
+task_id: "TASK-022"
+implementation_report_id: "IR-022"
+design_state_version: "1.6.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 15
+    issues_found: 0
+  brief: |
+    Frontend preferences and onboarding implementation verified.
+    ISS-019-1 dependency resolved. Build passes successfully.
+
+# ============================================================
+# ISS-019-1 Dependency Resolution
+# ============================================================
+dependency_resolution:
+  previous_status: "blocked"
+  current_status: "resolved"
+  note: "types package now outputs ESM, user-web builds successfully"
+
+# ============================================================
+# Theme System Verification
+# ============================================================
+theme_system_check:
+  context_provider:
+    file: "apps/user-web/src/contexts/ThemeContext.tsx"
+    lines: 89
+    features:
+      - "ThemeProvider wrapping entire app"
+      - "usePreferences hook for data fetching"
+      - "useEffect applying preferences to document.documentElement"
+      - "Font size applied via style.fontSize"
+      - "CSS classes toggled: high-contrast, warm-colors, reduced-motion"
+      - "useTheme hook for consuming context"
+    status: "pass"
+
+  css_theme_classes:
+    file: "apps/user-web/src/index.css"
+    classes:
+      - "high-contrast: black background, white text, yellow accents"
+      - "warm-colors: warm beige/green color palette"
+      - "reduced-motion: disables transitions and animations"
+    status: "pass"
+
+# ============================================================
+# Onboarding Flow Verification
+# ============================================================
+onboarding_check:
+  page:
+    file: "apps/user-web/src/pages/onboarding/OnboardingPage.tsx"
+    lines: 137
+    features:
+      - "4-step state machine: welcome -> preference -> features -> visual"
+      - "Step indicator progress bar"
+      - "Local state for preferences during flow"
+      - "Final submit with updatePreferences and completeOnboarding"
+    status: "pass"
+
+  steps:
+    - step: "WelcomeStep"
+      file: "apps/user-web/src/components/onboarding/WelcomeStep.tsx"
+      description: "Welcome message with Shield icon and app introduction"
+      status: "pass"
+
+    - step: "PreferenceStep"
+      file: "apps/user-web/src/components/onboarding/PreferenceStep.tsx"
+      description: "preferFeaturesOn toggle selection"
+      status: "pass"
+
+    - step: "FeaturesStep"
+      file: "apps/user-web/src/components/onboarding/FeaturesStep.tsx"
+      description: "hobbyCheckIn and familyAccess toggles"
+      status: "pass"
+
+    - step: "VisualStep"
+      file: "apps/user-web/src/components/onboarding/VisualStep.tsx"
+      description: "Font size slider and visual toggles with live preview"
+      status: "pass"
+
+  routing:
+    file: "apps/user-web/src/App.tsx:45"
+    route: "/onboarding"
+    protected: true
+    status: "pass"
+
+# ============================================================
+# Settings Page Verification
+# ============================================================
+settings_check:
+  features_section:
+    file: "apps/user-web/src/components/settings/FeaturesSection.tsx"
+    toggles:
+      - "preferFeaturesOn: Auto-enable new features"
+      - "hobbyCheckIn: Share what made you happy"
+      - "familyAccess: Let family check status"
+    status: "pass"
+
+  visual_section:
+    file: "apps/user-web/src/components/settings/VisualSection.tsx"
+    lines: 96
+    controls:
+      - "fontSize slider: min=14, max=24, displays current value"
+      - "highContrast toggle"
+      - "reducedMotion toggle"
+      - "warmColors toggle"
+    status: "pass"
+
+  feature_toggle_component:
+    file: "apps/user-web/src/components/settings/FeatureToggle.tsx"
+    props: "icon, title, description, enabled, onChange"
+    status: "pass"
+
+# ============================================================
+# API Hooks Verification
+# ============================================================
+api_hooks_check:
+  file: "packages/api-client/src/hooks.ts:139-180"
+  hooks:
+    - name: "usePreferences"
+      type: "query"
+      queryKey: '["preferences"]'
+      status: "pass"
+
+    - name: "useUpdatePreferences"
+      type: "mutation"
+      invalidates: '["preferences"]'
+      status: "pass"
+
+    - name: "useToggleFeature"
+      type: "mutation"
+      params: "featureName, enabled"
+      status: "pass"
+
+    - name: "useCompleteOnboarding"
+      type: "mutation"
+      invalidates: '["preferences"]'
+      status: "pass"
+
+# ============================================================
+# i18n Verification
+# ============================================================
+i18n_check:
+  onboarding_namespace:
+    files:
+      - "apps/user-web/src/i18n/locales/en/onboarding.json"
+      - "apps/user-web/src/i18n/locales/zh/onboarding.json"
+      - "apps/user-web/src/i18n/locales/ja/onboarding.json"
+    status: "pass"
+
+  preferences_namespace:
+    files:
+      - "apps/user-web/src/i18n/locales/en/preferences.json"
+      - "apps/user-web/src/i18n/locales/zh/preferences.json"
+      - "apps/user-web/src/i18n/locales/ja/preferences.json"
+    keys_covered:
+      - "features.title, features.description"
+      - "features.preferFeaturesOn.*, features.hobbyCheckIn.*, features.familyAccess.*"
+      - "visual.title, visual.description, visual.fontSize"
+      - "visual.highContrast*, visual.reducedMotion*, visual.warmColors*"
+    status: "pass"
+
+# ============================================================
+# Constraint Compliance
+# ============================================================
+constraint_check:
+  no_any_type: "pass"
+  file_under_300_lines: "pass (max: 137 lines in OnboardingPage)"
+  function_under_50_lines: "pass"
+  explicit_return_types: "pass (JSX.Element)"
+  functional_components_hooks: "pass"
+  business_logic_in_hooks: "pass"
+  i18n_all_text: "pass"
+
+# ============================================================
+# Build Verification
+# ============================================================
+build_verification:
+  user_web:
+    status: "pass"
+    command: "npm run build"
+    output: "2085 modules transformed, built in 1.41s"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_criteria:
+  - criterion: "Onboarding flow for new users"
+    status: "pass"
+
+  - criterion: "Settings page with Features/Visual sections"
+    status: "pass"
+
+  - criterion: "Theme provider applying visual preferences"
+    status: "pass"
+
+  - criterion: "Font size slider (14-24px)"
+    status: "pass"
+
+  - criterion: "High contrast toggle"
+    status: "pass"
+
+  - criterion: "Reduced motion toggle"
+    status: "pass"
+
+  - criterion: "Warm colors toggle"
+    status: "pass"
+
+  - criterion: "Feature toggles"
+    status: "pass"
+
+  - criterion: "All text uses i18n"
+    status: "pass"
+
+  - criterion: "Mobile responsive"
+    status: "pass"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  notes: |
+    TASK-022 implementation is complete and production-ready.
+
+    The frontend preferences system includes:
+    - 4-step onboarding flow with preferFeaturesOn selection
+    - Settings page with Features and Visual sections
+    - ThemeContext applying visual preferences to DOM
+    - All API hooks for preferences CRUD operations
+    - Full i18n support for en, zh, ja
+
+  next_steps:
+    - "A Session: Mark TASK-022 as completed"
