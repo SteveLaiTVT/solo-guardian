@@ -3,6 +3,7 @@
 // Fix JSX namespace for React 19 + TypeScript
 import type { JSX as ReactJSX } from 'react';
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 declare global {
   namespace JSX {
     interface Element extends ReactJSX.Element {}
@@ -14,3 +15,4 @@ declare global {
     interface IntrinsicElements extends ReactJSX.IntrinsicElements {}
   }
 }
+/* eslint-enable @typescript-eslint/no-empty-object-type */
