@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.4.2"
+  version: "1.5.0"
   updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "feature/iter-006-emergency-contacts"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Emergency Contacts Module"
+  milestone: "Emergency Contacts Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -155,10 +155,11 @@ modules:
         description: "Track consecutive check-in days (gamification)"
 
   emergency_contacts:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "Emergency contacts management - people to notify if user misses check-in"
     started_iteration: "iter-006"
+    completed_iteration: "iter-006"
     skeleton_created: true
     skeleton_version: "0.1.0"
     features:
@@ -183,10 +184,11 @@ modules:
         completed_task: "TASK-015"
 
   user_web:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "User-facing web application"
     started_iteration: "iter-005"
+    completed_iteration: "iter-006"
     features:
       - name: "Login/Register"
         priority: "P0"
@@ -215,9 +217,9 @@ modules:
         completed_task: "TASK-013"
       - name: "Emergency Contacts Page"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
         description: "Manage emergency contacts in user-web"
-        added_in: "iter-006"
+        completed_task: "TASK-016"
 
 # ============================================================
 # 3. API Design Constraints
@@ -288,7 +290,8 @@ current_iteration:
   id: "iter-006"
   goal: "Implement emergency contacts module - core safety feature"
   started_at: "2026-01-15"
-  status: "in_progress"
+  completed_at: "2026-01-15"
+  status: "completed"
   tasks:
     - id: "TASK-014"
       title: "Database: Add EmergencyContact model"
@@ -297,6 +300,7 @@ current_iteration:
       handoff: "HO-014-emergency-contact-db.yaml"
       depends_on: []
       description: "Prisma schema for emergency contacts"
+      review_verdict: "pass"
 
     - id: "TASK-015"
       title: "Backend: Emergency contacts module"
@@ -305,19 +309,45 @@ current_iteration:
       handoff: "HO-015-emergency-contacts-backend.yaml"
       depends_on: ["TASK-014"]
       description: "NestJS module with CRUD operations for emergency contacts"
+      review_verdict: "pass"
 
     - id: "TASK-016"
       title: "Frontend: Emergency contacts page"
-      status: "in_progress"
+      status: "completed"
       priority: "P0"
       handoff: "HO-016-emergency-contacts-frontend.yaml"
       depends_on: ["TASK-015"]
       description: "User-web page for managing emergency contacts"
+      review_verdict: "pass"
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-006"
+    goal: "Implement emergency contacts module - core safety feature"
+    started_at: "2026-01-15"
+    completed_at: "2026-01-15"
+    status: "completed"
+    summary: |
+      Emergency contacts module complete:
+      - EmergencyContact database model with soft delete
+      - Backend CRUD API with 6 endpoints
+      - Frontend contacts page with add/edit/delete
+      - i18n support (English, Chinese, Japanese)
+      - Max 5 contacts per user with priority ordering
+    tasks_completed:
+      - id: "TASK-014"
+        title: "Database: Add EmergencyContact model"
+        review_verdict: "pass"
+      - id: "TASK-015"
+        title: "Backend: Emergency contacts module"
+        review_verdict: "pass"
+      - id: "TASK-016"
+        title: "Frontend: Emergency contacts page"
+        review_verdict: "pass"
+    milestone: "Emergency Contacts Complete"
+
   - id: "iter-005"
     goal: "Implement user-web frontend MVP"
     started_at: "2026-01-15"
@@ -558,6 +588,30 @@ decision_log:
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-006"
+    task: "TASK-016"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Emergency contacts frontend page with i18n support"
+
+  - iteration: "iter-006"
+    task: "TASK-015"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Backend CRUD module with 6 endpoints, soft delete, priority ordering"
+
+  - iteration: "iter-006"
+    task: "TASK-014"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "EmergencyContact model with soft delete and priority ordering"
+
   - iteration: "iter-005"
     task: "TASK-012"
     reviewer: "C Session"
