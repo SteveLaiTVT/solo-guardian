@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.3.0"
+  version: "1.4.0"
   updated_at: "2026-01-15"
   updated_by: "A Session"
-  branch: "main"
+  branch: "feature/iter-006-emergency-contacts"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "User Web MVP Complete"
+  milestone: "Emergency Contacts Module"
 
 # ============================================================
 # 1. Technical Architecture
@@ -154,12 +154,35 @@ modules:
         status: "pending"
         description: "Track consecutive check-in days (gamification)"
 
+  emergency_contacts:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Emergency contacts management - people to notify if user misses check-in"
+    started_iteration: "iter-006"
+    skeleton_created: false
+    features:
+      - name: "Contact CRUD"
+        priority: "P0"
+        status: "pending"
+        description: "Add, edit, delete emergency contacts"
+      - name: "Contact List"
+        priority: "P0"
+        status: "pending"
+        description: "View all emergency contacts"
+      - name: "Contact Verification"
+        priority: "P1"
+        status: "pending"
+        description: "Verify contact email/phone before activation"
+      - name: "Contact Limit"
+        priority: "P0"
+        status: "pending"
+        description: "Maximum 5 emergency contacts per user"
+
   user_web:
-    status: "done"
+    status: "in_progress"
     owner: "B Session"
     description: "User-facing web application"
     started_iteration: "iter-005"
-    completed_iteration: "iter-005"
     features:
       - name: "Login/Register"
         priority: "P0"
@@ -186,6 +209,11 @@ modules:
         status: "done"
         description: "Support for English, Chinese, Japanese"
         completed_task: "TASK-013"
+      - name: "Emergency Contacts Page"
+        priority: "P0"
+        status: "pending"
+        description: "Manage emergency contacts in user-web"
+        added_in: "iter-006"
 
 # ============================================================
 # 3. API Design Constraints
@@ -253,66 +281,34 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-005"
-  goal: "Implement user-web frontend MVP"
+  id: "iter-006"
+  goal: "Implement emergency contacts module - core safety feature"
   started_at: "2026-01-15"
-  completed_at: "2026-01-15"
-  status: "completed"
+  status: "in_progress"
   tasks:
-    - id: "TASK-008"
-      title: "Frontend: User-web infrastructure setup"
-      status: "completed"
+    - id: "TASK-014"
+      title: "Database: Add EmergencyContact model"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-008-user-web-infra.yaml"
-      description: "Vite + React + TypeScript + Tailwind + shadcn/ui"
-
-    - id: "TASK-009"
-      title: "Frontend: Shared API client package"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-009-api-client.yaml"
+      handoff: "HO-014-emergency-contact-db.yaml"
       depends_on: []
-      description: "TanStack Query + Axios API client"
+      description: "Prisma schema for emergency contacts"
 
-    - id: "TASK-010"
-      title: "Frontend: Auth pages (Login/Register)"
-      status: "completed"
+    - id: "TASK-015"
+      title: "Backend: Emergency contacts module"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-010-auth-pages.yaml"
-      depends_on: ["TASK-008", "TASK-009"]
-      description: "Login, Register pages with Zustand auth store"
-      review_verdict: "pass"
+      handoff: "HO-015-emergency-contacts-backend.yaml"
+      depends_on: ["TASK-014"]
+      description: "NestJS module with CRUD operations for emergency contacts"
 
-    - id: "TASK-011"
-      title: "Frontend: Main pages (Dashboard/Settings/History)"
-      status: "completed"
+    - id: "TASK-016"
+      title: "Frontend: Emergency contacts page"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-011-main-pages.yaml"
-      depends_on: ["TASK-010"]
-      description: "Check-in dashboard, settings, history pages"
-      review_verdict: "pass"
-      issues_resolved: ["ISS-012", "ISS-013"]
-
-    - id: "TASK-013"
-      title: "Frontend: Internationalization (i18n) setup"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-013-i18n-setup.yaml"
-      depends_on: ["TASK-011"]
-      description: "Add i18n support for English, Chinese, Japanese"
-      languages: ["en", "zh", "ja"]
-      implementation_report: "IR-013-i18n-setup.yaml"
-      review_verdict: "pass"
-
-    - id: "TASK-012"
-      title: "Frontend: Fix return types and cleanup"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-012-fix-return-types.yaml"
-      depends_on: ["TASK-013"]
-      description: "Fix constraint violations from TASK-011 review"
-      resolves: ["ISS-012", "ISS-013"]
-      review_verdict: "pass"
+      handoff: "HO-016-emergency-contacts-frontend.yaml"
+      depends_on: ["TASK-015"]
+      description: "User-web page for managing emergency contacts"
 
 # ============================================================
 # 5.1 Iteration History
@@ -532,6 +528,27 @@ decision_log:
       - "en: English (default)"
       - "zh: Chinese Simplified"
       - "ja: Japanese"
+
+  - id: "ADR-010"
+    date: "2026-01-15"
+    decision: "Emergency contacts with priority ordering and 5-contact limit"
+    rationale: |
+      - Each user can have up to 5 emergency contacts
+      - Contacts have priority order (1-5) for notification sequence
+      - Contact types: email (MVP), phone/SMS (future)
+      - Contacts must be verified before activation (future)
+      - Soft delete to preserve notification history
+    schema:
+      fields:
+        - "id: UUID primary key"
+        - "userId: FK to User"
+        - "name: Contact's name"
+        - "email: Contact's email address"
+        - "phone: Optional phone number (future)"
+        - "priority: 1-5 ordering"
+        - "isVerified: Boolean (default false)"
+        - "isActive: Boolean (default true)"
+        - "createdAt, updatedAt, deletedAt"
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

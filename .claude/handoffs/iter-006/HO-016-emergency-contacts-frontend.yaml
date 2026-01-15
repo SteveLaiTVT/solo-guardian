@@ -1,0 +1,206 @@
+# ============================================================
+# Handoff: TASK-016 - Emergency Contacts Frontend Page
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-016"
+task_id: "TASK-016"
+design_state_version: "1.4.0"
+
+objective: "Implement emergency contacts management page in user-web"
+
+context: |
+  Users need a UI to manage their emergency contacts. This page allows
+  adding, editing, deleting, and reordering contacts. Must follow existing
+  user-web patterns (shadcn/ui, TanStack Query, i18n).
+
+tasks:
+  - id: "TASK-016"
+    title: "Frontend: Emergency contacts page"
+
+    files_to_create:
+      - path: "apps/user-web/src/pages/ContactsPage.tsx"
+        description: "Main contacts page component"
+      - path: "apps/user-web/src/components/contacts/ContactList.tsx"
+        description: "List of emergency contacts"
+      - path: "apps/user-web/src/components/contacts/ContactCard.tsx"
+        description: "Single contact display card"
+      - path: "apps/user-web/src/components/contacts/ContactForm.tsx"
+        description: "Add/Edit contact form (dialog)"
+      - path: "apps/user-web/src/components/contacts/DeleteContactDialog.tsx"
+        description: "Delete confirmation dialog"
+      - path: "apps/user-web/src/hooks/useContacts.ts"
+        description: "Contact API hooks (TanStack Query)"
+
+    files_to_modify:
+      - path: "packages/api-client/src/contacts.ts"
+        action: "Add contact API functions"
+      - path: "packages/api-client/src/index.ts"
+        action: "Export contacts module"
+      - path: "apps/user-web/src/App.tsx"
+        action: "Add /contacts route"
+      - path: "apps/user-web/src/components/layout/Header.tsx"
+        action: "Add Contacts nav link"
+      - path: "apps/user-web/src/locales/en/contacts.json"
+        action: "Create English translations"
+      - path: "apps/user-web/src/locales/zh/contacts.json"
+        action: "Create Chinese translations"
+      - path: "apps/user-web/src/locales/ja/contacts.json"
+        action: "Create Japanese translations"
+      - path: "apps/user-web/src/i18n.ts"
+        action: "Add contacts namespace"
+
+    ui_requirements:
+      page_layout:
+        - "Header: 'Emergency Contacts' with contact count (e.g., '3/5')"
+        - "Add Contact button (disabled if 5 contacts reached)"
+        - "Empty state with illustration when no contacts"
+        - "Contact list with drag-to-reorder"
+
+      contact_card:
+        - "Priority number badge (1-5)"
+        - "Contact name (prominent)"
+        - "Email address"
+        - "Phone number (if present)"
+        - "Verified/Unverified badge"
+        - "Active/Inactive toggle"
+        - "Edit button"
+        - "Delete button"
+
+      contact_form_dialog:
+        - "Title: 'Add Contact' or 'Edit Contact'"
+        - "Name input (required)"
+        - "Email input (required, validated)"
+        - "Phone input (optional)"
+        - "Cancel and Save buttons"
+        - "Form validation with error messages"
+
+      delete_dialog:
+        - "Confirmation message with contact name"
+        - "Cancel and Delete buttons"
+        - "Delete button should be destructive style"
+
+    i18n_keys:
+      en:
+        title: "Emergency Contacts"
+        subtitle: "People who will be notified if you miss a check-in"
+        addContact: "Add Contact"
+        editContact: "Edit Contact"
+        deleteContact: "Delete Contact"
+        contactCount: "{{count}}/5 contacts"
+        maxContactsReached: "Maximum 5 contacts reached"
+        emptyState: "No emergency contacts yet"
+        emptyStateHint: "Add someone who should be notified if you miss a check-in"
+        form:
+          name: "Name"
+          namePlaceholder: "Contact's name"
+          email: "Email"
+          emailPlaceholder: "contact@example.com"
+          phone: "Phone (optional)"
+          phonePlaceholder: "+1 234 567 8900"
+        deleteConfirm: "Are you sure you want to remove {{name}} from your emergency contacts?"
+        errors:
+          nameRequired: "Name is required"
+          emailRequired: "Email is required"
+          emailInvalid: "Invalid email format"
+          duplicateEmail: "This email is already added"
+        success:
+          created: "Contact added successfully"
+          updated: "Contact updated successfully"
+          deleted: "Contact removed successfully"
+          reordered: "Contact order updated"
+
+      zh:
+        title: "紧急联系人"
+        subtitle: "当您错过签到时会通知的人"
+        addContact: "添加联系人"
+        editContact: "编辑联系人"
+        deleteContact: "删除联系人"
+        contactCount: "{{count}}/5 位联系人"
+        maxContactsReached: "已达到5位联系人上限"
+        emptyState: "暂无紧急联系人"
+        emptyStateHint: "添加一个在您错过签到时应该被通知的人"
+        form:
+          name: "姓名"
+          namePlaceholder: "联系人姓名"
+          email: "邮箱"
+          emailPlaceholder: "contact@example.com"
+          phone: "电话（可选）"
+          phonePlaceholder: "+86 123 4567 8900"
+        deleteConfirm: "确定要将 {{name}} 从紧急联系人中移除吗？"
+        errors:
+          nameRequired: "姓名不能为空"
+          emailRequired: "邮箱不能为空"
+          emailInvalid: "邮箱格式无效"
+          duplicateEmail: "该邮箱已添加"
+        success:
+          created: "联系人添加成功"
+          updated: "联系人更新成功"
+          deleted: "联系人已移除"
+          reordered: "联系人顺序已更新"
+
+      ja:
+        title: "緊急連絡先"
+        subtitle: "チェックインを逃した際に通知される方"
+        addContact: "連絡先を追加"
+        editContact: "連絡先を編集"
+        deleteContact: "連絡先を削除"
+        contactCount: "{{count}}/5 件"
+        maxContactsReached: "連絡先は最大5件です"
+        emptyState: "緊急連絡先がありません"
+        emptyStateHint: "チェックインを逃した際に通知する方を追加してください"
+        form:
+          name: "名前"
+          namePlaceholder: "連絡先の名前"
+          email: "メール"
+          emailPlaceholder: "contact@example.com"
+          phone: "電話（任意）"
+          phonePlaceholder: "+81 90 1234 5678"
+        deleteConfirm: "{{name}}を緊急連絡先から削除しますか？"
+        errors:
+          nameRequired: "名前は必須です"
+          emailRequired: "メールは必須です"
+          emailInvalid: "無効なメール形式です"
+          duplicateEmail: "このメールは既に追加されています"
+        success:
+          created: "連絡先を追加しました"
+          updated: "連絡先を更新しました"
+          deleted: "連絡先を削除しました"
+          reordered: "連絡先の順序を更新しました"
+
+    acceptance_criteria:
+      - "Contacts page accessible at /contacts"
+      - "Navigation link in header"
+      - "Can add new contact with form validation"
+      - "Can edit existing contact"
+      - "Can delete contact with confirmation"
+      - "Shows count indicator (x/5)"
+      - "Add button disabled at 5 contacts"
+      - "Empty state shown when no contacts"
+      - "All text uses i18n (en, zh, ja)"
+      - "Mobile responsive layout"
+      - "Toast notifications for success/error"
+
+    constraints:
+      - "Use existing shadcn/ui components"
+      - "Use TanStack Query for data fetching"
+      - "Use react-i18next for translations"
+      - "Follow existing code patterns from Settings/History pages"
+      - "All functions < 50 lines"
+      - "All files < 300 lines"
+      - "Explicit return types on all functions"
+
+out_of_scope:
+  - "Drag-and-drop reordering (nice-to-have, defer)"
+  - "Contact verification flow"
+  - "Sending test notifications"
+
+depends_on:
+  - "TASK-015 (Backend API)"
+  - "Existing user-web infrastructure"
+  - "api-client package"
+
+estimated_files_changed: 12
