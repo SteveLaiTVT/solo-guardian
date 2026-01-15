@@ -1,0 +1,29 @@
+{
+  "features": {
+    "title": "功能",
+    "description": "管理您的功能偏好",
+    "preferFeaturesOn": {
+      "title": "自动启用新功能",
+      "description": "新功能发布时自动启用"
+    },
+    "hobbyCheckIn": {
+      "title": "兴趣打卡",
+      "description": "分享今天让您开心的事"
+    },
+    "familyAccess": {
+      "title": "家人访问",
+      "description": "让家人可以查看您的状态"
+    }
+  },
+  "visual": {
+    "title": "视觉与无障碍",
+    "description": "自定义外观和无障碍设置",
+    "fontSize": "字体大小",
+    "highContrast": "高对比度",
+    "highContrastDesc": "提高对比度以获得更好的可见性",
+    "reducedMotion": "减少动画",
+    "reducedMotionDesc": "减少整个应用中的动画效果",
+    "warmColors": "暖色调",
+    "warmColorsDesc": "使用更温暖的配色方案"
+  }
+}

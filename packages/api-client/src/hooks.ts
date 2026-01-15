@@ -15,6 +15,8 @@ import type {
   CreateContactRequest,
   UpdateContactRequest,
   ReorderContactsRequest,
+  UserPreferences,
+  UpdatePreferencesRequest,
 } from "./types"
 
 export function createHooks(client: AxiosInstance) {
@@ -130,6 +132,49 @@ export function createHooks(client: AxiosInstance) {
           api.contacts.reorder(data).then((r: AxiosResponse<EmergencyContact[]>) => r.data),
         onSuccess: () => {
           void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
+
+    // Preferences hooks
+    usePreferences: () =>
+      useQuery({
+        queryKey: ["preferences"],
+        queryFn: () =>
+          api.preferences.get().then((r: AxiosResponse<UserPreferences>) => r.data),
+      }),
+
+    useUpdatePreferences: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (data: UpdatePreferencesRequest) =>
+          api.preferences.update(data).then((r: AxiosResponse<UserPreferences>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
+        },
+      })
+    },
+
+    useToggleFeature: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: ({ featureName, enabled }: { featureName: string; enabled: boolean }) =>
+          api.preferences
+            .toggleFeature(featureName, { enabled })
+            .then((r: AxiosResponse<UserPreferences>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
+        },
+      })
+    },
+
+    useCompleteOnboarding: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: () =>
+          api.preferences.completeOnboarding().then((r: AxiosResponse<UserPreferences>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
         },
       })
     },

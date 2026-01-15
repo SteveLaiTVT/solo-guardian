@@ -16,6 +16,8 @@ import enSettings from './locales/en/settings.json';
 import enHistory from './locales/en/history.json';
 import enContacts from './locales/en/contacts.json';
 import enError from './locales/en/error.json';
+import enOnboarding from './locales/en/onboarding.json';
+import enPreferences from './locales/en/preferences.json';
 
 // Chinese
 import zhCommon from './locales/zh/common.json';
@@ -25,6 +27,8 @@ import zhSettings from './locales/zh/settings.json';
 import zhHistory from './locales/zh/history.json';
 import zhContacts from './locales/zh/contacts.json';
 import zhError from './locales/zh/error.json';
+import zhOnboarding from './locales/zh/onboarding.json';
+import zhPreferences from './locales/zh/preferences.json';
 
 // Japanese
 import jaCommon from './locales/ja/common.json';
@@ -34,6 +38,8 @@ import jaSettings from './locales/ja/settings.json';
 import jaHistory from './locales/ja/history.json';
 import jaContacts from './locales/ja/contacts.json';
 import jaError from './locales/ja/error.json';
+import jaOnboarding from './locales/ja/onboarding.json';
+import jaPreferences from './locales/ja/preferences.json';
 
 const resources = {
   en: {
@@ -44,6 +50,8 @@ const resources = {
     history: enHistory,
     contacts: enContacts,
     error: enError,
+    onboarding: enOnboarding,
+    preferences: enPreferences,
   },
   zh: {
     common: zhCommon,
@@ -53,6 +61,8 @@ const resources = {
     history: zhHistory,
     contacts: zhContacts,
     error: zhError,
+    onboarding: zhOnboarding,
+    preferences: zhPreferences,
   },
   ja: {
     common: jaCommon,
@@ -62,6 +72,8 @@ const resources = {
     history: jaHistory,
     contacts: jaContacts,
     error: jaError,
+    onboarding: jaOnboarding,
+    preferences: jaPreferences,
   },
 };
 
@@ -72,7 +84,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'settings', 'history', 'contacts', 'error'],
+    ns: ['common', 'auth', 'dashboard', 'settings', 'history', 'contacts', 'error', 'onboarding', 'preferences'],
     interpolation: {
       escapeValue: false,
     },

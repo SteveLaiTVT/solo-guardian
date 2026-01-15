@@ -1,8 +1,8 @@
 /**
  * @file SettingsPage.tsx
- * @description Settings page for check-in preferences and account
- * @task TASK-013
- * @design_state_version 1.2.2
+ * @description Settings page for check-in preferences, features, visual, and account
+ * @task TASK-013, TASK-022
+ * @design_state_version 1.6.0
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TimePicker } from '@/components/ui/TimePicker'
 import { Label } from '@/components/ui/label'
+import { FeaturesSection, VisualSection } from '@/components/settings'
 
 // DONE(B): Added i18n support - TASK-013
 export function SettingsPage(): JSX.Element {
@@ -131,6 +132,10 @@ export function SettingsPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+
+      <FeaturesSection />
+
+      <VisualSection />
 
       <Card>
         <CardHeader>

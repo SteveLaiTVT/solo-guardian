@@ -109,3 +109,34 @@ export interface UpdateContactRequest {
 export interface ReorderContactsRequest {
   contactIds: string[]
 }
+
+// User Preferences types
+export interface UserPreferences {
+  id: string
+  userId: string
+  preferFeaturesOn: boolean
+  fontSize: number
+  highContrast: boolean
+  reducedMotion: boolean
+  warmColors: boolean
+  hobbyCheckIn: boolean
+  familyAccess: boolean
+  optionalFeatures: Record<string, boolean>
+  onboardingCompleted: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UpdatePreferencesRequest {
+  preferFeaturesOn?: boolean
+  fontSize?: number
+  highContrast?: boolean
+  reducedMotion?: boolean
+  warmColors?: boolean
+  hobbyCheckIn?: boolean
+  familyAccess?: boolean
+}
+
+export interface ToggleFeatureRequest {
+  enabled: boolean
+}

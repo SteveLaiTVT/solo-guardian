@@ -1,0 +1,41 @@
+{
+  "welcome": {
+    "title": "欢迎使用独居守护",
+    "subtitle": "您的安全守护伙伴",
+    "getStarted": "开始使用"
+  },
+  "preference": {
+    "title": "新功能设置",
+    "subtitle": "当我们推出新功能时，您希望如何处理？",
+    "enableAll": "自动启用",
+    "enableAllDesc": "新功能上线后立即可用",
+    "keepSimple": "保持简洁",
+    "keepSimpleDesc": "我会自己选择要启用的功能"
+  },
+  "features": {
+    "title": "个性化您的体验",
+    "subtitle": "选择您想要启用的可选功能",
+    "hobbyCheckIn": {
+      "title": "兴趣打卡",
+      "description": "分享今天让您开心的事"
+    },
+    "familyAccess": {
+      "title": "家人访问",
+      "description": "让家人可以查看您的状态"
+    },
+    "presetSimple": "保持简洁",
+    "presetAll": "全部启用"
+  },
+  "visual": {
+    "title": "视觉舒适度",
+    "subtitle": "根据您的喜好调整显示设置",
+    "fontSize": "字体大小",
+    "highContrast": "高对比度",
+    "reducedMotion": "减少动画",
+    "warmColors": "暖色调"
+  },
+  "back": "返回",
+  "next": "下一步",
+  "finish": "完成",
+  "saving": "保存中..."
+}

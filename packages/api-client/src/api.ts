@@ -13,6 +13,9 @@ import type {
   CreateContactRequest,
   UpdateContactRequest,
   ReorderContactsRequest,
+  UserPreferences,
+  UpdatePreferencesRequest,
+  ToggleFeatureRequest,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -68,6 +71,20 @@ export function createApi(client: AxiosInstance) {
 
       reorder: (data: ReorderContactsRequest) =>
         client.put<EmergencyContact[]>("/api/v1/emergency-contacts/reorder", data),
+    },
+
+    preferences: {
+      get: () =>
+        client.get<UserPreferences>("/api/v1/preferences"),
+
+      update: (data: UpdatePreferencesRequest) =>
+        client.patch<UserPreferences>("/api/v1/preferences", data),
+
+      toggleFeature: (featureName: string, data: ToggleFeatureRequest) =>
+        client.patch<UserPreferences>(`/api/v1/preferences/features/${featureName}`, data),
+
+      completeOnboarding: () =>
+        client.post<UserPreferences>("/api/v1/preferences/onboarding/complete"),
     },
   }
 }
