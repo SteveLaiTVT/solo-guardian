@@ -12,14 +12,14 @@ import {
   ErrorCategory,
 } from '@solo-guardian/types';
 
-// TODO(B): Define options interface for BusinessException constructor
+// DONE(B): Define options interface for BusinessException constructor
 // interface BusinessExceptionOptions {
 //   details?: Record<string, unknown>;
 //   field?: string;
 //   message?: string;
 // }
 
-// TODO(B): Implement BusinessException class
+// DONE(B): Implement BusinessException class
 // - Extend HttpException
 // - Accept errorCodeKey: ErrorCodeKey as first parameter
 // - Accept optional options: BusinessExceptionOptions
@@ -42,8 +42,8 @@ export class BusinessException extends HttpException {
       message?: string;
     },
   ) {
-    // TODO(B): Get error definition from ErrorCodes using errorCodeKey
-    // TODO(B): Build response body matching ApiErrorResponse format:
+    // DONE(B): Get error definition from ErrorCodes using errorCodeKey
+    // DONE(B): Build response body matching ApiErrorResponse format:
     // {
     //   success: false,
     //   error: {
@@ -56,8 +56,8 @@ export class BusinessException extends HttpException {
     //     timestamp: new Date().toISOString(),
     //   },
     // }
-    // TODO(B): Call super(responseBody, errorDef.httpStatus)
-    // TODO(B): Assign class properties
+    // DONE(B): Call super(responseBody, errorDef.httpStatus)
+    // DONE(B): Assign class properties
 
     // Placeholder implementation - replace with actual
     const errorDef = ErrorCodes[errorCodeKey];

@@ -21,7 +21,7 @@ import {
 } from '@solo-guardian/types';
 import { BusinessException } from '../exceptions/business.exception';
 
-// TODO(B): Implement GlobalExceptionFilter
+// DONE(B): Implement GlobalExceptionFilter
 // - Use @Catch() decorator to catch all exceptions
 // - Implement ExceptionFilter interface
 // - Handle three types of exceptions:
@@ -43,18 +43,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let errorResponse: ApiErrorResponse;
     let status: number;
 
-    // TODO(B): Handle BusinessException
+    // DONE(B): Handle BusinessException
     // - Check if exception instanceof BusinessException
     // - Get status from exception.getStatus()
     // - Get response from exception.getResponse() as ApiErrorResponse
 
-    // TODO(B): Handle HttpException (NestJS built-in)
+    // DONE(B): Handle HttpException (NestJS built-in)
     // - Check if exception instanceof HttpException
     // - Get status from exception.getStatus()
     // - Map to appropriate error code using getErrorDefByStatus helper
     // - Format response to match ApiErrorResponse
 
-    // TODO(B): Handle unknown errors
+    // DONE(B): Handle unknown errors
     // - Set status to 500
     // - Return SYSTEM_INTERNAL_ERROR
     // - Log stack trace at error level
@@ -76,7 +76,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       );
     }
 
-    // TODO(B): Log all errors with appropriate level
+    // DONE(B): Log all errors with appropriate level
     // - status >= 500 -> error level
     // - status < 500 -> warn level
     // - Format: [METHOD] URL - STATUS - CODE
@@ -89,7 +89,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.status(status).json(errorResponse);
   }
 
-  // TODO(B): Implement formatHttpException helper
+  // DONE(B): Implement formatHttpException helper
   // - Map HTTP status to error code
   // - Format response to match ApiErrorResponse
   private formatHttpException(exception: HttpException): ApiErrorResponse {
@@ -116,7 +116,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
   }
 
-  // TODO(B): Implement formatUnknownError helper
+  // DONE(B): Implement formatUnknownError helper
   // - Return SYSTEM_INTERNAL_ERROR response
   // - Do NOT expose internal error details
   private formatUnknownError(_exception: unknown): ApiErrorResponse {
@@ -132,7 +132,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
   }
 
-  // TODO(B): Implement getErrorDefByStatus helper
+  // DONE(B): Implement getErrorDefByStatus helper
   // - Map HTTP status codes to error definitions
   private getErrorDefByStatus(
     status: number,

@@ -18,7 +18,7 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  // TODO(B): Register GlobalExceptionFilter
+  // DONE(B): Register GlobalExceptionFilter
   // This ensures all exceptions are caught and formatted consistently
   app.useGlobalFilters(new GlobalExceptionFilter());
 
