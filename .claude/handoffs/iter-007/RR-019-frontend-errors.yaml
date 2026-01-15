@@ -1,0 +1,158 @@
+# ============================================================
+# REVIEW REPORT: RR-019 - Frontend Error Handling (Updated)
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect)
+# Created: 2026-01-16
+# Updated: 2026-01-16 (Re-reviewed after ISS-019-1 fix)
+# ============================================================
+
+report_id: "RR-019"
+task_id: "TASK-019"
+implementation_report_id: "IR-019"
+design_state_version: "1.6.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 8
+    issues_found: 0
+  brief: |
+    Frontend error handling infrastructure implemented correctly.
+    ISS-019-1 (CJS/ESM module mismatch) has been fixed.
+    Build passes successfully.
+
+# ============================================================
+# ISS-019-1 Resolution
+# ============================================================
+issue_resolution:
+  issue_id: "ISS-019-1"
+  original_problem: "types package output CommonJS, api-client imported as ESM"
+  fix_applied:
+    - "packages/types/tsconfig.json: module changed to ESNext"
+    - "packages/types/package.json: added type: module and exports config"
+  verification: "user-web build passes"
+
+# ============================================================
+# Implementation Verification
+# ============================================================
+implementation_check:
+  error_handler_ts:
+    file: "packages/api-client/src/error-handler.ts"
+    lines: 96
+    features:
+      - "ParsedError interface with all required fields"
+      - "parseApiError function handling network/axios/unknown errors"
+      - "isAxiosError type guard"
+      - "ErrorCategory imported from @solo-guardian/types"
+    status: "pass"
+
+  use_error_handler_hook:
+    file: "apps/user-web/src/hooks/useErrorHandler.ts"
+    lines: 79
+    features:
+      - "Uses parseApiError from api-client"
+      - "i18n translation lookup with t(parsed.i18nKey)"
+      - "Toast notifications with variant based on isUserError"
+      - "Network error retry action"
+    status: "pass"
+
+  error_boundary:
+    file: "apps/user-web/src/components/ErrorBoundary.tsx"
+    lines: 88
+    features:
+      - "Class component with getDerivedStateFromError"
+      - "componentDidCatch logging"
+      - "ErrorFallback with retry and go-back buttons"
+      - "i18n for all text"
+    status: "pass"
+
+  i18n_translations:
+    languages:
+      - "en: apps/user-web/src/i18n/locales/en/error.json"
+      - "zh: apps/user-web/src/i18n/locales/zh/error.json"
+      - "ja: apps/user-web/src/i18n/locales/ja/error.json"
+    keys_covered:
+      - "title.userError, title.systemError"
+      - "action.retry, action.goBack"
+      - "auth.*, validation.*, user.*, contact.*"
+      - "checkin.*, preferences.*, network.*, system.*"
+    status: "pass"
+
+  app_integration:
+    file: "apps/user-web/src/App.tsx"
+    features:
+      - "ErrorBoundary wrapping entire app"
+      - "Toaster from sonner for notifications"
+    status: "pass"
+
+# ============================================================
+# Constraint Compliance
+# ============================================================
+constraint_check:
+  no_any_type: "pass"
+  file_under_300_lines: "pass"
+  function_under_50_lines: "pass"
+  explicit_return_types: "pass"
+  i18n_all_text: "pass"
+
+# ============================================================
+# Build Verification
+# ============================================================
+build_verification:
+  types_package:
+    status: "pass"
+    command: "npm run build"
+
+  api_client:
+    status: "pass"
+    command: "typecheck"
+
+  user_web:
+    status: "pass"
+    command: "npm run build"
+    output: "2085 modules transformed, built in 1.41s"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_criteria:
+  - criterion: "parseApiError function in api-client"
+    status: "pass"
+
+  - criterion: "useErrorHandler hook with toast"
+    status: "pass"
+
+  - criterion: "error.json translations for 3 languages"
+    status: "pass"
+
+  - criterion: "ErrorBoundary with retry"
+    status: "pass"
+
+  - criterion: "Network errors detected"
+    status: "pass"
+
+  - criterion: "User vs system error tone differentiation"
+    status: "pass"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  notes: |
+    ISS-019-1 has been resolved. The types package now outputs ESM format,
+    and user-web builds successfully.
+
+    Frontend error handling is production-ready with:
+    - Structured error parsing
+    - i18n-aware toast notifications
+    - Error boundary for React errors
+    - Clear differentiation between user and system errors
+
+  next_steps:
+    - "A Session: Mark TASK-019 as completed"

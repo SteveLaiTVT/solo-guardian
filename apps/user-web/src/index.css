@@ -57,3 +57,58 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Theme: High Contrast */
+.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 60 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 80%;
+  --accent: 60 100% 50%;
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 40%;
+  --input: 0 0% 20%;
+  --ring: 60 100% 50%;
+}
+
+/* Theme: Warm Colors */
+.warm-colors {
+  --background: 40 100% 97%;
+  --foreground: 20 20% 16%;
+  --card: 40 100% 97%;
+  --card-foreground: 20 20% 16%;
+  --popover: 40 100% 97%;
+  --popover-foreground: 20 20% 16%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 100% 90%;
+  --secondary-foreground: 20 20% 16%;
+  --muted: 40 100% 90%;
+  --muted-foreground: 20 10% 40%;
+  --accent: 40 100% 90%;
+  --accent-foreground: 20 20% 16%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 50% 85%;
+  --input: 40 50% 85%;
+  --ring: 160 84% 39%;
+}
+
+/* Reduced Motion */
+.reduced-motion,
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

@@ -1,0 +1,29 @@
+{
+  "features": {
+    "title": "Features",
+    "description": "Manage your feature preferences",
+    "preferFeaturesOn": {
+      "title": "Auto-enable New Features",
+      "description": "Automatically enable new features when they're released"
+    },
+    "hobbyCheckIn": {
+      "title": "Hobby Check-in",
+      "description": "Share what made you happy today"
+    },
+    "familyAccess": {
+      "title": "Family Access",
+      "description": "Let family members check your status"
+    }
+  },
+  "visual": {
+    "title": "Visual & Accessibility",
+    "description": "Customize the appearance and accessibility",
+    "fontSize": "Font Size",
+    "highContrast": "High Contrast",
+    "highContrastDesc": "Increase contrast for better visibility",
+    "reducedMotion": "Reduce Animations",
+    "reducedMotionDesc": "Minimize animations throughout the app",
+    "warmColors": "Warm Colors",
+    "warmColorsDesc": "Use a warmer color palette"
+  }
+}

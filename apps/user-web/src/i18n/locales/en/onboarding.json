@@ -1,0 +1,41 @@
+{
+  "welcome": {
+    "title": "Welcome to Solo Guardian",
+    "subtitle": "Your safety companion for peace of mind",
+    "getStarted": "Get Started"
+  },
+  "preference": {
+    "title": "New Features",
+    "subtitle": "When we add new features, how would you like us to handle them?",
+    "enableAll": "Enable automatically",
+    "enableAllDesc": "Get access to new features as soon as they're available",
+    "keepSimple": "Keep it simple",
+    "keepSimpleDesc": "I'll choose which features to enable"
+  },
+  "features": {
+    "title": "Customize Your Experience",
+    "subtitle": "Choose which optional features you'd like to enable",
+    "hobbyCheckIn": {
+      "title": "Hobby Check-in",
+      "description": "Share what made you happy today"
+    },
+    "familyAccess": {
+      "title": "Family Access",
+      "description": "Let family members check your status"
+    },
+    "presetSimple": "Keep it Simple",
+    "presetAll": "Enable All"
+  },
+  "visual": {
+    "title": "Visual Comfort",
+    "subtitle": "Adjust the display settings to your preference",
+    "fontSize": "Font Size",
+    "highContrast": "High Contrast",
+    "reducedMotion": "Reduce Animations",
+    "warmColors": "Warm Colors"
+  },
+  "back": "Back",
+  "next": "Next",
+  "finish": "Finish",
+  "saving": "Saving..."
+}

@@ -1,0 +1,169 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-019 - Frontend Error Handling
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-019"
+task_id: "TASK-019"
+design_state_version: "1.6.0"
+report_type: "implementation"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented frontend error handling infrastructure with parseApiError,
+  useErrorHandler hook, ErrorBoundary component, and i18n translations
+  for en, zh, ja.
+
+# ============================================================
+# Files Created/Modified
+# ============================================================
+files:
+  - path: "packages/api-client/src/error-handler.ts"
+    status: "implemented"
+    description: "ParsedError interface and parseApiError function"
+
+  - path: "packages/api-client/src/index.ts"
+    status: "already exported"
+    description: "Exports error-handler"
+
+  - path: "apps/user-web/src/hooks/useErrorHandler.ts"
+    status: "implemented"
+    description: "Error handler hook with toast and i18n"
+
+  - path: "apps/user-web/src/components/ErrorBoundary.tsx"
+    status: "implemented"
+    description: "React error boundary with retry/go-back"
+
+  - path: "apps/user-web/src/components/ui/use-toast.ts"
+    status: "created"
+    description: "Toast hook wrapper for sonner"
+
+  - path: "apps/user-web/src/i18n/locales/en/error.json"
+    status: "implemented"
+    description: "English error translations"
+
+  - path: "apps/user-web/src/i18n/locales/zh/error.json"
+    status: "implemented"
+    description: "Chinese error translations"
+
+  - path: "apps/user-web/src/i18n/locales/ja/error.json"
+    status: "implemented"
+    description: "Japanese error translations"
+
+  - path: "apps/user-web/src/i18n/index.ts"
+    status: "already configured"
+    description: "Error namespace already added"
+
+  - path: "apps/user-web/src/App.tsx"
+    status: "modified"
+    description: "Wrapped with ErrorBoundary and added Toaster"
+
+  - path: "packages/types/src/errors.ts"
+    status: "modified"
+    description: "Changed ErrorCategory from enum to const object"
+
+  - path: "apps/user-web/package.json"
+    status: "modified"
+    description: "Added sonner dependency"
+
+# ============================================================
+# Implementation Details
+# ============================================================
+implementation:
+  parsed_error_interface:
+    fields:
+      - "code: string"
+      - "category: ErrorCategory"
+      - "i18nKey: string"
+      - "message: string"
+      - "field?: string"
+      - "details?: Record<string, unknown>"
+      - "isUserError: boolean"
+      - "isNetworkError: boolean"
+
+  parse_api_error_function:
+    handles:
+      - type: "Network error"
+        condition: "Error without response"
+        returns: "NETWORK_ERROR with isNetworkError=true"
+      - type: "Axios error"
+        condition: "Has response.data with error"
+        returns: "Extracted error info"
+      - type: "Unknown error"
+        condition: "Fallback"
+        returns: "UNKNOWN_ERROR"
+
+  use_error_handler_hook:
+    returns:
+      - "handleError: (error, options?) => ParsedError"
+      - "parseApiError: function"
+    behavior:
+      - "Parses error with parseApiError"
+      - "Gets translated message via i18n"
+      - "Shows toast with variant based on isUserError"
+      - "Network errors get retry action"
+
+  error_boundary:
+    features:
+      - "Catches React rendering errors"
+      - "Shows ErrorFallback component"
+      - "Retry button clears error state"
+      - "Go back button navigates home"
+      - "Logs errors for debugging"
+
+  error_category_change:
+    reason: "user-web tsconfig has erasableSyntaxOnly enabled"
+    change: "Converted enum to const object + type union"
+    impact: "No breaking changes - same API surface"
+
+# ============================================================
+# Acceptance Criteria Verification
+# ============================================================
+acceptance_criteria:
+  - criteria: "parseApiError function in api-client package"
+    status: "pass"
+
+  - criteria: "useErrorHandler hook shows toast with translated message"
+    status: "pass"
+
+  - criteria: "error.json translations for all 3 languages"
+    status: "pass"
+
+  - criteria: "ErrorBoundary component with retry option"
+    status: "pass"
+
+  - criteria: "User errors get friendly tone, system errors get apologetic tone"
+    status: "pass"
+
+  - criteria: "Network errors detected and shown appropriately"
+    status: "pass"
+
+# ============================================================
+# Verification Results
+# ============================================================
+verification:
+  api_client_typecheck:
+    status: "pass"
+
+  user_web_build:
+    status: "pass"
+
+  backend_build:
+    status: "pass"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion: |
+  TASK-019 implementation complete. Frontend now has comprehensive
+  error handling with i18n support and toast notifications.
+
+  Additional change: ErrorCategory converted from enum to const object
+  for compatibility with user-web's erasableSyntaxOnly setting.
+
+  Ready for C Session review.

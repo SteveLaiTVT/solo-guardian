@@ -1,0 +1,48 @@
+{
+  "title": {
+    "userError": "Please check your input",
+    "systemError": "Something went wrong"
+  },
+  "action": {
+    "retry": "Try again",
+    "goBack": "Go back",
+    "contactSupport": "Contact support"
+  },
+  "auth": {
+    "invalidCredentials": "Email or password is incorrect. Please try again.",
+    "tokenExpired": "Your session has expired. Please log in again.",
+    "tokenInvalid": "Your session is invalid. Please log in again.",
+    "unauthorized": "You don't have permission to access this."
+  },
+  "validation": {
+    "failed": "Please check your input and try again.",
+    "emailInvalid": "Please enter a valid email address.",
+    "requiredField": "This field is required."
+  },
+  "user": {
+    "notFound": "User not found.",
+    "emailExists": "This email is already registered. Try logging in instead."
+  },
+  "contact": {
+    "notFound": "Contact not found.",
+    "limitReached": "You can add up to {{maxAllowed}} emergency contacts. Please remove one to add another.",
+    "emailExists": "This email is already in your contacts."
+  },
+  "checkin": {
+    "alreadyToday": "You've already checked in today. Great job!",
+    "settingsNotFound": "Please set up your check-in settings first."
+  },
+  "preferences": {
+    "notFound": "Preferences not found. Let's set them up!",
+    "invalidFeature": "Invalid feature name."
+  },
+  "network": {
+    "failed": "Unable to connect. Please check your internet connection."
+  },
+  "system": {
+    "internal": "We're sorry, something went wrong on our end. Please try again later.",
+    "unavailable": "Service is temporarily unavailable. Please try again in a few minutes.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "unknown": "An unexpected error occurred. Please try again."
+  }
+}

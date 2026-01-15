@@ -1,0 +1,48 @@
+{
+  "title": {
+    "userError": "请检查您的输入",
+    "systemError": "出了点问题"
+  },
+  "action": {
+    "retry": "重试",
+    "goBack": "返回",
+    "contactSupport": "联系客服"
+  },
+  "auth": {
+    "invalidCredentials": "邮箱或密码不正确，请重试。",
+    "tokenExpired": "您的会话已过期，请重新登录。",
+    "tokenInvalid": "您的会话无效，请重新登录。",
+    "unauthorized": "您没有权限访问此内容。"
+  },
+  "validation": {
+    "failed": "请检查您的输入后重试。",
+    "emailInvalid": "请输入有效的邮箱地址。",
+    "requiredField": "此字段为必填项。"
+  },
+  "user": {
+    "notFound": "用户不存在。",
+    "emailExists": "此邮箱已注册，请尝试登录。"
+  },
+  "contact": {
+    "notFound": "联系人不存在。",
+    "limitReached": "您最多可以添加 {{maxAllowed}} 位紧急联系人。请删除一位后再添加。",
+    "emailExists": "此邮箱已在您的联系人列表中。"
+  },
+  "checkin": {
+    "alreadyToday": "您今天已经签到了，做得好！",
+    "settingsNotFound": "请先设置您的签到选项。"
+  },
+  "preferences": {
+    "notFound": "未找到偏好设置，让我们来设置一下吧！",
+    "invalidFeature": "无效的功能名称。"
+  },
+  "network": {
+    "failed": "无法连接网络，请检查您的网络连接。"
+  },
+  "system": {
+    "internal": "抱歉，我们这边出了点问题。请稍后重试。",
+    "unavailable": "服务暂时不可用，请稍后重试。",
+    "rateLimited": "请求太频繁，请稍等片刻后重试。",
+    "unknown": "发生了意外错误，请重试。"
+  }
+}

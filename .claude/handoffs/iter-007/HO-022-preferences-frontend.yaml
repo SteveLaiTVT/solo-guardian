@@ -1,0 +1,319 @@
+# ============================================================
+# HANDOFF: HO-022 - Frontend Preferences and Onboarding
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-022"
+title: "Frontend: Preferences and onboarding"
+priority: "P0"
+estimated_complexity: "high"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create frontend onboarding flow, settings page for preferences,
+    and theme system for visual customization.
+
+  goals:
+    - First-time user onboarding with feature selection
+    - Settings page with Features and Visual sections
+    - Theme system with CSS variables
+    - Apply visual preferences (font size, colors)
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Onboarding flow for new users (not onboarded)"
+  - "Settings page with Features and Visual sections"
+  - "Theme provider applying visual preferences"
+  - "Font size slider (14-24px)"
+  - "High contrast toggle"
+  - "Reduced motion toggle"
+  - "Warm colors toggle"
+  - "Feature toggles (hobby check-in, family access)"
+  - "preferFeaturesOn selection in onboarding"
+  - "All text uses i18n"
+  - "Mobile responsive"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_create:
+  # API Client
+  - path: "packages/api-client/src/preferences.ts"
+    description: "Preferences API methods"
+
+  # Theme System
+  - path: "apps/user-web/src/contexts/ThemeContext.tsx"
+    description: "Theme provider with preferences"
+
+  - path: "apps/user-web/src/styles/themes.css"
+    description: "CSS variables for themes"
+
+  # Onboarding
+  - path: "apps/user-web/src/pages/onboarding/OnboardingPage.tsx"
+    description: "Onboarding flow page"
+
+  - path: "apps/user-web/src/components/onboarding/WelcomeStep.tsx"
+    description: "Welcome screen"
+
+  - path: "apps/user-web/src/components/onboarding/PreferenceStep.tsx"
+    description: "preferFeaturesOn selection"
+
+  - path: "apps/user-web/src/components/onboarding/FeaturesStep.tsx"
+    description: "Feature toggle selection"
+
+  - path: "apps/user-web/src/components/onboarding/VisualStep.tsx"
+    description: "Visual preferences"
+
+  # Settings Sections
+  - path: "apps/user-web/src/components/settings/FeaturesSection.tsx"
+    description: "Feature toggles in settings"
+
+  - path: "apps/user-web/src/components/settings/VisualSection.tsx"
+    description: "Visual preferences in settings"
+
+  - path: "apps/user-web/src/components/settings/FeatureToggle.tsx"
+    description: "Reusable feature toggle component"
+
+  # i18n
+  - path: "apps/user-web/src/i18n/locales/en/onboarding.json"
+    description: "English onboarding text"
+
+  - path: "apps/user-web/src/i18n/locales/zh/onboarding.json"
+    description: "Chinese onboarding text"
+
+  - path: "apps/user-web/src/i18n/locales/ja/onboarding.json"
+    description: "Japanese onboarding text"
+
+  - path: "apps/user-web/src/i18n/locales/en/preferences.json"
+    description: "English preferences text"
+
+  - path: "apps/user-web/src/i18n/locales/zh/preferences.json"
+    description: "Chinese preferences text"
+
+  - path: "apps/user-web/src/i18n/locales/ja/preferences.json"
+    description: "Japanese preferences text"
+
+files_to_modify:
+  - path: "packages/api-client/src/index.ts"
+    description: "Export preferences"
+
+  - path: "packages/api-client/src/hooks.ts"
+    description: "Add preferences hooks"
+
+  - path: "apps/user-web/src/App.tsx"
+    description: "Add ThemeProvider, onboarding route"
+
+  - path: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+    description: "Add Features and Visual sections"
+
+  - path: "apps/user-web/src/i18n/i18n.ts"
+    description: "Add onboarding, preferences namespaces"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  theme_system:
+    css_variables:
+      base:
+        - "--font-size-base: 16px"
+        - "--color-background: #ffffff"
+        - "--color-foreground: #0a0a0a"
+        - "--color-primary: #2563eb"
+        - "--color-muted: #f4f4f5"
+      high_contrast:
+        - "--color-background: #000000"
+        - "--color-foreground: #ffffff"
+        - "--color-primary: #ffff00"
+      warm_colors:
+        - "--color-background: #fffbeb"
+        - "--color-foreground: #292524"
+        - "--color-primary: #059669"
+        - "--color-muted: #fef3c7"
+
+    theme_context:
+      provides:
+        - "preferences: UserPreferences"
+        - "updatePreference: (key, value) => void"
+        - "isLoading: boolean"
+      applies:
+        - "CSS variables based on preferences"
+        - "Font size to document root"
+        - "prefers-reduced-motion media query"
+
+  onboarding_flow:
+    steps:
+      - step: 1
+        component: "WelcomeStep"
+        title: "Welcome to Solo Guardian"
+        description: "Your safety companion"
+
+      - step: 2
+        component: "PreferenceStep"
+        title: "New Features"
+        description: "When we add new features..."
+        options:
+          - label: "Enable new features automatically"
+            value: true
+          - label: "Keep it simple, I'll choose"
+            value: false
+
+      - step: 3
+        component: "FeaturesStep"
+        title: "Customize Your Experience"
+        features:
+          - key: "hobbyCheckIn"
+            icon: "Heart"
+            title: "Hobby Check-in"
+            description: "Share what made you happy today"
+          - key: "familyAccess"
+            icon: "Users"
+            title: "Family Access"
+            description: "Let family check your status"
+        presets:
+          - label: "Keep it Simple"
+            action: "Disable all optional features"
+          - label: "Enable All"
+            action: "Enable all optional features"
+
+      - step: 4
+        component: "VisualStep"
+        title: "Visual Comfort"
+        settings:
+          - key: "fontSize"
+            type: "slider"
+            min: 14
+            max: 24
+            label: "Font Size"
+          - key: "highContrast"
+            type: "toggle"
+            label: "High Contrast"
+          - key: "reducedMotion"
+            type: "toggle"
+            label: "Reduce Animations"
+          - key: "warmColors"
+            type: "toggle"
+            label: "Warm Colors"
+
+  settings_page:
+    sections:
+      - name: "FeaturesSection"
+        title: "Features"
+        content:
+          - "preferFeaturesOn toggle"
+          - "hobbyCheckIn toggle"
+          - "familyAccess toggle"
+          - "Optional features from JSON"
+
+      - name: "VisualSection"
+        title: "Visual & Accessibility"
+        content:
+          - "Font size slider"
+          - "High contrast toggle"
+          - "Reduced motion toggle"
+          - "Warm colors toggle"
+
+  api_hooks:
+    - name: "usePreferences"
+      description: "Get user preferences"
+      auto_create: true
+
+    - name: "useUpdatePreferences"
+      description: "Update preferences"
+      invalidates: "['preferences']"
+
+    - name: "useToggleFeature"
+      description: "Toggle optional feature"
+      invalidates: "['preferences']"
+
+    - name: "useCompleteOnboarding"
+      description: "Mark onboarding done"
+      invalidates: "['preferences']"
+
+  routing:
+    onboarding:
+      path: "/onboarding"
+      protected: true
+      show_when: "!preferences.onboardingCompleted"
+      redirect_after: "/dashboard"
+
+# ============================================================
+# i18n Keys
+# ============================================================
+i18n_keys:
+  onboarding:
+    - "welcome.title"
+    - "welcome.subtitle"
+    - "welcome.getStarted"
+    - "preference.title"
+    - "preference.subtitle"
+    - "preference.enableAll"
+    - "preference.keepSimple"
+    - "features.title"
+    - "features.subtitle"
+    - "features.hobbyCheckIn.title"
+    - "features.hobbyCheckIn.description"
+    - "features.familyAccess.title"
+    - "features.familyAccess.description"
+    - "features.presetSimple"
+    - "features.presetAll"
+    - "visual.title"
+    - "visual.subtitle"
+    - "visual.fontSize"
+    - "visual.highContrast"
+    - "visual.reducedMotion"
+    - "visual.warmColors"
+    - "finish"
+    - "back"
+    - "next"
+
+  preferences:
+    - "features.title"
+    - "features.preferFeaturesOn.title"
+    - "features.preferFeaturesOn.description"
+    - "features.hobbyCheckIn.title"
+    - "features.hobbyCheckIn.description"
+    - "features.familyAccess.title"
+    - "features.familyAccess.description"
+    - "visual.title"
+    - "visual.fontSize"
+    - "visual.highContrast"
+    - "visual.reducedMotion"
+    - "visual.warmColors"
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "No `any` type"
+  - "All components have JSX.Element return type"
+  - "All files < 300 lines"
+  - "All functions < 50 lines"
+  - "Use shadcn/ui components"
+  - "Mobile responsive"
+  - "All text uses i18n"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: ["TASK-021", "TASK-019"]
+  blocks: []
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "Onboarding should feel warm and welcoming"
+  - "Visual changes should apply immediately (optimistic)"
+  - "Consider adding preview in visual settings"
+  - "Font size affects document root for global effect"

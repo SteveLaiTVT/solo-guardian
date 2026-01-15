@@ -1,0 +1,29 @@
+{
+  "features": {
+    "title": "機能",
+    "description": "機能設定を管理",
+    "preferFeaturesOn": {
+      "title": "新機能を自動有効化",
+      "description": "新機能がリリースされたら自動的に有効にする"
+    },
+    "hobbyCheckIn": {
+      "title": "趣味チェックイン",
+      "description": "今日嬉しかったことを共有"
+    },
+    "familyAccess": {
+      "title": "家族アクセス",
+      "description": "家族があなたの状態を確認できます"
+    }
+  },
+  "visual": {
+    "title": "視覚とアクセシビリティ",
+    "description": "外観とアクセシビリティをカスタマイズ",
+    "fontSize": "フォントサイズ",
+    "highContrast": "高コントラスト",
+    "highContrastDesc": "視認性向上のためコントラストを上げる",
+    "reducedMotion": "アニメーション軽減",
+    "reducedMotionDesc": "アプリ全体のアニメーションを最小限に",
+    "warmColors": "暖色系",
+    "warmColorsDesc": "暖かみのある配色を使用"
+  }
+}

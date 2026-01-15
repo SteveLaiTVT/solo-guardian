@@ -1,0 +1,209 @@
+# ============================================================
+# HANDOFF: HO-017 - Shared Error Codes and Types
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-017"
+title: "Shared: Error codes and types"
+priority: "P0"
+estimated_complexity: "medium"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create shared error handling types and codes in packages/types.
+    This provides a consistent error format for both backend and frontend.
+
+  goals:
+    - Define error categories (VALIDATION, AUTH, BUSINESS, etc.)
+    - Define error codes with i18n keys
+    - Define API error response interface
+    - Provide helper functions for error classification
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "ErrorCategory enum defined with all categories"
+  - "ErrorCodes object with code, category, httpStatus, i18nKey"
+  - "ApiErrorResponse interface matching backend response format"
+  - "isUserError helper function to distinguish user vs system errors"
+  - "Types exported from packages/types index"
+  - "No `any` type used"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_create:
+  - path: "packages/types/src/errors.ts"
+    description: "Error codes, categories, and types"
+
+files_to_modify:
+  - path: "packages/types/src/index.ts"
+    description: "Export error types"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  error_categories:
+    - name: "VALIDATION"
+      description: "Input validation errors (400)"
+    - name: "AUTH"
+      description: "Authentication/authorization errors (401, 403)"
+    - name: "BUSINESS"
+      description: "Business logic errors (400)"
+    - name: "NOT_FOUND"
+      description: "Resource not found (404)"
+    - name: "CONFLICT"
+      description: "Resource conflict (409)"
+    - name: "RATE_LIMIT"
+      description: "Too many requests (429)"
+    - name: "SYSTEM"
+      description: "Internal server errors (500, 503)"
+
+  error_code_groups:
+    auth_1xxx:
+      - code: "AUTH_1001"
+        name: "AUTH_INVALID_CREDENTIALS"
+        httpStatus: 401
+        i18nKey: "error.auth.invalidCredentials"
+      - code: "AUTH_1002"
+        name: "AUTH_TOKEN_EXPIRED"
+        httpStatus: 401
+        i18nKey: "error.auth.tokenExpired"
+      - code: "AUTH_1003"
+        name: "AUTH_TOKEN_INVALID"
+        httpStatus: 401
+        i18nKey: "error.auth.tokenInvalid"
+      - code: "AUTH_1004"
+        name: "AUTH_UNAUTHORIZED"
+        httpStatus: 403
+        i18nKey: "error.auth.unauthorized"
+
+    validation_2xxx:
+      - code: "VAL_2001"
+        name: "VALIDATION_FAILED"
+        httpStatus: 400
+        i18nKey: "error.validation.failed"
+      - code: "VAL_2002"
+        name: "VALIDATION_EMAIL_INVALID"
+        httpStatus: 400
+        i18nKey: "error.validation.emailInvalid"
+      - code: "VAL_2003"
+        name: "VALIDATION_REQUIRED_FIELD"
+        httpStatus: 400
+        i18nKey: "error.validation.requiredField"
+
+    user_3xxx:
+      - code: "USER_3001"
+        name: "USER_NOT_FOUND"
+        httpStatus: 404
+        i18nKey: "error.user.notFound"
+      - code: "USER_3002"
+        name: "USER_EMAIL_EXISTS"
+        httpStatus: 409
+        i18nKey: "error.user.emailExists"
+
+    contact_4xxx:
+      - code: "CONTACT_4001"
+        name: "CONTACT_NOT_FOUND"
+        httpStatus: 404
+        i18nKey: "error.contact.notFound"
+      - code: "CONTACT_4002"
+        name: "CONTACT_LIMIT_REACHED"
+        httpStatus: 400
+        i18nKey: "error.contact.limitReached"
+      - code: "CONTACT_4003"
+        name: "CONTACT_EMAIL_EXISTS"
+        httpStatus: 409
+        i18nKey: "error.contact.emailExists"
+
+    checkin_5xxx:
+      - code: "CHECKIN_5001"
+        name: "CHECKIN_ALREADY_TODAY"
+        httpStatus: 400
+        i18nKey: "error.checkin.alreadyToday"
+      - code: "CHECKIN_5002"
+        name: "CHECKIN_SETTINGS_NOT_FOUND"
+        httpStatus: 404
+        i18nKey: "error.checkin.settingsNotFound"
+
+    preferences_6xxx:
+      - code: "PREF_6001"
+        name: "PREFERENCES_NOT_FOUND"
+        httpStatus: 404
+        i18nKey: "error.preferences.notFound"
+      - code: "PREF_6002"
+        name: "PREFERENCES_INVALID_FEATURE"
+        httpStatus: 400
+        i18nKey: "error.preferences.invalidFeature"
+
+    system_9xxx:
+      - code: "SYS_9001"
+        name: "SYSTEM_INTERNAL_ERROR"
+        httpStatus: 500
+        i18nKey: "error.system.internal"
+      - code: "SYS_9002"
+        name: "SYSTEM_SERVICE_UNAVAILABLE"
+        httpStatus: 503
+        i18nKey: "error.system.unavailable"
+      - code: "SYS_9003"
+        name: "SYSTEM_RATE_LIMITED"
+        httpStatus: 429
+        i18nKey: "error.system.rateLimited"
+
+  api_error_response:
+    interface: |
+      interface ApiErrorResponse {
+        success: false;
+        error: {
+          code: string;           // e.g., "AUTH_1001"
+          category: ErrorCategory;
+          message: string;        // Default English message
+          i18nKey: string;        // For frontend translation
+          details?: Record<string, unknown>;
+          field?: string;         // For validation errors
+          timestamp: string;      // ISO 8601
+        };
+      }
+
+  helper_functions:
+    - name: "isUserError"
+      description: "Returns true for user-caused errors (friendly message)"
+      signature: "isUserError(category: ErrorCategory): boolean"
+      user_error_categories:
+        - "VALIDATION"
+        - "AUTH"
+        - "BUSINESS"
+        - "CONFLICT"
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "No `any` type"
+  - "All types must be exported"
+  - "Use `as const` for ErrorCodes object"
+  - "ErrorCodeKey type derived from ErrorCodes keys"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: []
+  blocks: ["TASK-018", "TASK-019"]
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "This is infrastructure code - other tasks depend on it"
+  - "Error codes can be extended in future iterations"
+  - "i18nKey format: error.<domain>.<specific>"

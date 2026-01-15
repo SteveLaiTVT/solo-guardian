@@ -1,0 +1,168 @@
+# ============================================================
+# HANDOFF: HO-018 - Backend Error Handling Infrastructure
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# Design State Version: 1.6.0
+# ============================================================
+
+task_id: "TASK-018"
+title: "Backend: Error handling infrastructure"
+priority: "P0"
+estimated_complexity: "medium"
+
+# ============================================================
+# Overview
+# ============================================================
+overview:
+  description: |
+    Create backend error handling infrastructure with BusinessException
+    and GlobalExceptionFilter for consistent, i18n-ready error responses.
+
+  goals:
+    - BusinessException class for throwing typed errors
+    - GlobalExceptionFilter for catching and formatting all errors
+    - Consistent error response format matching ApiErrorResponse
+    - Proper logging for system errors
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "BusinessException class throws errors with error code key"
+  - "GlobalExceptionFilter catches all exceptions"
+  - "Error responses match ApiErrorResponse interface"
+  - "System errors (500) are logged with stack trace"
+  - "User errors (4xx) are logged at warn level"
+  - "Filter registered globally in main.ts"
+  - "Existing services can use BusinessException"
+
+# ============================================================
+# File Structure
+# ============================================================
+files_to_create:
+  - path: "apps/backend/src/common/exceptions/business.exception.ts"
+    description: "BusinessException class"
+
+  - path: "apps/backend/src/common/filters/global-exception.filter.ts"
+    description: "Global exception filter"
+
+  - path: "apps/backend/src/common/exceptions/index.ts"
+    description: "Export exceptions"
+
+  - path: "apps/backend/src/common/filters/index.ts"
+    description: "Export filters"
+
+files_to_modify:
+  - path: "apps/backend/src/main.ts"
+    description: "Register global exception filter"
+
+# ============================================================
+# Technical Specification
+# ============================================================
+specification:
+  business_exception:
+    class_name: "BusinessException"
+    extends: "HttpException"
+    constructor_params:
+      - name: "errorCodeKey"
+        type: "ErrorCodeKey"
+        description: "Key from ErrorCodes object"
+      - name: "options"
+        type: "object"
+        optional: true
+        properties:
+          - "details?: Record<string, unknown>"
+          - "field?: string"
+          - "message?: string"
+
+    properties:
+      - name: "errorCode"
+        type: "string"
+        description: "The error code (e.g., AUTH_1001)"
+      - name: "category"
+        type: "ErrorCategory"
+      - name: "i18nKey"
+        type: "string"
+      - name: "details"
+        type: "Record<string, unknown>"
+        optional: true
+      - name: "field"
+        type: "string"
+        optional: true
+
+  global_exception_filter:
+    class_name: "GlobalExceptionFilter"
+    implements: "ExceptionFilter"
+    decorator: "@Catch()"
+
+    catch_method:
+      handles:
+        - type: "BusinessException"
+          action: "Return formatted response from exception"
+        - type: "HttpException"
+          action: "Map to appropriate error code"
+        - type: "unknown"
+          action: "Return SYSTEM_INTERNAL_ERROR"
+
+    logging:
+      - condition: "status >= 500"
+        level: "error"
+        include: "stack trace"
+      - condition: "status < 500"
+        level: "warn"
+        format: "[METHOD] URL - STATUS - CODE"
+
+  main_ts_registration: |
+    import { GlobalExceptionFilter } from './common/filters';
+
+    async function bootstrap() {
+      const app = await NestFactory.create(AppModule);
+      app.useGlobalFilters(new GlobalExceptionFilter());
+      // ... rest
+    }
+
+# ============================================================
+# Usage Example
+# ============================================================
+usage_example: |
+  // In service
+  import { BusinessException } from '../common/exceptions';
+
+  @Injectable()
+  export class EmergencyContactsService {
+    async create(userId: string, dto: CreateContactDto) {
+      const count = await this.repository.countByUserId(userId);
+      if (count >= 5) {
+        throw new BusinessException('CONTACT_LIMIT_REACHED', {
+          details: { currentCount: count, maxAllowed: 5 },
+        });
+      }
+      // ...
+    }
+  }
+
+# ============================================================
+# Code Constraints
+# ============================================================
+constraints:
+  - "No `any` type"
+  - "Use NestJS Logger, not console.log"
+  - "All functions < 50 lines"
+  - "Import error types from @solo-guardian/types"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  depends_on: ["TASK-017"]
+  blocks: ["TASK-021"]
+
+# ============================================================
+# Notes
+# ============================================================
+notes:
+  - "Consider updating existing services to use BusinessException"
+  - "Emergency contacts service is a good candidate for refactoring"
+  - "Filter should not expose internal error details in production"

@@ -1,0 +1,41 @@
+{
+  "welcome": {
+    "title": "Solo Guardianへようこそ",
+    "subtitle": "あなたの安心を守るパートナー",
+    "getStarted": "始める"
+  },
+  "preference": {
+    "title": "新機能設定",
+    "subtitle": "新機能が追加されたとき、どのように対応しますか？",
+    "enableAll": "自動的に有効化",
+    "enableAllDesc": "新機能が利用可能になり次第アクセスできます",
+    "keepSimple": "シンプルに",
+    "keepSimpleDesc": "どの機能を有効にするか自分で選びます"
+  },
+  "features": {
+    "title": "体験をカスタマイズ",
+    "subtitle": "有効にしたいオプション機能を選択してください",
+    "hobbyCheckIn": {
+      "title": "趣味チェックイン",
+      "description": "今日嬉しかったことを共有"
+    },
+    "familyAccess": {
+      "title": "家族アクセス",
+      "description": "家族があなたの状態を確認できます"
+    },
+    "presetSimple": "シンプルに",
+    "presetAll": "すべて有効"
+  },
+  "visual": {
+    "title": "視覚的な快適さ",
+    "subtitle": "お好みに合わせて表示設定を調整",
+    "fontSize": "フォントサイズ",
+    "highContrast": "高コントラスト",
+    "reducedMotion": "アニメーション軽減",
+    "warmColors": "暖色系"
+  },
+  "back": "戻る",
+  "next": "次へ",
+  "finish": "完了",
+  "saving": "保存中..."
+}
