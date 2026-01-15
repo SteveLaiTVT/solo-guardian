@@ -1,0 +1,115 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-020 - UserPreferences Database Model
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-020"
+task_id: "TASK-020"
+design_state_version: "1.6.0"
+report_type: "implementation"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Created UserPreferences Prisma model with feature toggles,
+  visual preferences, and flexible JSON field for optional features.
+
+# ============================================================
+# Files Modified/Created
+# ============================================================
+files:
+  - path: "apps/backend/prisma/schema.prisma"
+    status: "modified"
+    description: "Added UserPreferences model and User relation"
+
+  - path: "apps/backend/prisma/migrations/20260115155516_add_user_preferences/migration.sql"
+    status: "created"
+    description: "Auto-generated migration file"
+
+# ============================================================
+# Implementation Details
+# ============================================================
+implementation:
+  model_fields:
+    basic:
+      - "id: String @id @default(uuid())"
+      - "userId: String @unique @map(\"user_id\")"
+
+    new_feature_behavior:
+      - "preferFeaturesOn: Boolean @default(false)"
+
+    visual_preferences:
+      - "fontSize: Int @default(16)"
+      - "highContrast: Boolean @default(false)"
+      - "reducedMotion: Boolean @default(false)"
+      - "warmColors: Boolean @default(false)"
+
+    core_feature_toggles:
+      - "hobbyCheckIn: Boolean @default(false)"
+      - "familyAccess: Boolean @default(false)"
+
+    flexible_features:
+      - "optionalFeatures: Json @default(\"{}\")"
+
+    onboarding:
+      - "onboardingCompleted: Boolean @default(false)"
+
+    timestamps:
+      - "createdAt: DateTime @default(now())"
+      - "updatedAt: DateTime @updatedAt"
+
+  user_relation:
+    description: "Added preferences UserPreferences? to User model"
+    type: "One-to-one relation"
+
+# ============================================================
+# Acceptance Criteria Verification
+# ============================================================
+acceptance_criteria:
+  - criteria: "UserPreferences model created in schema.prisma"
+    status: "pass"
+
+  - criteria: "One-to-one relation with User"
+    status: "pass"
+
+  - criteria: "preferFeaturesOn boolean field"
+    status: "pass"
+
+  - criteria: "Visual preference fields (fontSize, highContrast, reducedMotion)"
+    status: "pass"
+
+  - criteria: "Core feature toggles as boolean columns"
+    status: "pass"
+
+  - criteria: "optionalFeatures JSON field"
+    status: "pass"
+
+  - criteria: "Migration created and applied"
+    status: "pass"
+
+# ============================================================
+# Verification Results
+# ============================================================
+verification:
+  prisma_migrate:
+    status: "pass"
+    migration: "20260115155516_add_user_preferences"
+
+  prisma_generate:
+    status: "pass"
+
+  backend_build:
+    status: "pass"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion: |
+  TASK-020 implementation complete. UserPreferences model is ready
+  for use by the preferences service in TASK-021.
+
+  Ready for C Session review.
