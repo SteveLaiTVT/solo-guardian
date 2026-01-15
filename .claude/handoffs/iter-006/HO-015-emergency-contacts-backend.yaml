@@ -1,0 +1,133 @@
+# ============================================================
+# Handoff: TASK-015 - Emergency Contacts Backend Module
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-015"
+task_id: "TASK-015"
+design_state_version: "1.4.0"
+
+objective: "Implement NestJS module for emergency contacts CRUD operations"
+
+context: |
+  This module handles all backend logic for managing emergency contacts.
+  Users can add up to 5 contacts with priority ordering. Contacts are
+  notified (in future iteration) when a user misses their daily check-in.
+
+tasks:
+  - id: "TASK-015"
+    title: "Backend: Emergency contacts module"
+
+    skeleton_files:
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+        description: "NestJS module definition"
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+        description: "REST API endpoints"
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+        description: "Business logic"
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+        description: "Database operations"
+      - path: "apps/backend/src/modules/emergency-contacts/dto/create-contact.dto.ts"
+        description: "Create contact DTO"
+      - path: "apps/backend/src/modules/emergency-contacts/dto/update-contact.dto.ts"
+        description: "Update contact DTO"
+
+    api_endpoints:
+      - method: "GET"
+        path: "/api/v1/emergency-contacts"
+        description: "List all contacts for current user"
+        auth: "Required (JwtAuthGuard)"
+        response: "{ success: true, data: EmergencyContact[] }"
+
+      - method: "GET"
+        path: "/api/v1/emergency-contacts/:id"
+        description: "Get single contact by ID"
+        auth: "Required (JwtAuthGuard)"
+        response: "{ success: true, data: EmergencyContact }"
+
+      - method: "POST"
+        path: "/api/v1/emergency-contacts"
+        description: "Create new emergency contact"
+        auth: "Required (JwtAuthGuard)"
+        body: "CreateContactDto"
+        response: "{ success: true, data: EmergencyContact }"
+        validation:
+          - "Max 5 contacts per user"
+          - "Email must be unique per user"
+          - "Priority auto-assigned if not provided"
+
+      - method: "PUT"
+        path: "/api/v1/emergency-contacts/:id"
+        description: "Update emergency contact"
+        auth: "Required (JwtAuthGuard)"
+        body: "UpdateContactDto"
+        response: "{ success: true, data: EmergencyContact }"
+
+      - method: "DELETE"
+        path: "/api/v1/emergency-contacts/:id"
+        description: "Soft delete emergency contact"
+        auth: "Required (JwtAuthGuard)"
+        response: "{ success: true, data: null }"
+
+      - method: "PUT"
+        path: "/api/v1/emergency-contacts/reorder"
+        description: "Reorder contact priorities"
+        auth: "Required (JwtAuthGuard)"
+        body: "{ contactIds: string[] }"
+        response: "{ success: true, data: EmergencyContact[] }"
+
+    dto_definitions:
+      CreateContactDto:
+        name: "string, required, max 100 chars"
+        email: "string, required, valid email format"
+        phone: "string, optional, valid phone format"
+        priority: "number, optional, 1-5"
+
+      UpdateContactDto:
+        name: "string, optional"
+        email: "string, optional"
+        phone: "string, optional"
+        priority: "number, optional, 1-5"
+        isActive: "boolean, optional"
+
+    business_rules:
+      - "Maximum 5 emergency contacts per user"
+      - "Email must be unique within user's contacts"
+      - "Priority must be unique (1-5) within user's contacts"
+      - "When creating without priority, assign next available"
+      - "When deleting, do NOT reorder remaining contacts"
+      - "User can only access their own contacts"
+      - "Soft delete (set deletedAt) instead of hard delete"
+
+    acceptance_criteria:
+      - "All 6 API endpoints work correctly"
+      - "JwtAuthGuard protects all endpoints"
+      - "Cannot add more than 5 contacts"
+      - "Cannot add duplicate email for same user"
+      - "Reorder endpoint updates all priorities correctly"
+      - "Delete is soft delete (sets deletedAt)"
+      - "Queries exclude soft-deleted contacts"
+
+    constraints:
+      - "Controller only validates and calls Service"
+      - "Service contains business logic"
+      - "Repository handles all Prisma operations"
+      - "Use @CurrentUser() decorator for userId"
+      - "All functions < 50 lines"
+      - "All files < 300 lines"
+      - "No any type"
+
+out_of_scope:
+  - "Email/SMS verification flow"
+  - "Notification sending logic"
+  - "Contact invitation emails"
+
+depends_on:
+  - "TASK-014 (EmergencyContact model)"
+  - "JwtAuthGuard from auth module"
+  - "CurrentUser decorator from auth module"
+
+estimated_files_changed: 6

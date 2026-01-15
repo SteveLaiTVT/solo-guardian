@@ -1,8 +1,8 @@
 /**
  * @file App.tsx
  * @description Main application component with routing configuration
- * @task TASK-010
- * @design_state_version 1.2.0
+ * @task TASK-010, TASK-016
+ * @design_state_version 1.4.2
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -11,6 +11,7 @@ import { Layout } from '@/components/layout'
 import { LoginPage, RegisterPage } from '@/pages/auth'
 import { DashboardPage, HistoryPage } from '@/pages/dashboard'
 import { SettingsPage } from '@/pages/settings'
+import { ContactsPage } from '@/pages/contacts'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ function App(): JSX.Element {
             <Route element={<Layout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/history" element={<HistoryPage />} />
+              <Route path="/contacts" element={<ContactsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>

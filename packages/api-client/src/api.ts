@@ -9,6 +9,10 @@ import type {
   CheckInHistory,
   CheckInSettings,
   UpdateSettingsRequest,
+  EmergencyContact,
+  CreateContactRequest,
+  UpdateContactRequest,
+  ReorderContactsRequest,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -44,6 +48,26 @@ export function createApi(client: AxiosInstance) {
 
       update: (data: UpdateSettingsRequest) =>
         client.put<CheckInSettings>("/api/v1/check-in-settings", data),
+    },
+
+    contacts: {
+      getAll: () =>
+        client.get<EmergencyContact[]>("/api/v1/emergency-contacts"),
+
+      getOne: (id: string) =>
+        client.get<EmergencyContact>(`/api/v1/emergency-contacts/${id}`),
+
+      create: (data: CreateContactRequest) =>
+        client.post<EmergencyContact>("/api/v1/emergency-contacts", data),
+
+      update: (id: string, data: UpdateContactRequest) =>
+        client.put<EmergencyContact>(`/api/v1/emergency-contacts/${id}`, data),
+
+      delete: (id: string) =>
+        client.delete(`/api/v1/emergency-contacts/${id}`),
+
+      reorder: (data: ReorderContactsRequest) =>
+        client.put<EmergencyContact[]>("/api/v1/emergency-contacts/reorder", data),
     },
   }
 }

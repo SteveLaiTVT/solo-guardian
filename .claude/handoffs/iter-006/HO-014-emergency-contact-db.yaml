@@ -1,0 +1,76 @@
+# ============================================================
+# Handoff: TASK-014 - Emergency Contact Database Model
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-014"
+task_id: "TASK-014"
+design_state_version: "1.4.0"
+
+objective: "Add EmergencyContact model to Prisma schema"
+
+context: |
+  Solo Guardian's core feature is notifying emergency contacts when a user
+  misses their daily check-in. This task creates the database model for
+  storing emergency contact information.
+
+tasks:
+  - id: "TASK-014"
+    title: "Database: Add EmergencyContact model"
+
+    files_to_modify:
+      - path: "apps/backend/prisma/schema.prisma"
+        action: "Add EmergencyContact model"
+
+    schema_design: |
+      model EmergencyContact {
+        id          String   @id @default(uuid())
+        userId      String
+        name        String
+        email       String
+        phone       String?
+        priority    Int      @default(1)  // 1-5, notification order
+        isVerified  Boolean  @default(false)
+        isActive    Boolean  @default(true)
+        createdAt   DateTime @default(now())
+        updatedAt   DateTime @updatedAt
+        deletedAt   DateTime?
+
+        user        User     @relation(fields: [userId], references: [id])
+
+        @@unique([userId, email])
+        @@unique([userId, priority])
+        @@index([userId, isActive])
+        @@map("emergency_contacts")
+      }
+
+    requirements:
+      - "Add EmergencyContact model as shown in schema_design"
+      - "Add relation to User model: emergencyContacts EmergencyContact[]"
+      - "Run prisma migrate dev with name 'add_emergency_contacts'"
+      - "Verify migration succeeds"
+
+    acceptance_criteria:
+      - "EmergencyContact table exists in database"
+      - "Unique constraint on (userId, email) prevents duplicate contacts"
+      - "Unique constraint on (userId, priority) ensures unique ordering"
+      - "Index on (userId, isActive) for efficient queries"
+      - "Migration file generated and applied"
+
+    constraints:
+      - "Use UUID for id (consistent with other models)"
+      - "Use soft delete pattern (deletedAt field)"
+      - "Priority must be 1-5 range (enforced at application level)"
+
+out_of_scope:
+  - "Contact verification logic (future feature)"
+  - "SMS/phone notification (future feature)"
+  - "Notification history tracking (separate model, future)"
+
+dependencies:
+  - "Existing User model in schema.prisma"
+
+estimated_files_changed: 1

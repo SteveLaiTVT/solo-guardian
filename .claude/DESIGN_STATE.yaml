@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.2.2"
+  version: "1.5.0"
   updated_at: "2026-01-15"
   updated_by: "A Session"
-  branch: "main"
+  branch: "feature/iter-006-emergency-contacts"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "User Web MVP Development"
+  milestone: "Emergency Contacts Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -154,11 +154,41 @@ modules:
         status: "pending"
         description: "Track consecutive check-in days (gamification)"
 
+  emergency_contacts:
+    status: "done"
+    owner: "B Session"
+    description: "Emergency contacts management - people to notify if user misses check-in"
+    started_iteration: "iter-006"
+    completed_iteration: "iter-006"
+    skeleton_created: true
+    skeleton_version: "0.1.0"
+    features:
+      - name: "Contact CRUD"
+        priority: "P0"
+        status: "done"
+        description: "Add, edit, delete emergency contacts"
+        completed_task: "TASK-015"
+      - name: "Contact List"
+        priority: "P0"
+        status: "done"
+        description: "View all emergency contacts"
+        completed_task: "TASK-015"
+      - name: "Contact Verification"
+        priority: "P1"
+        status: "pending"
+        description: "Verify contact email/phone before activation"
+      - name: "Contact Limit"
+        priority: "P0"
+        status: "done"
+        description: "Maximum 5 emergency contacts per user"
+        completed_task: "TASK-015"
+
   user_web:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "User-facing web application"
     started_iteration: "iter-005"
+    completed_iteration: "iter-006"
     features:
       - name: "Login/Register"
         priority: "P0"
@@ -166,25 +196,30 @@ modules:
         completed_task: "TASK-010"
       - name: "Check-in Dashboard"
         priority: "P0"
-        status: "in_review"
+        status: "done"
         completed_task: "TASK-011"
       - name: "Check-in Settings"
         priority: "P0"
-        status: "in_review"
+        status: "done"
         completed_task: "TASK-011"
       - name: "Check-in History"
         priority: "P0"
-        status: "in_review"
+        status: "done"
         completed_task: "TASK-011"
       - name: "Mobile Responsive"
         priority: "P0"
-        status: "in_review"
+        status: "done"
         completed_task: "TASK-011"
       - name: "Internationalization (i18n)"
         priority: "P0"
         status: "done"
         description: "Support for English, Chinese, Japanese"
         completed_task: "TASK-013"
+      - name: "Emergency Contacts Page"
+        priority: "P0"
+        status: "done"
+        description: "Manage emergency contacts in user-web"
+        completed_task: "TASK-016"
 
 # ============================================================
 # 3. API Design Constraints
@@ -252,69 +287,105 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-005"
-  goal: "Implement user-web frontend MVP"
+  id: "iter-006"
+  goal: "Implement emergency contacts module - core safety feature"
   started_at: "2026-01-15"
-  status: "in_progress"
+  completed_at: "2026-01-15"
+  status: "completed"
   tasks:
-    - id: "TASK-008"
-      title: "Frontend: User-web infrastructure setup"
+    - id: "TASK-014"
+      title: "Database: Add EmergencyContact model"
       status: "completed"
       priority: "P0"
-      handoff: "HO-008-user-web-infra.yaml"
-      description: "Vite + React + TypeScript + Tailwind + shadcn/ui"
-
-    - id: "TASK-009"
-      title: "Frontend: Shared API client package"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-009-api-client.yaml"
+      handoff: "HO-014-emergency-contact-db.yaml"
       depends_on: []
-      description: "TanStack Query + Axios API client"
-
-    - id: "TASK-010"
-      title: "Frontend: Auth pages (Login/Register)"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-010-auth-pages.yaml"
-      depends_on: ["TASK-008", "TASK-009"]
-      description: "Login, Register pages with Zustand auth store"
+      description: "Prisma schema for emergency contacts"
       review_verdict: "pass"
 
-    - id: "TASK-011"
-      title: "Frontend: Main pages (Dashboard/Settings/History)"
-      status: "in_review"
-      priority: "P0"
-      handoff: "HO-011-main-pages.yaml"
-      depends_on: ["TASK-010"]
-      description: "Check-in dashboard, settings, history pages"
-      review_verdict: "conditional_pass"
-      issues: ["ISS-012", "ISS-013", "ISS-014"]
-
-    - id: "TASK-013"
-      title: "Frontend: Internationalization (i18n) setup"
+    - id: "TASK-015"
+      title: "Backend: Emergency contacts module"
       status: "completed"
       priority: "P0"
-      handoff: "HO-013-i18n-setup.yaml"
-      depends_on: ["TASK-011"]
-      description: "Add i18n support for English, Chinese, Japanese"
-      languages: ["en", "zh", "ja"]
-      implementation_report: "IR-013-i18n-setup.yaml"
+      handoff: "HO-015-emergency-contacts-backend.yaml"
+      depends_on: ["TASK-014"]
+      description: "NestJS module with CRUD operations for emergency contacts"
       review_verdict: "pass"
 
-    - id: "TASK-012"
-      title: "Frontend: Fix return types and cleanup"
-      status: "pending"
+    - id: "TASK-016"
+      title: "Frontend: Emergency contacts page"
+      status: "completed"
       priority: "P0"
-      handoff: "HO-012-fix-return-types.yaml"
-      depends_on: ["TASK-013"]
-      description: "Fix constraint violations from TASK-011 review"
-      resolves: ["ISS-012", "ISS-013"]
+      handoff: "HO-016-emergency-contacts-frontend.yaml"
+      depends_on: ["TASK-015"]
+      description: "User-web page for managing emergency contacts"
+      review_verdict: "pass"
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-006"
+    goal: "Implement emergency contacts module - core safety feature"
+    started_at: "2026-01-15"
+    completed_at: "2026-01-15"
+    status: "completed"
+    summary: |
+      Emergency contacts module complete:
+      - EmergencyContact database model with soft delete
+      - Backend CRUD API with 6 endpoints
+      - Frontend contacts page with add/edit/delete
+      - i18n support (English, Chinese, Japanese)
+      - Max 5 contacts per user with priority ordering
+    tasks_completed:
+      - id: "TASK-014"
+        title: "Database: Add EmergencyContact model"
+        review_verdict: "pass"
+      - id: "TASK-015"
+        title: "Backend: Emergency contacts module"
+        review_verdict: "pass"
+      - id: "TASK-016"
+        title: "Frontend: Emergency contacts page"
+        review_verdict: "pass"
+    milestone: "Emergency Contacts Complete"
+
+  - id: "iter-005"
+    goal: "Implement user-web frontend MVP"
+    started_at: "2026-01-15"
+    completed_at: "2026-01-15"
+    status: "completed"
+    summary: |
+      User-web frontend MVP complete:
+      - Vite + React + TypeScript + Tailwind + shadcn/ui setup
+      - Shared API client package (@solo-guardian/api-client)
+      - Auth pages (Login/Register) with Zustand state
+      - Main pages (Dashboard/Settings/History)
+      - Mobile responsive design
+      - Internationalization (English, Chinese, Japanese)
+    tasks_completed:
+      - id: "TASK-008"
+        title: "Frontend: User-web infrastructure setup"
+        review_verdict: "pass"
+      - id: "TASK-009"
+        title: "Frontend: Shared API client package"
+        review_verdict: "pass"
+      - id: "TASK-010"
+        title: "Frontend: Auth pages (Login/Register)"
+        review_verdict: "pass"
+      - id: "TASK-011"
+        title: "Frontend: Main pages (Dashboard/Settings/History)"
+        review_verdict: "pass"
+      - id: "TASK-012"
+        title: "Frontend: Fix return types and cleanup"
+        review_verdict: "pass"
+        resolves: ["ISS-012", "ISS-013"]
+      - id: "TASK-013"
+        title: "Frontend: Internationalization (i18n) setup"
+        review_verdict: "pass"
+    issues_resolved:
+      - "ISS-012: Missing JSX.Element return types"
+      - "ISS-013: Leftover TODO(B) marker"
+    milestone: "User Web MVP Complete"
+
   - id: "iter-004"
     goal: "Add JWT Auth Guard to protect API endpoints"
     started_at: "2026-01-14"
@@ -492,10 +563,64 @@ decision_log:
       - "zh: Chinese Simplified"
       - "ja: Japanese"
 
+  - id: "ADR-010"
+    date: "2026-01-15"
+    decision: "Emergency contacts with priority ordering and 5-contact limit"
+    rationale: |
+      - Each user can have up to 5 emergency contacts
+      - Contacts have priority order (1-5) for notification sequence
+      - Contact types: email (MVP), phone/SMS (future)
+      - Contacts must be verified before activation (future)
+      - Soft delete to preserve notification history
+    schema:
+      fields:
+        - "id: UUID primary key"
+        - "userId: FK to User"
+        - "name: Contact's name"
+        - "email: Contact's email address"
+        - "phone: Optional phone number (future)"
+        - "priority: 1-5 ordering"
+        - "isVerified: Boolean (default false)"
+        - "isActive: Boolean (default true)"
+        - "createdAt, updatedAt, deletedAt"
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-006"
+    task: "TASK-016"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Emergency contacts frontend page with i18n support"
+
+  - iteration: "iter-006"
+    task: "TASK-015"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Backend CRUD module with 6 endpoints, soft delete, priority ordering"
+
+  - iteration: "iter-006"
+    task: "TASK-014"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "EmergencyContact model with soft delete and priority ordering"
+
+  - iteration: "iter-005"
+    task: "TASK-012"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    resolves: ["ISS-012", "ISS-013"]
+    notes: "Fixed return types and removed leftover TODO markers"
+
   - iteration: "iter-005"
     task: "TASK-013"
     reviewer: "C Session"
@@ -522,18 +647,18 @@ review_history:
         type: "constraint_violation"
         severity: "error"
         description: "Missing JSX.Element return types on 10 React components"
-        resolution: "Fix in TASK-012"
+        resolution: "Resolved in TASK-012"
       - id: "ISS-013"
         type: "todo_incomplete"
         severity: "warning"
         description: "Leftover TODO(B) marker in Header.tsx"
-        resolution: "Fix in TASK-012"
+        resolution: "Resolved in TASK-012"
       - id: "ISS-014"
         type: "consistency"
         severity: "suggestion"
         description: "Missing file headers with @task annotation"
         resolution: "Optional improvement"
-    notes: "Functionally complete, needs constraint fixes"
+    notes: "Functionally complete, constraint fixes resolved in TASK-012"
 
   - iteration: "iter-003"
     task: "TASK-005"

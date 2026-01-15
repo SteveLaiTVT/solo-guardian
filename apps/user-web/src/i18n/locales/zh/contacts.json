@@ -1,0 +1,38 @@
+{
+  "title": "紧急联系人",
+  "subtitle": "当您错过签到时会通知的人",
+  "addContact": "添加联系人",
+  "editContact": "编辑联系人",
+  "deleteContact": "删除联系人",
+  "addContactDescription": "添加一个在您错过签到时应该被通知的人",
+  "editContactDescription": "更新联系人信息",
+  "contactCount": "{{count}}/5 位联系人",
+  "maxContactsReached": "已达到5位联系人上限",
+  "emptyState": "暂无紧急联系人",
+  "emptyStateHint": "添加一个在您错过签到时应该被通知的人",
+  "inactive": "已停用",
+  "form": {
+    "name": "姓名",
+    "namePlaceholder": "联系人姓名",
+    "email": "邮箱",
+    "emailPlaceholder": "contact@example.com",
+    "phone": "电话（可选）",
+    "phonePlaceholder": "+86 123 4567 8900"
+  },
+  "deleteConfirm": "确定要将 {{name}} 从紧急联系人中移除吗？",
+  "errors": {
+    "nameRequired": "姓名不能为空",
+    "emailRequired": "邮箱不能为空",
+    "emailInvalid": "邮箱格式无效",
+    "duplicateEmail": "该邮箱已添加"
+  },
+  "error": {
+    "loadFailed": "加载联系人失败"
+  },
+  "success": {
+    "created": "联系人添加成功",
+    "updated": "联系人更新成功",
+    "deleted": "联系人已移除",
+    "reordered": "联系人顺序已更新"
+  }
+}

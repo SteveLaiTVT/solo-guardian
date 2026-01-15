@@ -1,16 +1,15 @@
 /**
  * @file Header.tsx
  * @description Application header with navigation
- * @task TASK-013
- * @design_state_version 1.2.2
+ * @task TASK-013, TASK-016
+ * @design_state_version 1.4.2
  */
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { User } from "lucide-react"
+import { User, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher"
 
-// DONE(B): Added i18n support and LanguageSwitcher - TASK-013
 export function Header(): JSX.Element {
   const { t } = useTranslation('common');
 
@@ -22,6 +21,12 @@ export function Header(): JSX.Element {
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <LanguageSwitcher />
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/contacts">
+              <Users className="h-5 w-5" />
+              <span className="sr-only">{t('nav.contacts')}</span>
+            </Link>
+          </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link to="/settings">
               <User className="h-5 w-5" />
