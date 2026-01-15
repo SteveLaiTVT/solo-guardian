@@ -1,0 +1,129 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-018 - Backend Error Handling
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-018"
+task_id: "TASK-018"
+design_state_version: "1.6.0"
+report_type: "implementation"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented backend error handling infrastructure with BusinessException
+  and GlobalExceptionFilter for consistent, i18n-ready error responses.
+
+# ============================================================
+# Files Modified/Created
+# ============================================================
+files:
+  - path: "apps/backend/src/common/exceptions/business.exception.ts"
+    status: "implemented"
+    description: "BusinessException class extending HttpException"
+
+  - path: "apps/backend/src/common/filters/global-exception.filter.ts"
+    status: "implemented"
+    description: "Global exception filter catching all exceptions"
+
+  - path: "apps/backend/src/common/exceptions/index.ts"
+    status: "implemented"
+    description: "Export BusinessException"
+
+  - path: "apps/backend/src/common/filters/index.ts"
+    status: "implemented"
+    description: "Export GlobalExceptionFilter"
+
+  - path: "apps/backend/src/main.ts"
+    status: "modified"
+    description: "Registered GlobalExceptionFilter globally"
+
+  - path: "apps/backend/package.json"
+    status: "modified"
+    description: "Added @solo-guardian/types as workspace dependency"
+
+# ============================================================
+# Implementation Details
+# ============================================================
+implementation:
+  business_exception:
+    class: "BusinessException"
+    extends: "HttpException"
+    constructor:
+      - param: "errorCodeKey: ErrorCodeKey"
+      - param: "options?: { details?, field?, message? }"
+    properties:
+      - "errorCode: string"
+      - "category: ErrorCategory"
+      - "i18nKey: string"
+      - "details?: Record<string, unknown>"
+      - "field?: string"
+
+  global_exception_filter:
+    class: "GlobalExceptionFilter"
+    implements: "ExceptionFilter"
+    handles:
+      - type: "BusinessException"
+        action: "Return pre-formatted response"
+      - type: "HttpException"
+        action: "Map to error code by status"
+      - type: "unknown"
+        action: "Return SYSTEM_INTERNAL_ERROR, log stack"
+    logging:
+      - "status >= 500 → error level with stack"
+      - "status < 500 → warn level"
+
+  main_registration: |
+    app.useGlobalFilters(new GlobalExceptionFilter());
+
+# ============================================================
+# Acceptance Criteria Verification
+# ============================================================
+acceptance_criteria:
+  - criteria: "BusinessException class throws errors with error code key"
+    status: "pass"
+
+  - criteria: "GlobalExceptionFilter catches all exceptions"
+    status: "pass"
+
+  - criteria: "Error responses match ApiErrorResponse interface"
+    status: "pass"
+
+  - criteria: "System errors (500) are logged with stack trace"
+    status: "pass"
+
+  - criteria: "User errors (4xx) are logged at warn level"
+    status: "pass"
+
+  - criteria: "Filter registered globally in main.ts"
+    status: "pass"
+
+  - criteria: "Existing services can use BusinessException"
+    status: "pass"
+
+# ============================================================
+# Verification Results
+# ============================================================
+verification:
+  typescript_build:
+    status: "pass"
+    command: "pnpm run build"
+
+  constraints:
+    no_any_type: "pass"
+    uses_nestjs_logger: "pass"
+    functions_under_50_lines: "pass"
+    imports_from_types_package: "pass"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion: |
+  TASK-018 implementation complete. Backend now has consistent error
+  handling infrastructure that integrates with @solo-guardian/types.
+
+  Ready for C Session review.
