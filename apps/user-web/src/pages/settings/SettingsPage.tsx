@@ -1,4 +1,11 @@
-import { useEffect, useState } from 'react'
+/**
+ * @file SettingsPage.tsx
+ * @description Settings page for check-in preferences and account
+ * @task TASK-013
+ * @design_state_version 1.2.2
+ */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { hooks } from '@/lib/api'
@@ -8,33 +15,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TimePicker } from '@/components/ui/TimePicker'
 import { Label } from '@/components/ui/label'
 
-export function SettingsPage() {
+// DONE(B): Added i18n support - TASK-013
+export function SettingsPage(): JSX.Element {
+  const { t } = useTranslation('settings')
+  const { t: tCommon } = useTranslation('common')
+  const { t: tAuth } = useTranslation('auth')
   const navigate = useNavigate()
   const clearTokens = useAuthStore((s) => s.clearTokens)
   const { data: settings, isLoading, error } = hooks.useSettings()
   const updateMutation = hooks.useUpdateSettings()
 
-  const [deadline, setDeadline] = useState('10:00')
-  const [reminderTime, setReminderTime] = useState('09:00')
-  const [reminderEnabled, setReminderEnabled] = useState(true)
+  // Local state for pending edits (null = use server value)
+  const [localDeadline, setLocalDeadline] = useState<string | null>(null)
+  const [localReminderTime, setLocalReminderTime] = useState<string | null>(null)
+  const [localReminderEnabled, setLocalReminderEnabled] = useState<boolean | null>(null)
 
-  useEffect(() => {
-    if (settings) {
-      setDeadline(settings.deadlineTime)
-      setReminderTime(settings.reminderTime)
-      setReminderEnabled(settings.reminderEnabled)
-    }
-  }, [settings])
+  // Derive values: use local edits if present, otherwise server values
+  const deadline = localDeadline ?? settings?.deadlineTime ?? '10:00'
+  const reminderTime = localReminderTime ?? settings?.reminderTime ?? '09:00'
+  const reminderEnabled = localReminderEnabled ?? settings?.reminderEnabled ?? true
 
-  const handleSave = () => {
-    updateMutation.mutate({
-      deadlineTime: deadline,
-      reminderTime: reminderTime,
-      reminderEnabled: reminderEnabled,
-    })
+  const handleSave = (): void => {
+    updateMutation.mutate(
+      {
+        deadlineTime: deadline,
+        reminderTime: reminderTime,
+        reminderEnabled: reminderEnabled,
+      },
+      {
+        onSuccess: () => {
+          // Reset local state after successful save
+          setLocalDeadline(null)
+          setLocalReminderTime(null)
+          setLocalReminderEnabled(null)
+        },
+      }
+    )
   }
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     clearTokens()
     navigate('/login')
   }
@@ -56,34 +75,34 @@ export function SettingsPage() {
   if (error) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-4">
-        <p className="text-red-500">Failed to load settings</p>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <p className="text-red-500">{t('error.loadFailed')}</p>
+        <Button onClick={() => window.location.reload()}>{tCommon('retry')}</Button>
       </div>
     )
   }
 
   return (
     <div className="space-y-6 px-4 py-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Check-in Settings</CardTitle>
-          <CardDescription>Configure your daily check-in preferences</CardDescription>
+          <CardTitle>{t('checkIn.title')}</CardTitle>
+          <CardDescription>{t('checkIn.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <TimePicker
             id="deadline"
-            label="Daily Deadline"
+            label={t('checkIn.deadline')}
             value={deadline}
-            onChange={setDeadline}
+            onChange={setLocalDeadline}
           />
 
           <TimePicker
             id="reminder"
-            label="Reminder Time"
+            label={t('checkIn.reminder')}
             value={reminderTime}
-            onChange={setReminderTime}
+            onChange={setLocalReminderTime}
           />
 
           <div className="flex items-center space-x-2">
@@ -91,10 +110,10 @@ export function SettingsPage() {
               type="checkbox"
               id="reminderEnabled"
               checked={reminderEnabled}
-              onChange={(e) => setReminderEnabled(e.target.checked)}
+              onChange={(e) => setLocalReminderEnabled(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300"
             />
-            <Label htmlFor="reminderEnabled">Enable daily reminders</Label>
+            <Label htmlFor="reminderEnabled">{t('checkIn.enableReminder')}</Label>
           </div>
 
           {hasChanges && (
@@ -103,27 +122,27 @@ export function SettingsPage() {
               disabled={updateMutation.isPending}
               className="w-full"
             >
-              {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+              {updateMutation.isPending ? tCommon('saving') : tCommon('save')}
             </Button>
           )}
 
           {updateMutation.isSuccess && !hasChanges && (
-            <p className="text-center text-sm text-green-600">Settings saved!</p>
+            <p className="text-center text-sm text-green-600">{t('success')}</p>
           )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>Manage your account settings</CardDescription>
+          <CardTitle>{t('account.title')}</CardTitle>
+          <CardDescription>{t('account.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-muted-foreground">
-            Signed in
+            {tAuth('signedIn')}
           </div>
           <Button variant="destructive" onClick={handleLogout}>
-            Sign out
+            {tAuth('signOut')}
           </Button>
         </CardContent>
       </Card>

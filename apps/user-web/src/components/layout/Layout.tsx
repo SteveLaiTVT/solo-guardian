@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom"
 import { Header } from "./Header"
 import { MobileNav } from "./MobileNav"
 
-export function Layout() {
+export function Layout(): JSX.Element {
   return (
     <div className="relative min-h-screen flex flex-col">
       <Header />

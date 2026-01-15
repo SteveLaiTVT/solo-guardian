@@ -1,3 +1,10 @@
+/**
+ * @file CheckInButton.tsx
+ * @description Large circular check-in button component
+ * @task TASK-013
+ * @design_state_version 1.2.2
+ */
+import { useTranslation } from 'react-i18next'
 import { Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -7,7 +14,9 @@ interface CheckInButtonProps {
   isLoading: boolean
 }
 
-export function CheckInButton({ status, onCheckIn, isLoading }: CheckInButtonProps) {
+// DONE(B): Added i18n support - TASK-013
+export function CheckInButton({ status, onCheckIn, isLoading }: CheckInButtonProps): JSX.Element {
+  const { t } = useTranslation('dashboard')
   const isDisabled = status === 'completed' || isLoading
 
   return (
@@ -30,7 +39,7 @@ export function CheckInButton({ status, onCheckIn, isLoading }: CheckInButtonPro
         <Check className="h-16 w-16" />
       ) : (
         <span className="text-xl font-semibold md:text-2xl">
-          {status === 'overdue' ? 'Check In Now!' : 'Check In'}
+          {status === 'overdue' ? t('button.checkInNow') : t('button.checkIn')}
         </span>
       )}
     </button>

@@ -7,7 +7,7 @@ interface TimePickerProps {
   id: string
 }
 
-export function TimePicker({ value, onChange, label, id }: TimePickerProps) {
+export function TimePicker({ value, onChange, label, id }: TimePickerProps): JSX.Element {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>

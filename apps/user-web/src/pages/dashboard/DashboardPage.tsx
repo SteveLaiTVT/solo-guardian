@@ -1,25 +1,37 @@
+/**
+ * @file DashboardPage.tsx
+ * @description Main dashboard with check-in functionality
+ * @task TASK-013
+ * @design_state_version 1.2.2
+ */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { hooks } from '@/lib/api'
 import { CheckInButton, StatusCard } from '@/components/check-in'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-function getGreeting(): string {
+// DONE(B): Added i18n support - TASK-013
+function useGreeting(): string {
+  const { t } = useTranslation('common')
   const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning!'
-  if (hour < 18) return 'Good afternoon!'
-  return 'Good evening!'
+  if (hour < 12) return t('greeting.morning')
+  if (hour < 18) return t('greeting.afternoon')
+  return t('greeting.evening')
 }
 
-export function DashboardPage() {
+export function DashboardPage(): JSX.Element {
+  const { t } = useTranslation('dashboard')
+  const { t: tCommon } = useTranslation('common')
+  const greeting = useGreeting()
   const [note, setNote] = useState('')
   const [showNoteInput, setShowNoteInput] = useState(false)
 
   const { data: todayStatus, isLoading, error } = hooks.useCheckInToday()
   const checkInMutation = hooks.useCreateCheckIn()
 
-  const handleCheckIn = () => {
+  const handleCheckIn = (): void => {
     checkInMutation.mutate(note ? { note } : undefined, {
       onSuccess: () => {
         setNote('')
@@ -39,8 +51,8 @@ export function DashboardPage() {
   if (error || !todayStatus) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-4">
-        <p className="text-red-500">Failed to load status</p>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <p className="text-red-500">{t('error.loadFailed')}</p>
+        <Button onClick={() => window.location.reload()}>{tCommon('retry')}</Button>
       </div>
     )
   }
@@ -53,11 +65,11 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col items-center space-y-8 px-4 py-8">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">{getGreeting()}</h1>
+        <h1 className="text-3xl font-bold">{greeting}</h1>
         <p className="text-muted-foreground">
           {todayStatus.hasCheckedIn
-            ? "You've already checked in today"
-            : 'Tap the button below to check in'}
+            ? t('status.alreadyCheckedIn')
+            : t('status.tapToCheckIn')}
         </p>
       </div>
 
@@ -74,7 +86,7 @@ export function DashboardPage() {
           {showNoteInput ? (
             <div className="space-y-2">
               <Input
-                placeholder="Add a note (optional)"
+                placeholder={t('note.placeholder')}
                 value={note}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNote(e.target.value)}
               />
@@ -84,7 +96,7 @@ export function DashboardPage() {
                 onClick={() => setShowNoteInput(false)}
                 className="w-full"
               >
-                Cancel
+                {tCommon('cancel')}
               </Button>
             </div>
           ) : (
@@ -94,7 +106,7 @@ export function DashboardPage() {
               onClick={() => setShowNoteInput(true)}
               className="w-full"
             >
-              + Add a note
+              {t('note.addNote')}
             </Button>
           )}
         </div>

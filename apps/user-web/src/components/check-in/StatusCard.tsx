@@ -1,4 +1,11 @@
+/**
+ * @file StatusCard.tsx
+ * @description Status card showing check-in status and deadline
+ * @task TASK-013
+ * @design_state_version 1.2.2
+ */
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { TodayStatus } from '@solo-guardian/api-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -14,7 +21,13 @@ function formatTime(time: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
 }
 
-function getTimeRemaining(deadlineTime: string): { text: string; isOverdue: boolean } {
+interface TimeInfo {
+  hours: number
+  minutes: number
+  isOverdue: boolean
+}
+
+function getTimeRemaining(deadlineTime: string): TimeInfo {
   const now = new Date()
   const [deadlineHours, deadlineMinutes] = deadlineTime.split(':').map(Number)
   const deadline = new Date()
@@ -27,19 +40,12 @@ function getTimeRemaining(deadlineTime: string): { text: string; isOverdue: bool
   const hours = Math.floor(absDiff / (1000 * 60 * 60))
   const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60))
 
-  if (hours > 0) {
-    return {
-      text: `${hours}h ${minutes}m ${isOverdue ? 'overdue' : 'remaining'}`,
-      isOverdue,
-    }
-  }
-  return {
-    text: `${minutes}m ${isOverdue ? 'overdue' : 'remaining'}`,
-    isOverdue,
-  }
+  return { hours, minutes, isOverdue }
 }
 
-export function StatusCard({ status }: StatusCardProps) {
+// DONE(B): Added i18n support - TASK-013
+export function StatusCard({ status }: StatusCardProps): JSX.Element {
+  const { t } = useTranslation('dashboard')
   const [timeInfo, setTimeInfo] = useState(() => getTimeRemaining(status.deadlineTime))
 
   useEffect(() => {
@@ -50,13 +56,25 @@ export function StatusCard({ status }: StatusCardProps) {
     return () => clearInterval(interval)
   }, [status.deadlineTime])
 
+  const getTimeText = (): string => {
+    const { hours, minutes, isOverdue } = timeInfo
+    if (hours > 0) {
+      return isOverdue
+        ? t('time.hoursMinutesOverdue', { hours, minutes })
+        : t('time.hoursMinutesRemaining', { hours, minutes })
+    }
+    return isOverdue
+      ? t('time.minutesOverdue', { minutes })
+      : t('time.minutesRemaining', { minutes })
+  }
+
   if (status.hasCheckedIn && status.checkIn) {
     return (
       <Card>
         <CardContent className="pt-6 text-center">
-          <p className="text-lg font-medium text-green-600">You&apos;re safe today!</p>
+          <p className="text-lg font-medium text-green-600">{t('status.safe')}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Checked in at {new Date(status.checkIn.checkedInAt).toLocaleTimeString()}
+            {t('status.checkedInAt', { time: new Date(status.checkIn.checkedInAt).toLocaleTimeString() })}
           </p>
           {status.checkIn.note && (
             <p className="mt-2 text-sm italic text-muted-foreground">
@@ -72,7 +90,7 @@ export function StatusCard({ status }: StatusCardProps) {
     <Card>
       <CardContent className="pt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Deadline: {formatTime(status.deadlineTime)}
+          {t('status.deadline', { time: formatTime(status.deadlineTime) })}
         </p>
         <p
           className={cn(
@@ -80,7 +98,7 @@ export function StatusCard({ status }: StatusCardProps) {
             timeInfo.isOverdue ? 'text-red-500' : 'text-slate-700'
           )}
         >
-          {timeInfo.text}
+          {getTimeText()}
         </p>
       </CardContent>
     </Card>
