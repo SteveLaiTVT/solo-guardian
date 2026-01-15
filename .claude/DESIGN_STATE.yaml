@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "1.4.0"
+  version: "1.4.1"
   updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "feature/iter-006-emergency-contacts"
@@ -159,7 +159,8 @@ modules:
     owner: "B Session"
     description: "Emergency contacts management - people to notify if user misses check-in"
     started_iteration: "iter-006"
-    skeleton_created: false
+    skeleton_created: true
+    skeleton_version: "0.1.0"
     features:
       - name: "Contact CRUD"
         priority: "P0"
@@ -288,7 +289,7 @@ current_iteration:
   tasks:
     - id: "TASK-014"
       title: "Database: Add EmergencyContact model"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-014-emergency-contact-db.yaml"
       depends_on: []
@@ -296,7 +297,7 @@ current_iteration:
 
     - id: "TASK-015"
       title: "Backend: Emergency contacts module"
-      status: "pending"
+      status: "in_progress"
       priority: "P0"
       handoff: "HO-015-emergency-contacts-backend.yaml"
       depends_on: ["TASK-014"]
