@@ -1,0 +1,714 @@
+# ============================================================
+# TASK HANDOFF: HO-013 - Internationalization (i18n) Setup
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-013"
+design_state_version: "1.2.2"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: "Add internationalization support to user-web (English, Chinese, Japanese)"
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  The user-web app needs to support multiple languages:
+  - English (en) - Default
+  - Chinese Simplified (zh)
+  - Japanese (ja)
+
+  This task sets up the i18n infrastructure and translates all
+  existing hardcoded text in the application.
+
+# ============================================================
+# Architecture Decision
+# ============================================================
+architecture:
+  library: "react-i18next"
+  rationale: |
+    - Most popular i18n solution for React
+    - Excellent TypeScript support
+    - Namespace support for organized translations
+    - Language detection and persistence
+    - Interpolation support for dynamic values
+
+  structure: |
+    apps/user-web/src/
+    ├── i18n/
+    │   ├── index.ts              # i18n configuration
+    │   └── locales/
+    │       ├── en/
+    │       │   ├── common.json   # Shared strings
+    │       │   ├── auth.json     # Login/Register
+    │       │   ├── dashboard.json # Dashboard page
+    │       │   ├── settings.json  # Settings page
+    │       │   └── history.json   # History page
+    │       ├── zh/
+    │       │   └── (same structure)
+    │       └── ja/
+    │           └── (same structure)
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-013-1"
+    title: "Install i18n dependencies"
+    priority: "P0"
+    commands:
+      - "cd apps/user-web && npm install i18next react-i18next i18next-browser-languagedetector"
+
+  - id: "TASK-013-2"
+    title: "Create i18n configuration"
+    priority: "P0"
+    file: "apps/user-web/src/i18n/index.ts"
+    skeleton: |
+      /**
+       * @file i18n configuration
+       * @description Internationalization setup with react-i18next
+       * @task TASK-013
+       * @design_state_version 1.2.2
+       */
+      import i18n from 'i18next';
+      import { initReactI18next } from 'react-i18next';
+      import LanguageDetector from 'i18next-browser-languagedetector';
+
+      // TODO(B): Import all translation files
+      // Import format: import enCommon from './locales/en/common.json';
+
+      // TODO(B): Define resources object with all namespaces
+      // Structure:
+      // const resources = {
+      //   en: { common: enCommon, auth: enAuth, ... },
+      //   zh: { common: zhCommon, auth: zhAuth, ... },
+      //   ja: { common: jaCommon, auth: jaAuth, ... },
+      // };
+
+      i18n
+        .use(LanguageDetector)
+        .use(initReactI18next)
+        .init({
+          // TODO(B): Configure i18n
+          // Requirements:
+          // - resources: the resources object
+          // - fallbackLng: 'en'
+          // - defaultNS: 'common'
+          // - ns: ['common', 'auth', 'dashboard', 'settings', 'history']
+          // - interpolation: { escapeValue: false }
+          // - detection: { order: ['localStorage', 'navigator'], caches: ['localStorage'] }
+        });
+
+      export default i18n;
+
+  - id: "TASK-013-3"
+    title: "Create English translation files"
+    priority: "P0"
+    files:
+      - path: "apps/user-web/src/i18n/locales/en/common.json"
+        content: |
+          {
+            "appName": "Solo Guardian",
+            "loading": "Loading...",
+            "error": "An error occurred",
+            "retry": "Retry",
+            "cancel": "Cancel",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "nav": {
+              "home": "Home",
+              "history": "History",
+              "settings": "Settings"
+            },
+            "greeting": {
+              "morning": "Good morning!",
+              "afternoon": "Good afternoon!",
+              "evening": "Good evening!"
+            },
+            "time": {
+              "today": "Today",
+              "yesterday": "Yesterday"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/en/auth.json"
+        content: |
+          {
+            "login": {
+              "title": "Welcome back",
+              "subtitle": "Sign in to your account to continue",
+              "button": "Sign in",
+              "loading": "Signing in...",
+              "noAccount": "Don't have an account?",
+              "signUp": "Sign up",
+              "failed": "Login failed"
+            },
+            "register": {
+              "title": "Create an account",
+              "subtitle": "Enter your details to get started",
+              "button": "Create account",
+              "loading": "Creating account...",
+              "hasAccount": "Already have an account?",
+              "signIn": "Sign in",
+              "failed": "Registration failed"
+            },
+            "fields": {
+              "email": "Email",
+              "emailPlaceholder": "you@example.com",
+              "password": "Password",
+              "passwordPlaceholder": "••••••••",
+              "name": "Name",
+              "namePlaceholder": "Your name",
+              "confirmPassword": "Confirm Password"
+            },
+            "validation": {
+              "emailInvalid": "Please enter a valid email",
+              "passwordRequired": "Password is required",
+              "passwordMinLength": "Password must be at least 8 characters",
+              "confirmRequired": "Please confirm your password",
+              "passwordMismatch": "Passwords do not match",
+              "nameRequired": "Name is required"
+            },
+            "signOut": "Sign out",
+            "signedIn": "Signed in"
+          }
+
+      - path: "apps/user-web/src/i18n/locales/en/dashboard.json"
+        content: |
+          {
+            "status": {
+              "safe": "You're safe today!",
+              "checkedInAt": "Checked in at {{time}}",
+              "deadline": "Deadline: {{time}}",
+              "alreadyCheckedIn": "You've already checked in today",
+              "tapToCheckIn": "Tap the button below to check in"
+            },
+            "button": {
+              "checkIn": "Check In",
+              "checkInNow": "Check In Now!",
+              "checkingIn": "Checking in..."
+            },
+            "time": {
+              "hoursMinutesOverdue": "{{hours}}h {{minutes}}m overdue",
+              "hoursMinutesRemaining": "{{hours}}h {{minutes}}m remaining",
+              "minutesOverdue": "{{minutes}}m overdue",
+              "minutesRemaining": "{{minutes}}m remaining"
+            },
+            "note": {
+              "placeholder": "Add a note (optional)",
+              "addNote": "+ Add a note"
+            },
+            "error": {
+              "loadFailed": "Failed to load status"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/en/settings.json"
+        content: |
+          {
+            "title": "Settings",
+            "checkIn": {
+              "title": "Check-in Settings",
+              "description": "Configure your daily check-in preferences",
+              "deadline": "Daily Deadline",
+              "reminder": "Reminder Time",
+              "enableReminder": "Enable daily reminders"
+            },
+            "account": {
+              "title": "Account",
+              "description": "Manage your account settings"
+            },
+            "success": "Settings saved!",
+            "error": {
+              "loadFailed": "Failed to load settings"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/en/history.json"
+        content: |
+          {
+            "title": "Check-in History",
+            "empty": {
+              "title": "No check-ins yet",
+              "description": "Your check-in history will appear here"
+            },
+            "pagination": {
+              "previous": "Previous",
+              "next": "Next",
+              "page": "Page {{page}} of {{total}}"
+            },
+            "error": {
+              "loadFailed": "Failed to load history"
+            }
+          }
+
+  - id: "TASK-013-4"
+    title: "Create Chinese translation files"
+    priority: "P0"
+    files:
+      - path: "apps/user-web/src/i18n/locales/zh/common.json"
+        content: |
+          {
+            "appName": "独居守护",
+            "loading": "加载中...",
+            "error": "发生错误",
+            "retry": "重试",
+            "cancel": "取消",
+            "save": "保存更改",
+            "saving": "保存中...",
+            "nav": {
+              "home": "首页",
+              "history": "历史",
+              "settings": "设置"
+            },
+            "greeting": {
+              "morning": "早上好！",
+              "afternoon": "下午好！",
+              "evening": "晚上好！"
+            },
+            "time": {
+              "today": "今天",
+              "yesterday": "昨天"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/zh/auth.json"
+        content: |
+          {
+            "login": {
+              "title": "欢迎回来",
+              "subtitle": "登录您的账户以继续",
+              "button": "登录",
+              "loading": "登录中...",
+              "noAccount": "还没有账户？",
+              "signUp": "注册",
+              "failed": "登录失败"
+            },
+            "register": {
+              "title": "创建账户",
+              "subtitle": "输入您的信息开始使用",
+              "button": "创建账户",
+              "loading": "创建中...",
+              "hasAccount": "已有账户？",
+              "signIn": "登录",
+              "failed": "注册失败"
+            },
+            "fields": {
+              "email": "邮箱",
+              "emailPlaceholder": "you@example.com",
+              "password": "密码",
+              "passwordPlaceholder": "••••••••",
+              "name": "姓名",
+              "namePlaceholder": "您的姓名",
+              "confirmPassword": "确认密码"
+            },
+            "validation": {
+              "emailInvalid": "请输入有效的邮箱地址",
+              "passwordRequired": "请输入密码",
+              "passwordMinLength": "密码至少需要8个字符",
+              "confirmRequired": "请确认您的密码",
+              "passwordMismatch": "两次输入的密码不一致",
+              "nameRequired": "请输入姓名"
+            },
+            "signOut": "退出登录",
+            "signedIn": "已登录"
+          }
+
+      - path: "apps/user-web/src/i18n/locales/zh/dashboard.json"
+        content: |
+          {
+            "status": {
+              "safe": "今天已安全签到！",
+              "checkedInAt": "签到时间：{{time}}",
+              "deadline": "截止时间：{{time}}",
+              "alreadyCheckedIn": "您今天已经签到了",
+              "tapToCheckIn": "点击下方按钮进行签到"
+            },
+            "button": {
+              "checkIn": "签到",
+              "checkInNow": "立即签到！",
+              "checkingIn": "签到中..."
+            },
+            "time": {
+              "hoursMinutesOverdue": "已超时 {{hours}}小时{{minutes}}分钟",
+              "hoursMinutesRemaining": "剩余 {{hours}}小时{{minutes}}分钟",
+              "minutesOverdue": "已超时 {{minutes}}分钟",
+              "minutesRemaining": "剩余 {{minutes}}分钟"
+            },
+            "note": {
+              "placeholder": "添加备注（可选）",
+              "addNote": "+ 添加备注"
+            },
+            "error": {
+              "loadFailed": "加载状态失败"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/zh/settings.json"
+        content: |
+          {
+            "title": "设置",
+            "checkIn": {
+              "title": "签到设置",
+              "description": "配置您的每日签到偏好",
+              "deadline": "每日截止时间",
+              "reminder": "提醒时间",
+              "enableReminder": "启用每日提醒"
+            },
+            "account": {
+              "title": "账户",
+              "description": "管理您的账户设置"
+            },
+            "success": "设置已保存！",
+            "error": {
+              "loadFailed": "加载设置失败"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/zh/history.json"
+        content: |
+          {
+            "title": "签到历史",
+            "empty": {
+              "title": "暂无签到记录",
+              "description": "您的签到历史将显示在这里"
+            },
+            "pagination": {
+              "previous": "上一页",
+              "next": "下一页",
+              "page": "第 {{page}} 页，共 {{total}} 页"
+            },
+            "error": {
+              "loadFailed": "加载历史失败"
+            }
+          }
+
+  - id: "TASK-013-5"
+    title: "Create Japanese translation files"
+    priority: "P0"
+    files:
+      - path: "apps/user-web/src/i18n/locales/ja/common.json"
+        content: |
+          {
+            "appName": "ソロガーディアン",
+            "loading": "読み込み中...",
+            "error": "エラーが発生しました",
+            "retry": "再試行",
+            "cancel": "キャンセル",
+            "save": "変更を保存",
+            "saving": "保存中...",
+            "nav": {
+              "home": "ホーム",
+              "history": "履歴",
+              "settings": "設定"
+            },
+            "greeting": {
+              "morning": "おはようございます！",
+              "afternoon": "こんにちは！",
+              "evening": "こんばんは！"
+            },
+            "time": {
+              "today": "今日",
+              "yesterday": "昨日"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/ja/auth.json"
+        content: |
+          {
+            "login": {
+              "title": "おかえりなさい",
+              "subtitle": "アカウントにログインしてください",
+              "button": "ログイン",
+              "loading": "ログイン中...",
+              "noAccount": "アカウントをお持ちでないですか？",
+              "signUp": "新規登録",
+              "failed": "ログインに失敗しました"
+            },
+            "register": {
+              "title": "アカウント作成",
+              "subtitle": "情報を入力して始めましょう",
+              "button": "アカウント作成",
+              "loading": "作成中...",
+              "hasAccount": "すでにアカウントをお持ちですか？",
+              "signIn": "ログイン",
+              "failed": "登録に失敗しました"
+            },
+            "fields": {
+              "email": "メールアドレス",
+              "emailPlaceholder": "you@example.com",
+              "password": "パスワード",
+              "passwordPlaceholder": "••••••••",
+              "name": "お名前",
+              "namePlaceholder": "お名前を入力",
+              "confirmPassword": "パスワード確認"
+            },
+            "validation": {
+              "emailInvalid": "有効なメールアドレスを入力してください",
+              "passwordRequired": "パスワードを入力してください",
+              "passwordMinLength": "パスワードは8文字以上必要です",
+              "confirmRequired": "パスワードを確認してください",
+              "passwordMismatch": "パスワードが一致しません",
+              "nameRequired": "お名前を入力してください"
+            },
+            "signOut": "ログアウト",
+            "signedIn": "ログイン中"
+          }
+
+      - path: "apps/user-web/src/i18n/locales/ja/dashboard.json"
+        content: |
+          {
+            "status": {
+              "safe": "今日は安全です！",
+              "checkedInAt": "チェックイン時刻：{{time}}",
+              "deadline": "締め切り：{{time}}",
+              "alreadyCheckedIn": "今日はすでにチェックイン済みです",
+              "tapToCheckIn": "下のボタンをタップしてチェックイン"
+            },
+            "button": {
+              "checkIn": "チェックイン",
+              "checkInNow": "今すぐチェックイン！",
+              "checkingIn": "チェックイン中..."
+            },
+            "time": {
+              "hoursMinutesOverdue": "{{hours}}時間{{minutes}}分 超過",
+              "hoursMinutesRemaining": "残り {{hours}}時間{{minutes}}分",
+              "minutesOverdue": "{{minutes}}分 超過",
+              "minutesRemaining": "残り {{minutes}}分"
+            },
+            "note": {
+              "placeholder": "メモを追加（任意）",
+              "addNote": "+ メモを追加"
+            },
+            "error": {
+              "loadFailed": "ステータスの読み込みに失敗しました"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/ja/settings.json"
+        content: |
+          {
+            "title": "設定",
+            "checkIn": {
+              "title": "チェックイン設定",
+              "description": "毎日のチェックイン設定を構成します",
+              "deadline": "毎日の締め切り時刻",
+              "reminder": "リマインダー時刻",
+              "enableReminder": "毎日のリマインダーを有効にする"
+            },
+            "account": {
+              "title": "アカウント",
+              "description": "アカウント設定を管理します"
+            },
+            "success": "設定を保存しました！",
+            "error": {
+              "loadFailed": "設定の読み込みに失敗しました"
+            }
+          }
+
+      - path: "apps/user-web/src/i18n/locales/ja/history.json"
+        content: |
+          {
+            "title": "チェックイン履歴",
+            "empty": {
+              "title": "チェックイン記録がありません",
+              "description": "チェックイン履歴がここに表示されます"
+            },
+            "pagination": {
+              "previous": "前へ",
+              "next": "次へ",
+              "page": "{{page}} / {{total}} ページ"
+            },
+            "error": {
+              "loadFailed": "履歴の読み込みに失敗しました"
+            }
+          }
+
+  - id: "TASK-013-6"
+    title: "Initialize i18n in main.tsx"
+    priority: "P0"
+    file: "apps/user-web/src/main.tsx"
+    instruction: |
+      Add import for i18n configuration at the top of main.tsx:
+
+      import './i18n';
+
+      This must be imported BEFORE App component.
+
+  - id: "TASK-013-7"
+    title: "Create LanguageSwitcher component"
+    priority: "P0"
+    file: "apps/user-web/src/components/ui/LanguageSwitcher.tsx"
+    skeleton: |
+      /**
+       * @file LanguageSwitcher.tsx
+       * @description Language selection dropdown component
+       * @task TASK-013
+       * @design_state_version 1.2.2
+       */
+      import { useTranslation } from 'react-i18next';
+      import {
+        Select,
+        SelectContent,
+        SelectItem,
+        SelectTrigger,
+        SelectValue,
+      } from '@/components/ui/select';
+
+      const languages = [
+        { code: 'en', name: 'English', flag: '🇺🇸' },
+        { code: 'zh', name: '中文', flag: '🇨🇳' },
+        { code: 'ja', name: '日本語', flag: '🇯🇵' },
+      ];
+
+      /**
+       * TODO(B): Implement LanguageSwitcher component
+       *
+       * Requirements:
+       * - Show current language in SelectTrigger
+       * - Display all languages in dropdown with flag + name
+       * - On select, call i18n.changeLanguage(code)
+       * - Language persists in localStorage (handled by i18n config)
+       *
+       * Acceptance:
+       * - Dropdown shows current language
+       * - Selecting language changes UI immediately
+       * - Language persists after page refresh
+       *
+       * Constraints:
+       * - Must have explicit return type JSX.Element
+       * - Use shadcn/ui Select component
+       */
+      export function LanguageSwitcher(): JSX.Element {
+        // TODO(B): Implement
+        throw new Error('Not implemented - TODO(B)');
+      }
+
+  - id: "TASK-013-8"
+    title: "Add LanguageSwitcher to Header"
+    priority: "P0"
+    file: "apps/user-web/src/components/layout/Header.tsx"
+    instruction: |
+      Add LanguageSwitcher component to the Header, positioned between
+      the app title and the settings icon.
+
+  - id: "TASK-013-9"
+    title: "Update all components to use translations"
+    priority: "P0"
+    description: |
+      Replace all hardcoded strings with useTranslation hook calls.
+
+    pattern: |
+      // Before:
+      <h1>Welcome back</h1>
+
+      // After:
+      import { useTranslation } from 'react-i18next';
+
+      function Component(): JSX.Element {
+        const { t } = useTranslation('auth');
+        return <h1>{t('login.title')}</h1>;
+      }
+
+      // For interpolation:
+      // Before: `Checked in at ${time}`
+      // After: t('status.checkedInAt', { time })
+
+    files_to_update:
+      - path: "apps/user-web/src/pages/auth/LoginPage.tsx"
+        namespace: "auth"
+
+      - path: "apps/user-web/src/pages/auth/RegisterPage.tsx"
+        namespace: "auth"
+
+      - path: "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+        namespaces: ["common", "dashboard"]
+
+      - path: "apps/user-web/src/components/check-in/CheckInButton.tsx"
+        namespace: "dashboard"
+
+      - path: "apps/user-web/src/components/check-in/StatusCard.tsx"
+        namespace: "dashboard"
+
+      - path: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+        namespaces: ["common", "settings", "auth"]
+
+      - path: "apps/user-web/src/pages/dashboard/HistoryPage.tsx"
+        namespaces: ["common", "history"]
+
+      - path: "apps/user-web/src/components/history/HistoryItem.tsx"
+        namespace: "common"
+
+      - path: "apps/user-web/src/components/layout/Header.tsx"
+        namespace: "common"
+
+      - path: "apps/user-web/src/components/layout/MobileNav.tsx"
+        namespace: "common"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "All React components must have explicit JSX.Element return type"
+  - "Use namespace-based translation keys (not flat keys)"
+  - "All interpolation uses {{variable}} syntax"
+  - "Translation files must be valid JSON"
+  - "Keep translation keys short but descriptive"
+  - "Do not hardcode any user-visible text"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Right-to-left (RTL) language support"
+  - "Backend API message translations"
+  - "Date/number format localization (use browser locale)"
+  - "Additional languages beyond en/zh/ja"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Language switcher appears in header"
+  - "All UI text changes when language is switched"
+  - "Selected language persists after page refresh"
+  - "No hardcoded user-visible strings remain"
+  - "TypeScript compiles without errors"
+  - "App runs without runtime errors"
+
+# ============================================================
+# Testing Instructions
+# ============================================================
+testing:
+  - step: "Start dev server"
+    command: "cd apps/user-web && npm run dev"
+
+  - step: "Test language switching"
+    actions:
+      - "Click language switcher in header"
+      - "Select Chinese (中文)"
+      - "Verify all text changes to Chinese"
+      - "Refresh page - should remain in Chinese"
+      - "Switch to Japanese - verify all text changes"
+      - "Switch back to English - verify all text changes"
+
+  - step: "Test all pages"
+    actions:
+      - "Visit /login - verify all text translated"
+      - "Visit /register - verify all text translated"
+      - "Login and visit / (dashboard) - verify all text translated"
+      - "Visit /history - verify all text translated"
+      - "Visit /settings - verify all text translated"
+
+# ============================================================
+# After Completion
+# ============================================================
+after_completion:
+  - "Create IR-013 implementation report"
+  - "C Session reviews for approval"
+  - "Then proceed with TASK-012 (fix return types)"
