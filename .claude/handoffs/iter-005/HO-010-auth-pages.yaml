@@ -1,0 +1,344 @@
+# ============================================================
+# HANDOFF: HO-010 - Auth Pages (Login & Register)
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-010"
+design_state_version: "1.1.0"
+priority: "P0"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement Login and Register pages with form validation,
+  Zustand auth store, and protected route handling.
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  Users need to authenticate before accessing the app.
+  After login/register, tokens are stored and user is
+  redirected to the dashboard.
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-010-1"
+    title: "Create auth store (Zustand)"
+    file: "apps/user-web/src/stores/auth.store.ts"
+    action: |
+      Create Zustand store for auth state:
+
+      ```typescript
+      import { create } from 'zustand';
+      import { persist } from 'zustand/middleware';
+
+      interface AuthState {
+        accessToken: string | null;
+        refreshToken: string | null;
+        isAuthenticated: boolean;
+
+        // Actions
+        setTokens: (access: string, refresh: string) => void;
+        clearTokens: () => void;
+        getAccessToken: () => string | null;
+        getRefreshToken: () => string | null;
+      }
+
+      export const useAuthStore = create<AuthState>()(
+        persist(
+          (set, get) => ({
+            accessToken: null,
+            refreshToken: null,
+            isAuthenticated: false,
+
+            setTokens: (access, refresh) =>
+              set({ accessToken: access, refreshToken: refresh, isAuthenticated: true }),
+
+            clearTokens: () =>
+              set({ accessToken: null, refreshToken: null, isAuthenticated: false }),
+
+            getAccessToken: () => get().accessToken,
+            getRefreshToken: () => get().refreshToken,
+          }),
+          {
+            name: 'auth-storage',
+            partialize: (state) => ({
+              accessToken: state.accessToken,
+              refreshToken: state.refreshToken,
+              isAuthenticated: state.isAuthenticated,
+            }),
+          }
+        )
+      );
+      ```
+
+  - id: "TASK-010-2"
+    title: "Create API client provider"
+    file: "apps/user-web/src/lib/api.ts"
+    action: |
+      Set up API client with auth store integration:
+
+      ```typescript
+      import { createApiClient, createApi, createHooks } from '@solo-guardian/api-client';
+      import { useAuthStore } from '@/stores/auth.store';
+
+      const client = createApiClient({
+        baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+        getAccessToken: () => useAuthStore.getState().getAccessToken(),
+        getRefreshToken: () => useAuthStore.getState().getRefreshToken(),
+        onTokenRefresh: (tokens) => {
+          useAuthStore.getState().setTokens(tokens.accessToken, tokens.refreshToken);
+        },
+        onAuthError: () => {
+          useAuthStore.getState().clearTokens();
+          window.location.href = '/login';
+        },
+      });
+
+      export const api = createApi(client);
+      export const hooks = createHooks(client);
+      ```
+
+  - id: "TASK-010-3"
+    title: "Install shadcn form components"
+    action: |
+      ```bash
+      cd apps/user-web
+      npx shadcn@latest add button input label card form
+      ```
+
+  - id: "TASK-010-4"
+    title: "Create Login page"
+    file: "apps/user-web/src/pages/auth/LoginPage.tsx"
+    action: |
+      Create login page with:
+      - Email input with validation
+      - Password input
+      - Submit button with loading state
+      - Link to register page
+      - Error display for failed login
+      - Redirect to dashboard on success
+
+      Mobile-first design using Tailwind:
+      - Full width on mobile
+      - Centered card on desktop
+      - Max width 400px
+
+      ```typescript
+      // TODO(B): Implement LoginPage
+      // - Use react-hook-form for form handling
+      // - Use hooks.useLogin() mutation
+      // - Store tokens on success via useAuthStore
+      // - Navigate to '/' on success
+      // - Display error message on failure
+      ```
+
+  - id: "TASK-010-5"
+    title: "Create Register page"
+    file: "apps/user-web/src/pages/auth/RegisterPage.tsx"
+    action: |
+      Create register page with:
+      - Name input
+      - Email input with validation
+      - Password input with strength indicator
+      - Password confirmation
+      - Submit button with loading state
+      - Link to login page
+      - Auto-login after successful registration
+
+      ```typescript
+      // TODO(B): Implement RegisterPage
+      // - Use react-hook-form for form handling
+      // - Validate password match
+      // - Use hooks.useRegister() mutation
+      // - Store tokens on success
+      // - Navigate to '/' on success
+      ```
+
+  - id: "TASK-010-6"
+    title: "Create ProtectedRoute component"
+    file: "apps/user-web/src/components/auth/ProtectedRoute.tsx"
+    action: |
+      Create route guard component:
+
+      ```typescript
+      import { Navigate, Outlet } from 'react-router-dom';
+      import { useAuthStore } from '@/stores/auth.store';
+
+      export function ProtectedRoute(): JSX.Element {
+        const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+        if (!isAuthenticated) {
+          return <Navigate to="/login" replace />;
+        }
+
+        return <Outlet />;
+      }
+      ```
+
+  - id: "TASK-010-7"
+    title: "Create GuestRoute component"
+    file: "apps/user-web/src/components/auth/GuestRoute.tsx"
+    action: |
+      Redirect authenticated users away from auth pages:
+
+      ```typescript
+      import { Navigate, Outlet } from 'react-router-dom';
+      import { useAuthStore } from '@/stores/auth.store';
+
+      export function GuestRoute(): JSX.Element {
+        const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+        if (isAuthenticated) {
+          return <Navigate to="/" replace />;
+        }
+
+        return <Outlet />;
+      }
+      ```
+
+  - id: "TASK-010-8"
+    title: "Update App.tsx with routes"
+    file: "apps/user-web/src/App.tsx"
+    action: |
+      Configure routing:
+
+      ```typescript
+      import { BrowserRouter, Routes, Route } from 'react-router-dom';
+      import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+      import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+      import { GuestRoute } from '@/components/auth/GuestRoute';
+      import { Layout } from '@/components/layout/Layout';
+      import { LoginPage } from '@/pages/auth/LoginPage';
+      import { RegisterPage } from '@/pages/auth/RegisterPage';
+      import { DashboardPage } from '@/pages/dashboard/DashboardPage';
+      // ... other imports
+
+      const queryClient = new QueryClient();
+
+      export function App(): JSX.Element {
+        return (
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <Routes>
+                {/* Guest routes (redirect if logged in) */}
+                <Route element={<GuestRoute />}>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
+
+                {/* Protected routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                  </Route>
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </QueryClientProvider>
+        );
+      }
+      ```
+
+# ============================================================
+# Deliverables
+# ============================================================
+deliverables:
+  - "apps/user-web/src/stores/auth.store.ts"
+  - "apps/user-web/src/lib/api.ts"
+  - "apps/user-web/src/pages/auth/LoginPage.tsx"
+  - "apps/user-web/src/pages/auth/RegisterPage.tsx"
+  - "apps/user-web/src/components/auth/ProtectedRoute.tsx"
+  - "apps/user-web/src/components/auth/GuestRoute.tsx"
+  - "Updated apps/user-web/src/App.tsx"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - description: "Login page renders"
+    verification: "Navigate to /login shows form"
+
+  - description: "Register page renders"
+    verification: "Navigate to /register shows form"
+
+  - description: "Login stores tokens"
+    verification: "After login, tokens in localStorage"
+
+  - description: "Protected routes redirect"
+    verification: "Visiting / when logged out redirects to /login"
+
+  - description: "Guest routes redirect"
+    verification: "Visiting /login when logged in redirects to /"
+
+  - description: "Mobile responsive"
+    verification: "Forms look good on 375px width"
+
+# ============================================================
+# UI Design Guidelines
+# ============================================================
+ui_design:
+  login_page:
+    layout: |
+      - Centered card on screen
+      - Logo at top
+      - "Welcome back" heading
+      - Email input
+      - Password input
+      - "Forgot password?" link (placeholder)
+      - Login button (full width)
+      - "Don't have account? Register" link
+
+  register_page:
+    layout: |
+      - Centered card on screen
+      - Logo at top
+      - "Create account" heading
+      - Name input
+      - Email input
+      - Password input
+      - Confirm password input
+      - Register button (full width)
+      - "Already have account? Login" link
+
+  colors:
+    primary: "slate-900"
+    error: "red-500"
+    success: "green-500"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use shadcn/ui components"
+  - "Mobile-first responsive design"
+  - "No any types"
+  - "Form validation with meaningful error messages"
+  - "Loading states during API calls"
+  - "Single file < 300 lines"
+
+# ============================================================
+# Dependencies
+# ============================================================
+dependencies:
+  - "TASK-008 (user-web infrastructure)"
+  - "TASK-009 (api-client package)"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  Use react-hook-form for form handling.
+  Consider adding zod for schema validation.
+
+  The login/register should feel smooth on mobile -
+  this is the first impression users get.

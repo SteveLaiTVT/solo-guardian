@@ -1,0 +1,113 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-009 - Shared API Client Package
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-009"
+task_id: "TASK-009"
+handoff_id: "HO-009"
+design_state_version: "1.1.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Created shared API client package with Axios and TanStack Query.
+  Includes typed API functions, automatic token refresh on 401,
+  and React Query hooks for data fetching.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - task: "TASK-009-1/2"
+    description: "Initialize package and configure"
+    file: "packages/api-client/package.json"
+
+  - task: "TASK-009-3"
+    description: "Create TypeScript types"
+    file: "packages/api-client/src/types.ts"
+    types:
+      - "User, AuthTokens, AuthResult"
+      - "LoginRequest, RegisterRequest, RefreshRequest"
+      - "CheckIn, CreateCheckInRequest, TodayStatus, CheckInHistory"
+      - "CheckInSettings, UpdateSettingsRequest"
+
+  - task: "TASK-009-4"
+    description: "Create Axios client with interceptors"
+    file: "packages/api-client/src/client.ts"
+    features:
+      - "Request interceptor adds Authorization header"
+      - "Response interceptor handles 401 with token refresh"
+      - "Automatic retry of original request after refresh"
+      - "Calls onAuthError callback if refresh fails"
+
+  - task: "TASK-009-5"
+    description: "Create API service functions"
+    file: "packages/api-client/src/api.ts"
+    endpoints:
+      - "auth.login, auth.register, auth.refresh, auth.logout"
+      - "checkIn.create, checkIn.getToday, checkIn.getHistory"
+      - "settings.get, settings.update"
+
+  - task: "TASK-009-6"
+    description: "Create TanStack Query hooks"
+    file: "packages/api-client/src/hooks.ts"
+    hooks:
+      - "useCheckInToday, useCheckInHistory, useCreateCheckIn"
+      - "useSettings, useUpdateSettings"
+      - "useLogin, useRegister"
+
+  - task: "TASK-009-7"
+    description: "Create package exports"
+    file: "packages/api-client/src/index.ts"
+
+  - task: "TASK-009-8"
+    description: "Add tsconfig.json"
+    file: "packages/api-client/tsconfig.json"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "TypeScript compiles"
+    status: "pass"
+    evidence: "pnpm run typecheck passes"
+
+  - criterion: "Types match backend API"
+    status: "pass"
+    evidence: "Types align with backend DTOs"
+
+  - criterion: "Can be imported by user-web"
+    status: "pass"
+    evidence: "Package exports all necessary functions and types"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "No any types"
+    status: "compliant"
+    evidence: "All types explicitly defined"
+
+  - constraint: "All functions must have return types"
+    status: "compliant"
+    evidence: "TypeScript strict mode enforces this"
+
+  - constraint: "Single file < 300 lines"
+    status: "compliant"
+    evidence: "Largest file (hooks.ts) is 84 lines"
+
+  - constraint: "Use TanStack Query v5"
+    status: "compliant"
+    evidence: "@tanstack/react-query ^5.0.0"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"

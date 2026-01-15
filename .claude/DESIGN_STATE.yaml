@@ -9,12 +9,13 @@
 # ============================================================
 
 meta:
-  version: "0.9.0"
-  updated_at: "2026-01-14"
+  version: "1.2.0"
+  updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
+  milestone: "User Web MVP Development"
 
 # ============================================================
 # 1. Technical Architecture
@@ -73,7 +74,7 @@ modules:
     description: "User authentication and authorization"
     skeleton_created: true
     skeleton_version: "0.2.0"
-    completed_iteration: "iter-002"
+    completed_iteration: "iter-004"
     hardened: true
     features:
       - name: "Email/Password Login"
@@ -92,7 +93,7 @@ modules:
         added_in: "iter-002"
       - name: "JWT Auth Guard"
         priority: "P0"
-        status: "in_progress"
+        status: "done"
         added_in: "iter-004"
         description: "Protect endpoints with JWT authentication"
       - name: "OAuth (Google/Apple)"
@@ -150,6 +151,28 @@ modules:
         priority: "P2"
         status: "pending"
         description: "Track consecutive check-in days (gamification)"
+
+  user_web:
+    status: "in_progress"
+    owner: "B Session"
+    description: "User-facing web application"
+    started_iteration: "iter-005"
+    features:
+      - name: "Login/Register"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in Dashboard"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in Settings"
+        priority: "P0"
+        status: "pending"
+      - name: "Check-in History"
+        priority: "P0"
+        status: "pending"
+      - name: "Mobile Responsive"
+        priority: "P0"
+        status: "pending"
 
 # ============================================================
 # 3. API Design Constraints
@@ -217,36 +240,64 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-004"
-  goal: "Add JWT Auth Guard to protect API endpoints"
-  started_at: "2026-01-14"
-
+  id: "iter-005"
+  goal: "Implement user-web frontend MVP"
+  started_at: "2026-01-15"
+  status: "in_progress"
   tasks:
-    - id: "TASK-007"
-      title: "Backend: Create JwtAuthGuard and CurrentUser decorator"
-      assigned_to: "B Session"
+    - id: "TASK-008"
+      title: "Frontend: User-web infrastructure setup"
+      status: "completed"
+      priority: "P0"
+      handoff: "HO-008-user-web-infra.yaml"
+      description: "Vite + React + TypeScript + Tailwind + shadcn/ui"
+
+    - id: "TASK-009"
+      title: "Frontend: Shared API client package"
+      status: "completed"
+      priority: "P0"
+      handoff: "HO-009-api-client.yaml"
+      depends_on: []
+      description: "TanStack Query + Axios API client"
+
+    - id: "TASK-010"
+      title: "Frontend: Auth pages (Login/Register)"
       status: "pending"
       priority: "P0"
-      handoff_doc: ".claude/handoffs/iter-004/HO-007-auth-guard.yaml"
-      acceptance_criteria:
-        - "JwtAuthGuard validates access token"
-        - "CurrentUser decorator extracts user ID from token"
-        - "Guard returns 401 for missing/invalid tokens"
-        - "Check-in endpoints protected with guard"
-        - "Auth endpoints (login, register, refresh) remain public"
-      files:
-        - "apps/backend/src/modules/auth/guards/jwt-auth.guard.ts"
-        - "apps/backend/src/modules/auth/decorators/current-user.decorator.ts"
-        - "apps/backend/src/modules/auth/strategies/jwt.strategy.ts"
-        - "apps/backend/src/modules/check-in/check-in.controller.ts"
+      handoff: "HO-010-auth-pages.yaml"
+      depends_on: ["TASK-008", "TASK-009"]
+      description: "Login, Register pages with Zustand auth store"
 
-  blocked_tasks: []
-  completed_tasks: []
+    - id: "TASK-011"
+      title: "Frontend: Main pages (Dashboard/Settings/History)"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-011-main-pages.yaml"
+      depends_on: ["TASK-010"]
+      description: "Check-in dashboard, settings, history pages"
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-004"
+    goal: "Add JWT Auth Guard to protect API endpoints"
+    started_at: "2026-01-14"
+    completed_at: "2026-01-14"
+    status: "completed"
+    summary: |
+      JWT authentication guard complete:
+      - JwtStrategy with Passport JWT
+      - JwtAuthGuard for protecting routes
+      - CurrentUser decorator for extracting userId
+      - Check-in endpoints now protected
+      - Settings moved to separate controller
+    tasks_completed:
+      - id: "TASK-007"
+        title: "Backend: Create JwtAuthGuard and CurrentUser decorator"
+        review_verdict: "pass"
+    milestone: "Backend MVP Complete"
+
   - id: "iter-003"
     goal: "Implement check-in module MVP - core safety check-in functionality"
     started_at: "2026-01-14"
@@ -373,6 +424,25 @@ decision_log:
       - CurrentUser decorator for extracting user from token
       - Consistent with NestJS ecosystem
 
+  - id: "ADR-007"
+    date: "2026-01-15"
+    decision: "User-web uses Vite + React + shadcn/ui + Tailwind"
+    rationale: |
+      - Vite for fast development and build
+      - shadcn/ui for accessible, customizable components
+      - Tailwind for mobile-first responsive design
+      - TanStack Query for server state management
+      - Zustand for client state (auth tokens)
+
+  - id: "ADR-008"
+    date: "2026-01-15"
+    decision: "Shared API client package (@solo-guardian/api-client)"
+    rationale: |
+      - Type-safe API calls matching backend
+      - Automatic token refresh handling
+      - Shared between user-web and admin-web
+      - TanStack Query hooks for data fetching
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
@@ -384,6 +454,14 @@ review_history:
     date: "2026-01-14"
     issues_found: []
 
+  - iteration: "iter-004"
+    task: "TASK-007"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-14"
+    issues_found: []
+    notes: "Settings controller separated per ISS-008 suggestion"
+
   - iteration: "iter-003"
     task: "TASK-006"
     reviewer: "C Session"
@@ -394,7 +472,7 @@ review_history:
         type: "consistency"
         severity: "suggestion"
         description: "Consider separate controller for settings"
-        resolution: "Optional improvement"
+        resolution: "Resolved in iter-004 TASK-007"
 
   - iteration: "iter-002"
     task: "TASK-003"

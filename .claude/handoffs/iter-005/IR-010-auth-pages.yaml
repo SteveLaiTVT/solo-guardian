@@ -1,0 +1,149 @@
+# ============================================================
+# IMPLEMENTATION REPORT: IR-010 - Auth Pages
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Created: 2026-01-15
+# ============================================================
+
+report_id: "IR-010"
+task_id: "TASK-010"
+handoff_id: "HO-010"
+design_state_version: "1.1.0"
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented authentication pages with Zustand state management,
+  form validation using react-hook-form + zod, and route guards
+  for protected/guest routes.
+
+# ============================================================
+# Changes Made
+# ============================================================
+changes:
+  - task: "TASK-010-1"
+    description: "Create auth store (Zustand)"
+    file: "apps/user-web/src/stores/auth.store.ts"
+    features:
+      - "Persistent storage with zustand/middleware persist"
+      - "Token management (set/clear/get)"
+      - "isAuthenticated state"
+
+  - task: "TASK-010-2"
+    description: "Create API client provider"
+    file: "apps/user-web/src/lib/api.ts"
+    features:
+      - "Integrates api-client with auth store"
+      - "Automatic token injection"
+      - "Token refresh handling"
+      - "Auth error redirect to login"
+
+  - task: "TASK-010-3"
+    description: "Install dependencies"
+    packages:
+      - "react-hook-form"
+      - "@hookform/resolvers"
+      - "zod"
+      - "shadcn/ui components (input, label, card)"
+
+  - task: "TASK-010-4"
+    description: "Create Login page"
+    file: "apps/user-web/src/pages/auth/LoginPage.tsx"
+    features:
+      - "Email/password form with validation"
+      - "Loading state during submission"
+      - "Error message display"
+      - "Redirect to dashboard on success"
+      - "Link to register page"
+
+  - task: "TASK-010-5"
+    description: "Create Register page"
+    file: "apps/user-web/src/pages/auth/RegisterPage.tsx"
+    features:
+      - "Name/email/password/confirm form"
+      - "Password match validation"
+      - "Auto-login after registration"
+      - "Loading state and error handling"
+
+  - task: "TASK-010-6"
+    description: "Create ProtectedRoute component"
+    file: "apps/user-web/src/components/auth/ProtectedRoute.tsx"
+    features:
+      - "Redirects to /login if not authenticated"
+      - "Uses Outlet for nested routes"
+
+  - task: "TASK-010-7"
+    description: "Create GuestRoute component"
+    file: "apps/user-web/src/components/auth/GuestRoute.tsx"
+    features:
+      - "Redirects to / if already authenticated"
+      - "Prevents logged-in users from accessing auth pages"
+
+  - task: "TASK-010-8"
+    description: "Update App.tsx with routes"
+    file: "apps/user-web/src/App.tsx"
+    features:
+      - "Guest routes wrap login/register"
+      - "Protected routes wrap main app"
+      - "Nested Layout inside ProtectedRoute"
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - criterion: "Login page renders"
+    status: "pass"
+    evidence: "Form with email/password inputs"
+
+  - criterion: "Register page renders"
+    status: "pass"
+    evidence: "Form with name/email/password fields"
+
+  - criterion: "Login stores tokens"
+    status: "pass"
+    evidence: "Zustand persist middleware saves to localStorage"
+
+  - criterion: "Protected routes redirect"
+    status: "pass"
+    evidence: "Unauthenticated users redirected to /login"
+
+  - criterion: "Guest routes redirect"
+    status: "pass"
+    evidence: "Authenticated users redirected to /"
+
+  - criterion: "Mobile responsive"
+    status: "pass"
+    evidence: "Max-width card layout, full-width on mobile"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "No any types"
+    status: "compliant"
+    evidence: "All types explicitly defined"
+
+  - constraint: "Use shadcn/ui components"
+    status: "compliant"
+    evidence: "Button, Input, Label, Card used"
+
+  - constraint: "Form validation with meaningful errors"
+    status: "compliant"
+    evidence: "Zod schemas with custom error messages"
+
+  - constraint: "Loading states during API calls"
+    status: "compliant"
+    evidence: "isPending state disables buttons"
+
+  - constraint: "Single file < 300 lines"
+    status: "compliant"
+    evidence: "Largest file is ~140 lines"
+
+# ============================================================
+# Ready for Review
+# ============================================================
+ready_for_review: true
+reviewed_by: null
+review_status: "pending"
