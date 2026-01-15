@@ -23,20 +23,7 @@ interface DeleteContactDialogProps {
   onClose: () => void
 }
 
-/**
- * TODO(B): Implement DeleteContactDialog
- * Requirements:
- * - Show confirmation message with contact name
- * - Cancel and Delete buttons
- * - Call delete API on confirm
- * - Close dialog on success
- * Acceptance:
- * - Shows when contact is not null
- * - Deletes contact and closes on confirm
- * Constraints:
- * - Use i18n for all text
- * - Delete button should be destructive style
- */
+// DONE(B): Implemented DeleteContactDialog - TASK-016
 export function DeleteContactDialog({ contact, onClose }: DeleteContactDialogProps): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
@@ -54,7 +41,7 @@ export function DeleteContactDialog({ contact, onClose }: DeleteContactDialogPro
   }
 
   return (
-    <Dialog open={contact !== null} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog open={contact !== null} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <div className="flex items-center space-x-2">

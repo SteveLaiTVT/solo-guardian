@@ -16,20 +16,7 @@ interface ContactCardProps {
   onDelete: () => void
 }
 
-/**
- * TODO(B): Implement ContactCard
- * Requirements:
- * - Show priority badge
- * - Show contact name, email, phone
- * - Show verified/active status
- * - Edit and Delete buttons
- * Acceptance:
- * - Card displays all contact info
- * - Buttons trigger callbacks
- * Constraints:
- * - Use i18n for all text
- * - Mobile responsive
- */
+// DONE(B): Implemented ContactCard - TASK-016
 export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps): JSX.Element {
   const { t } = useTranslation('contacts')
 

@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Loader2, Plus, Users } from 'lucide-react'
 import { hooks } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import { ContactCard } from '@/components/contacts/ContactCard'
 import { ContactForm } from '@/components/contacts/ContactForm'
 import { DeleteContactDialog } from '@/components/contacts/DeleteContactDialog'
@@ -17,22 +17,7 @@ import type { EmergencyContact } from '@solo-guardian/api-client'
 
 const MAX_CONTACTS = 5
 
-/**
- * TODO(B): Implement ContactsPage
- * Requirements:
- * - Show list of emergency contacts
- * - Add contact button (disabled if 5 contacts)
- * - Edit/Delete contacts
- * - Empty state when no contacts
- * - Loading and error states
- * Acceptance:
- * - Page shows all contacts sorted by priority
- * - Can add/edit/delete contacts
- * - Shows count indicator (x/5)
- * Constraints:
- * - Use i18n for all text
- * - Mobile responsive
- */
+// DONE(B): Implemented ContactsPage - TASK-016
 export function ContactsPage(): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
