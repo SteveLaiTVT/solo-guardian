@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "1.2.0"
+  version: "1.2.2"
   updated_at: "2026-01-15"
   updated_by: "A Session"
   branch: "main"
@@ -46,6 +46,8 @@ architecture:
     base: "frontend_shared"
     routing: "React Router"
     ui_library: "shadcn/ui"
+    i18n: "react-i18next"
+    languages: ["en", "zh", "ja"]
     responsive: true
     breakpoints:
       mobile: "< 768px"
@@ -160,19 +162,29 @@ modules:
     features:
       - name: "Login/Register"
         priority: "P0"
-        status: "pending"
+        status: "done"
+        completed_task: "TASK-010"
       - name: "Check-in Dashboard"
         priority: "P0"
-        status: "pending"
+        status: "in_review"
+        completed_task: "TASK-011"
       - name: "Check-in Settings"
         priority: "P0"
-        status: "pending"
+        status: "in_review"
+        completed_task: "TASK-011"
       - name: "Check-in History"
         priority: "P0"
-        status: "pending"
+        status: "in_review"
+        completed_task: "TASK-011"
       - name: "Mobile Responsive"
         priority: "P0"
-        status: "pending"
+        status: "in_review"
+        completed_task: "TASK-011"
+      - name: "Internationalization (i18n)"
+        priority: "P0"
+        status: "done"
+        description: "Support for English, Chinese, Japanese"
+        completed_task: "TASK-013"
 
 # ============================================================
 # 3. API Design Constraints
@@ -262,19 +274,42 @@ current_iteration:
 
     - id: "TASK-010"
       title: "Frontend: Auth pages (Login/Register)"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-010-auth-pages.yaml"
       depends_on: ["TASK-008", "TASK-009"]
       description: "Login, Register pages with Zustand auth store"
+      review_verdict: "pass"
 
     - id: "TASK-011"
       title: "Frontend: Main pages (Dashboard/Settings/History)"
-      status: "pending"
+      status: "in_review"
       priority: "P0"
       handoff: "HO-011-main-pages.yaml"
       depends_on: ["TASK-010"]
       description: "Check-in dashboard, settings, history pages"
+      review_verdict: "conditional_pass"
+      issues: ["ISS-012", "ISS-013", "ISS-014"]
+
+    - id: "TASK-013"
+      title: "Frontend: Internationalization (i18n) setup"
+      status: "completed"
+      priority: "P0"
+      handoff: "HO-013-i18n-setup.yaml"
+      depends_on: ["TASK-011"]
+      description: "Add i18n support for English, Chinese, Japanese"
+      languages: ["en", "zh", "ja"]
+      implementation_report: "IR-013-i18n-setup.yaml"
+      review_verdict: "pass"
+
+    - id: "TASK-012"
+      title: "Frontend: Fix return types and cleanup"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-012-fix-return-types.yaml"
+      depends_on: ["TASK-013"]
+      description: "Fix constraint violations from TASK-011 review"
+      resolves: ["ISS-012", "ISS-013"]
 
 # ============================================================
 # 5.1 Iteration History
@@ -443,10 +478,63 @@ decision_log:
       - Shared between user-web and admin-web
       - TanStack Query hooks for data fetching
 
+  - id: "ADR-009"
+    date: "2026-01-15"
+    decision: "Use react-i18next for internationalization"
+    rationale: |
+      - Most popular i18n solution for React
+      - Excellent TypeScript support
+      - Namespace-based organization (auth, dashboard, settings, history)
+      - Built-in language detection and persistence
+      - Interpolation support for dynamic values
+    languages:
+      - "en: English (default)"
+      - "zh: Chinese Simplified"
+      - "ja: Japanese"
+
 # ============================================================
 # 8. Review History (Recorded by A Session)
 # ============================================================
 review_history:
+  - iteration: "iter-005"
+    task: "TASK-013"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Excellent i18n implementation with 3 languages (en/zh/ja)"
+
+  - iteration: "iter-005"
+    task: "TASK-010"
+    reviewer: "C Session"
+    verdict: "pass"
+    date: "2026-01-15"
+    issues_found: []
+    notes: "Clean implementation with good patterns"
+
+  - iteration: "iter-005"
+    task: "TASK-011"
+    reviewer: "C Session"
+    verdict: "conditional_pass"
+    date: "2026-01-15"
+    issues_found:
+      - id: "ISS-012"
+        type: "constraint_violation"
+        severity: "error"
+        description: "Missing JSX.Element return types on 10 React components"
+        resolution: "Fix in TASK-012"
+      - id: "ISS-013"
+        type: "todo_incomplete"
+        severity: "warning"
+        description: "Leftover TODO(B) marker in Header.tsx"
+        resolution: "Fix in TASK-012"
+      - id: "ISS-014"
+        type: "consistency"
+        severity: "suggestion"
+        description: "Missing file headers with @task annotation"
+        resolution: "Optional improvement"
+    notes: "Functionally complete, needs constraint fixes"
+
   - iteration: "iter-003"
     task: "TASK-005"
     reviewer: "C Session"

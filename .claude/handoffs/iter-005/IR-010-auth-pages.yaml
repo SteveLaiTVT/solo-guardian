@@ -9,7 +9,7 @@
 report_id: "IR-010"
 task_id: "TASK-010"
 handoff_id: "HO-010"
-design_state_version: "1.1.0"
+design_state_version: "1.2.0"
 
 # ============================================================
 # Summary
@@ -139,7 +139,15 @@ constraints_compliance:
 
   - constraint: "Single file < 300 lines"
     status: "compliant"
-    evidence: "Largest file is ~140 lines"
+    evidence: "Largest file is ~150 lines"
+
+  - constraint: "All functions have return type declarations"
+    status: "compliant"
+    evidence: "All components have JSX.Element return type"
+
+  - constraint: "File headers with @task annotation"
+    status: "compliant"
+    evidence: "All files have @file, @description, @task, @design_state_version"
 
 # ============================================================
 # Ready for Review

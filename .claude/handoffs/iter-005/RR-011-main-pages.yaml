@@ -1,0 +1,246 @@
+# ============================================================
+# REVIEW REPORT: RR-011 - Main Pages (RE-REVIEW)
+# ============================================================
+# From: C Session (Reviewer)
+# To: A Session (Architect) / B Session (Implementer)
+# Created: 2026-01-15
+# Re-reviewed: 2026-01-15
+# ============================================================
+
+report_id: "RR-011"
+task_id: "TASK-011"
+implementation_report_id: "IR-011"
+design_state_version: "1.2.0"
+review_round: 2
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  previous_verdict: "conditional_pass"
+  statistics:
+    files_reviewed: 10
+    issues_found: 1
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+    suggestions: 1
+  brief: |
+    RE-REVIEW: All blocking issues from Round 1 have been resolved.
+    - ISS-012 (missing return types): FIXED - all components now have JSX.Element
+    - ISS-013 (incomplete TODO): FIXED - changed to DONE(B) marker
+
+    Implementation is clean, constraints satisfied, ready to merge.
+
+# ============================================================
+# Files Reviewed
+# ============================================================
+files_reviewed:
+  - file: "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+    lines: 105
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/check-in/CheckInButton.tsx"
+    lines: 39
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/check-in/StatusCard.tsx"
+    lines: 89
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+    lines: 141
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/ui/TimePicker.tsx"
+    lines: 24
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/pages/dashboard/HistoryPage.tsx"
+    lines: 79
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/history/HistoryItem.tsx"
+    lines: 55
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/layout/Layout.tsx"
+    lines: 16
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/layout/MobileNav.tsx"
+    lines: 42
+    status: "compliant"
+    note: "Return type added: JSX.Element"
+
+  - file: "apps/user-web/src/components/layout/Header.tsx"
+    lines: 25
+    status: "compliant"
+    note: "Return type added: JSX.Element, TODO changed to DONE"
+
+# ============================================================
+# Issues Resolved (from Round 1)
+# ============================================================
+issues_resolved:
+  - id: "ISS-012"
+    title: "Missing return type declarations on React components"
+    resolution: "All 10 components now have `: JSX.Element` return type"
+    status: "resolved"
+
+  - id: "ISS-013"
+    title: "Incomplete TODO(B) marker in Header.tsx"
+    resolution: "Changed to DONE(B) marker - logout via Settings is intended"
+    status: "resolved"
+
+# ============================================================
+# TODO Completion Check
+# ============================================================
+todo_check:
+  all_complete: true
+  files:
+    - file: "DashboardPage.tsx"
+      status: "complete"
+    - file: "CheckInButton.tsx"
+      status: "complete"
+    - file: "StatusCard.tsx"
+      status: "complete"
+    - file: "SettingsPage.tsx"
+      status: "complete"
+    - file: "TimePicker.tsx"
+      status: "complete"
+    - file: "HistoryPage.tsx"
+      status: "complete"
+    - file: "HistoryItem.tsx"
+      status: "complete"
+    - file: "Layout.tsx"
+      status: "complete"
+    - file: "MobileNav.tsx"
+      status: "complete"
+    - file: "Header.tsx"
+      status: "complete"
+      note: "DONE(B) marker indicates logout in Settings is intentional"
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "No any types"
+    status: "pass"
+    evidence: "All types from api-client or defined locally"
+
+  - constraint: "All functions have return type declaration"
+    status: "pass"
+    evidence: "All 10 components now have JSX.Element return type"
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    evidence: "Largest file (SettingsPage.tsx) is 141 lines"
+
+  - constraint: "Single function < 50 lines"
+    status: "pass"
+    evidence: "All functions within limit"
+
+  - constraint: "Mobile-first responsive design"
+    status: "pass"
+    evidence: "Mobile-first classes, md: breakpoints for desktop"
+
+  - constraint: "Check-in button easily tappable"
+    status: "pass"
+    evidence: "Button is h-40 w-40 (160px), well above 44px minimum"
+
+  - constraint: "Loading states for async operations"
+    status: "pass"
+    evidence: "All pages show Loader2 spinner while loading"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - criterion: "Dashboard shows check-in status"
+    status: "pass"
+    evidence: "Uses useCheckInToday hook, displays StatusCard"
+
+  - criterion: "Can check in"
+    status: "pass"
+    evidence: "CheckInButton triggers useCreateCheckIn mutation"
+
+  - criterion: "Settings page loads"
+    status: "pass"
+    evidence: "Uses useSettings hook to fetch current values"
+
+  - criterion: "Can update deadline"
+    status: "pass"
+    evidence: "useUpdateSettings mutation on Save"
+
+  - criterion: "History shows records"
+    status: "pass"
+    evidence: "useCheckInHistory with pagination"
+
+  - criterion: "Mobile navigation works"
+    status: "pass"
+    evidence: "Fixed bottom nav with NavLink active states"
+
+  - criterion: "Responsive design"
+    status: "pass"
+    evidence: "Mobile-first layout, pb-20 for bottom nav spacing"
+
+# ============================================================
+# Remaining Issues (Non-blocking)
+# ============================================================
+issues:
+  - id: "ISS-014"
+    severity: "suggestion"
+    type: "consistency"
+    title: "Missing file headers with @task annotation"
+    location:
+      files: "All TASK-011 files except Header.tsx"
+    description: |
+      TASK-010 files have consistent file headers with @file,
+      @description, @task, and @design_state_version annotations.
+      TASK-011 files are missing these headers (except Header.tsx
+      which has a DONE marker).
+    recommendation: |
+      Optional: Add file headers to match TASK-010 pattern for
+      future maintainability.
+    effort: "low"
+    blocking: false
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Quick turnaround on fixing constraint violations"
+  - "Excellent check-in button design - large, prominent, clear states"
+  - "Good use of pulse animation for overdue state"
+  - "Countdown timer updates every minute for live feedback"
+  - "Clean pagination implementation in History page"
+  - "Friendly date formatting (Today, Yesterday, etc.)"
+  - "Proper loading and error states throughout"
+  - "Mobile navigation is well-designed with active state indicators"
+  - "Settings page shows save button only when changes exist"
+  - "Note input is expandable - good UX for optional field"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  resolved_issues:
+    - "ISS-012: Return type declarations added"
+    - "ISS-013: TODO marker resolved"
+  optional_improvements:
+    - "ISS-014: Add file headers for consistency (non-blocking)"
+  next_steps:
+    - "Ready to merge TASK-010 and TASK-011"
+    - "Integration testing with real backend recommended"
+    - "Consider end-to-end testing for critical flows"

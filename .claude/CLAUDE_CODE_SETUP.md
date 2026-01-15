@@ -30,9 +30,14 @@ cd /Users/stevelife/source/learn/ai_develop_template
 claude --print-system-prompt
 # Then paste A_SESSION.md content, or use:
 
+# After Start up.
 claude "Read .claude/prompts/A_SESSION.md and act as A Session. 
 Read .claude/DESIGN_STATE.yaml to understand current state.
 I want to start iter-001: design the auth module."
+```
+
+claude "Read .claude/prompts/A_SESSION.md and act as A Session.
+Read .claude/DESIGN_STATE.yaml to understand current state."
 ```
 
 ### Terminal 2: B Session (Implementation)

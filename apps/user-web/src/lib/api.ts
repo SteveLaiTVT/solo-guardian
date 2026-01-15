@@ -1,3 +1,9 @@
+/**
+ * @file api.ts
+ * @description API client setup with auth store integration
+ * @task TASK-010
+ * @design_state_version 1.2.0
+ */
 import { createApiClient, createApi, createHooks } from '@solo-guardian/api-client'
 import { useAuthStore } from '@/stores/auth.store'
 import { config } from './config'

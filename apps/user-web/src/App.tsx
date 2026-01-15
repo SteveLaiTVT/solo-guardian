@@ -1,3 +1,9 @@
+/**
+ * @file App.tsx
+ * @description Main application component with routing configuration
+ * @task TASK-010
+ * @design_state_version 1.2.0
+ */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ProtectedRoute, GuestRoute } from '@/components/auth'
@@ -15,7 +21,7 @@ const queryClient = new QueryClient({
   },
 })
 
-function App() {
+function App(): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

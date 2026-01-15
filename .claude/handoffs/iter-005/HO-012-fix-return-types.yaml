@@ -1,0 +1,142 @@
+# ============================================================
+# TASK HANDOFF: HO-012 - Fix Return Types and Cleanup
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-15
+# ============================================================
+
+handoff_id: "HO-012"
+design_state_version: "1.2.1"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: "Fix constraint violations found in TASK-011 review"
+
+# ============================================================
+# Context
+# ============================================================
+context: |
+  C Session reviewed TASK-011 (Main Pages) and found constraint violations.
+  The verdict was "conditional_pass" - functionally complete but needs fixes
+  before merge.
+
+  Review report: .claude/handoffs/iter-005/RR-011-main-pages.yaml
+
+# ============================================================
+# Tasks
+# ============================================================
+tasks:
+  - id: "TASK-012-1"
+    title: "Add JSX.Element return types to all components"
+    priority: "P0"
+    type: "fix"
+    resolves: "ISS-012"
+    description: |
+      All TASK-011 React components are missing explicit return type
+      declarations. This violates the constraint: "All functions must
+      have return type declaration".
+
+    files_to_fix:
+      - path: "apps/user-web/src/pages/dashboard/DashboardPage.tsx"
+        change: "export function DashboardPage() {" → "export function DashboardPage(): JSX.Element {"
+
+      - path: "apps/user-web/src/components/check-in/CheckInButton.tsx"
+        change: "export function CheckInButton({ ... }) {" → "export function CheckInButton({ ... }): JSX.Element {"
+
+      - path: "apps/user-web/src/components/check-in/StatusCard.tsx"
+        change: "export function StatusCard({ ... }) {" → "export function StatusCard({ ... }): JSX.Element {"
+
+      - path: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+        change: "export function SettingsPage() {" → "export function SettingsPage(): JSX.Element {"
+
+      - path: "apps/user-web/src/components/ui/TimePicker.tsx"
+        change: "export function TimePicker({ ... }) {" → "export function TimePicker({ ... }): JSX.Element {"
+
+      - path: "apps/user-web/src/pages/dashboard/HistoryPage.tsx"
+        change: "export function HistoryPage() {" → "export function HistoryPage(): JSX.Element {"
+
+      - path: "apps/user-web/src/components/history/HistoryItem.tsx"
+        change: "export function HistoryItem({ ... }) {" → "export function HistoryItem({ ... }): JSX.Element {"
+
+      - path: "apps/user-web/src/components/layout/Layout.tsx"
+        change: "export function Layout() {" → "export function Layout(): JSX.Element {"
+
+      - path: "apps/user-web/src/components/layout/MobileNav.tsx"
+        change: "export function MobileNav() {" → "export function MobileNav(): JSX.Element {"
+
+      - path: "apps/user-web/src/components/layout/Header.tsx"
+        change: "export function Header() {" → "export function Header(): JSX.Element {"
+
+    acceptance_criteria:
+      - "All 10 components have `: JSX.Element` return type"
+      - "TypeScript compiles without errors"
+
+  - id: "TASK-012-2"
+    title: "Remove incomplete TODO(B) marker from Header.tsx"
+    priority: "P0"
+    type: "fix"
+    resolves: "ISS-013"
+    description: |
+      Header.tsx contains a leftover TODO(B) marker that was not completed:
+      `// TODO(B): Add user menu dropdown with logout`
+
+      Decision: Remove this TODO. Logout functionality exists in SettingsPage
+      and is accessible via the mobile navigation. A header dropdown can be
+      added in a future iteration if needed.
+
+    file_to_fix:
+      path: "apps/user-web/src/components/layout/Header.tsx"
+      action: "Remove the TODO comment line entirely"
+
+    acceptance_criteria:
+      - "No TODO(B) markers remain in Header.tsx"
+      - "Code compiles without errors"
+
+# ============================================================
+# Optional Improvement (Not Required)
+# ============================================================
+optional:
+  - id: "TASK-012-3"
+    title: "Add file headers to TASK-011 files"
+    priority: "P2"
+    type: "enhancement"
+    resolves: "ISS-014"
+    description: |
+      For consistency with TASK-010 files, add JSDoc headers to all
+      TASK-011 files with @file, @description, @task, and @design_state_version.
+
+    note: "This is optional and can be skipped if time-constrained"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Do not change any functionality"
+  - "Only add return types and remove TODO comment"
+  - "Verify TypeScript compiles after changes"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Adding user menu dropdown to Header"
+  - "Changing any business logic"
+  - "Adding new features"
+
+# ============================================================
+# Acceptance Criteria (Overall)
+# ============================================================
+acceptance_criteria:
+  - "All TASK-011 React components have JSX.Element return type"
+  - "No TODO(B) markers remain in code"
+  - "TypeScript compiles without errors"
+  - "App runs without runtime errors"
+
+# ============================================================
+# After Completion
+# ============================================================
+after_completion:
+  - "Create IR-012 implementation report"
+  - "C Session re-reviews for final approval"

@@ -1,3 +1,9 @@
+/**
+ * @file auth.store.ts
+ * @description Zustand store for authentication state management
+ * @task TASK-010
+ * @design_state_version 1.2.0
+ */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
