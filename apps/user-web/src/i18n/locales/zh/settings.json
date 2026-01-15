@@ -1,0 +1,18 @@
+{
+  "title": "设置",
+  "checkIn": {
+    "title": "签到设置",
+    "description": "配置您的每日签到偏好",
+    "deadline": "每日截止时间",
+    "reminder": "提醒时间",
+    "enableReminder": "启用每日提醒"
+  },
+  "account": {
+    "title": "账户",
+    "description": "管理您的账户设置"
+  },
+  "success": "设置已保存！",
+  "error": {
+    "loadFailed": "加载设置失败"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "status": {
+    "safe": "今天已安全签到！",
+    "checkedInAt": "签到时间：{{time}}",
+    "deadline": "截止时间：{{time}}",
+    "alreadyCheckedIn": "您今天已经签到了",
+    "tapToCheckIn": "点击下方按钮进行签到"
+  },
+  "button": {
+    "checkIn": "签到",
+    "checkInNow": "立即签到！",
+    "checkingIn": "签到中..."
+  },
+  "time": {
+    "hoursMinutesOverdue": "已超时 {{hours}}小时{{minutes}}分钟",
+    "hoursMinutesRemaining": "剩余 {{hours}}小时{{minutes}}分钟",
+    "minutesOverdue": "已超时 {{minutes}}分钟",
+    "minutesRemaining": "剩余 {{minutes}}分钟"
+  },
+  "note": {
+    "placeholder": "添加备注（可选）",
+    "addNote": "+ 添加备注"
+  },
+  "error": {
+    "loadFailed": "加载状态失败"
+  }
+}

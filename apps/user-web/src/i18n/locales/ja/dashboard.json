@@ -1,0 +1,27 @@
+{
+  "status": {
+    "safe": "今日は安全です！",
+    "checkedInAt": "チェックイン時刻：{{time}}",
+    "deadline": "締め切り：{{time}}",
+    "alreadyCheckedIn": "今日はすでにチェックイン済みです",
+    "tapToCheckIn": "下のボタンをタップしてチェックイン"
+  },
+  "button": {
+    "checkIn": "チェックイン",
+    "checkInNow": "今すぐチェックイン！",
+    "checkingIn": "チェックイン中..."
+  },
+  "time": {
+    "hoursMinutesOverdue": "{{hours}}時間{{minutes}}分 超過",
+    "hoursMinutesRemaining": "残り {{hours}}時間{{minutes}}分",
+    "minutesOverdue": "{{minutes}}分 超過",
+    "minutesRemaining": "残り {{minutes}}分"
+  },
+  "note": {
+    "placeholder": "メモを追加（任意）",
+    "addNote": "+ メモを追加"
+  },
+  "error": {
+    "loadFailed": "ステータスの読み込みに失敗しました"
+  }
+}

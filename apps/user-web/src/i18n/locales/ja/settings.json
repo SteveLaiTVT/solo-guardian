@@ -1,0 +1,18 @@
+{
+  "title": "設定",
+  "checkIn": {
+    "title": "チェックイン設定",
+    "description": "毎日のチェックイン設定を構成します",
+    "deadline": "毎日の締め切り時刻",
+    "reminder": "リマインダー時刻",
+    "enableReminder": "毎日のリマインダーを有効にする"
+  },
+  "account": {
+    "title": "アカウント",
+    "description": "アカウント設定を管理します"
+  },
+  "success": "設定を保存しました！",
+  "error": {
+    "loadFailed": "設定の読み込みに失敗しました"
+  }
+}

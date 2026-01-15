@@ -1,0 +1,23 @@
+{
+  "appName": "独居守护",
+  "loading": "加载中...",
+  "error": "发生错误",
+  "retry": "重试",
+  "cancel": "取消",
+  "save": "保存更改",
+  "saving": "保存中...",
+  "nav": {
+    "home": "首页",
+    "history": "历史",
+    "settings": "设置"
+  },
+  "greeting": {
+    "morning": "早上好！",
+    "afternoon": "下午好！",
+    "evening": "晚上好！"
+  },
+  "time": {
+    "today": "今天",
+    "yesterday": "昨天"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Check-in History",
+  "empty": {
+    "title": "No check-ins yet",
+    "description": "Your check-in history will appear here"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{total}}"
+  },
+  "error": {
+    "loadFailed": "Failed to load history"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "status": {
+    "safe": "You're safe today!",
+    "checkedInAt": "Checked in at {{time}}",
+    "deadline": "Deadline: {{time}}",
+    "alreadyCheckedIn": "You've already checked in today",
+    "tapToCheckIn": "Tap the button below to check in"
+  },
+  "button": {
+    "checkIn": "Check In",
+    "checkInNow": "Check In Now!",
+    "checkingIn": "Checking in..."
+  },
+  "time": {
+    "hoursMinutesOverdue": "{{hours}}h {{minutes}}m overdue",
+    "hoursMinutesRemaining": "{{hours}}h {{minutes}}m remaining",
+    "minutesOverdue": "{{minutes}}m overdue",
+    "minutesRemaining": "{{minutes}}m remaining"
+  },
+  "note": {
+    "placeholder": "Add a note (optional)",
+    "addNote": "+ Add a note"
+  },
+  "error": {
+    "loadFailed": "Failed to load status"
+  }
+}

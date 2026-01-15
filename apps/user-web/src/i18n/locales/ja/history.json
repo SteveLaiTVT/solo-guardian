@@ -1,0 +1,15 @@
+{
+  "title": "チェックイン履歴",
+  "empty": {
+    "title": "チェックイン記録がありません",
+    "description": "チェックイン履歴がここに表示されます"
+  },
+  "pagination": {
+    "previous": "前へ",
+    "next": "次へ",
+    "page": "{{page}} / {{total}} ページ"
+  },
+  "error": {
+    "loadFailed": "履歴の読み込みに失敗しました"
+  }
+}
