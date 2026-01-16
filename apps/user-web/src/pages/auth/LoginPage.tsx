@@ -1,8 +1,8 @@
 /**
  * @file LoginPage.tsx
- * @description Login page with email/password authentication
- * @task TASK-013
- * @design_state_version 1.2.2
+ * @description Login page with email/password and OAuth authentication
+ * @task TASK-013, TASK-041
+ * @design_state_version 3.6.0
  */
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
+import { OAuthButtons } from '@/components/auth'
 
 // DONE(B): Added i18n support - TASK-013
 export function LoginPage(): JSX.Element {
@@ -101,6 +102,12 @@ export function LoginPage(): JSX.Element {
               {loginMutation.isPending ? t('login.loading') : t('login.button')}
             </Button>
           </form>
+
+          {/* OAuth Login Buttons */}
+          <div className="mt-6">
+            <OAuthButtons mode="login" />
+          </div>
+
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('login.noAccount')}{' '}
             <Link
