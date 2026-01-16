@@ -1,0 +1,66 @@
+# E2E Tests Workflow
+# @task TASK-045
+# @design_state_version 3.6.0
+#
+# Validates E2E testing infrastructure setup
+# Note: Full E2E tests require running backend/frontend which is complex in CI
+# This workflow validates the E2E package builds and Playwright is configured correctly
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e-setup-validation:
+    name: Validate E2E Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate Playwright config
+        working-directory: e2e
+        run: npx playwright test --list
+
+      - name: TypeScript check E2E tests
+        working-directory: e2e
+        run: npx tsc --noEmit
+
+      - name: E2E setup validation complete
+        run: echo "E2E testing infrastructure is properly configured"
