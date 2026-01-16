@@ -1,0 +1,193 @@
+# ============================================================
+# Handoff Document: Reminder Notifications
+# @task TASK-029
+# @design_state_version 2.0.0
+# ============================================================
+
+handoff_id: "HO-029"
+task_id: "TASK-029"
+title: "Backend: Reminder notification system"
+design_state_version: "2.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement a scheduled job to send reminder emails to users who haven't
+  checked in yet and are within their reminder window (after reminder time,
+  before deadline time). This is a gentle nudge to help users remember.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  database_changes:
+    - "Run: npx prisma migrate dev --name add_reminder_tracking"
+    - "New field: CheckInSettings.lastReminderSentAt (DateTime?)"
+
+  dependencies:
+    - "TASK-025: Email service (already implemented)"
+    - "TASK-028: Missed check-in detector (already implemented)"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/detector/missed-checkin.detector.ts"
+    todos:
+      - "TODO(B): Import EmailService"
+      - "TODO(B): Inject EmailService"
+      - "TODO(B): Implement sendReminders cron job"
+      - "TODO(B): Implement isWithinReminderWindow"
+      - "TODO(B): Implement wasReminderSentToday"
+
+  - path: "apps/backend/src/modules/detector/detector.module.ts"
+    todos:
+      - "TODO(B): Import EmailModule"
+
+  - path: "apps/backend/src/modules/email/email.service.ts"
+    todos:
+      - "TODO(B): Implement sendReminderEmail"
+      - "TODO(B): Implement getReminderEmailHtml"
+      - "TODO(B): Implement getReminderEmailText"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  send_reminders:
+    schedule: "Every minute (CronExpression.EVERY_MINUTE)"
+    algorithm: |
+      1. Query all users with checkInSettings where reminderEnabled = true
+      2. For each user:
+         a. Check if current time is within reminder window
+         b. Check if user has already checked in today (skip if yes)
+         c. Check if reminder was already sent today (skip if yes)
+         d. Send reminder email to user's email
+         e. Update lastReminderSentAt in checkInSettings
+      3. Log summary: users processed, reminders sent
+
+    error_handling: |
+      - Continue processing other users if one fails
+      - Log errors but don't crash
+
+  is_within_reminder_window:
+    inputs:
+      - "reminderTime: string (HH:mm format, e.g., '09:00')"
+      - "deadlineTime: string (HH:mm format, e.g., '10:00')"
+      - "timezone: string (e.g., 'Asia/Shanghai')"
+    output: "boolean"
+    logic: |
+      1. Get current time in user's timezone (HH:mm)
+      2. Parse reminderTime and deadlineTime
+      3. Return true if: reminderTime <= currentTime < deadlineTime
+      4. Edge case: if reminderTime >= deadlineTime, return false (invalid window)
+
+  was_reminder_sent_today:
+    inputs:
+      - "lastReminderSentAt: Date | null"
+      - "timezone: string"
+    output: "boolean"
+    logic: |
+      1. If lastReminderSentAt is null, return false
+      2. Convert lastReminderSentAt to user's timezone date (YYYY-MM-DD)
+      3. Get today's date in user's timezone
+      4. Return true if dates match
+
+  reminder_email:
+    subject: "[Solo Guardian] Reminder: Check in before {deadlineTime}"
+    content:
+      - "Friendly greeting with user's name"
+      - "Reminder that deadline is approaching"
+      - "Call-to-action button/link to check-in page"
+      - "Warm, encouraging tone (not alarming)"
+    app_url: "Use APP_URL environment variable"
+
+# ============================================================
+# Database Changes
+# ============================================================
+database_changes:
+  prisma_schema:
+    model: "CheckInSettings"
+    new_field: "lastReminderSentAt DateTime? @map('last_reminder_sent_at')"
+
+  migration: |
+    Already added to schema. Run:
+    cd apps/backend && npx prisma migrate dev --name add_reminder_tracking
+
+# ============================================================
+# Environment Variables
+# ============================================================
+environment_variables:
+  APP_URL:
+    description: "Base URL for the web app (for email links)"
+    example: "http://localhost:3000"
+    usage: "Used in reminder email to link to check-in page"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Reminder job runs every minute"
+  - "Only users with reminderEnabled = true receive reminders"
+  - "Reminder sent only if within reminder window"
+  - "No reminder if user already checked in today"
+  - "No duplicate reminders on same day"
+  - "lastReminderSentAt updated after sending"
+  - "Email contains check-in link"
+  - "Graceful error handling"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single function < 50 lines"
+  - "Must handle timezone correctly"
+  - "Must be idempotent (safe to run multiple times)"
+  - "Must not interfere with existing missed check-in detection"
+  - "No external dependencies beyond existing EmailService"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  manual_test_steps:
+    - "Create user with reminder enabled"
+    - "Set reminder time to past, deadline to future"
+    - "Ensure no check-in for today"
+    - "Wait for cron to run"
+    - "Verify email sent"
+    - "Verify lastReminderSentAt updated"
+    - "Wait for next cron run"
+    - "Verify no duplicate email"
+
+  test_scenarios:
+    - scenario: "User in reminder window, no check-in"
+      expected: "Reminder email sent"
+
+    - scenario: "User in reminder window, already checked in"
+      expected: "No email sent"
+
+    - scenario: "User in reminder window, reminder already sent today"
+      expected: "No duplicate email"
+
+    - scenario: "User before reminder time"
+      expected: "No email sent"
+
+    - scenario: "User past deadline time"
+      expected: "No reminder (missed check-in detection handles this)"
+
+    - scenario: "User with reminderEnabled = false"
+      expected: "No email sent"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This feature is about helping users, not punishing them. The reminder
+  should feel like a helpful nudge from a friend, not an alarm.
+
+  The reminder window ensures we don't send emails too early (user may
+  not be awake) or too late (deadline passed, alert will handle it).

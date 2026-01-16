@@ -1,8 +1,8 @@
 /**
  * @file missed-checkin.detector.ts
  * @description Missed Check-in Detector - Cron job to detect overdue users
- * @task TASK-028
- * @design_state_version 1.8.0
+ * @task TASK-028, TASK-029
+ * @design_state_version 2.0.0
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -12,6 +12,8 @@ import { AlertService } from '../alerts';
 // DONE(B): Import PrismaService for batch queries - TASK-028
 import { PrismaService } from '../../prisma/prisma.service';
 import { CheckInService } from '../check-in';
+// TODO(B): Import EmailService for sending reminders - TASK-029
+// import { EmailService } from '../email';
 
 // DONE(B): Implemented MissedCheckInDetector - TASK-028
 @Injectable()
@@ -25,6 +27,8 @@ export class MissedCheckInDetector implements OnModuleInit {
     private readonly prisma: PrismaService,
     // DONE(B): Inject CheckInService - TASK-028
     private readonly checkInService: CheckInService,
+    // TODO(B): Inject EmailService for sending reminders - TASK-029
+    // private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -172,4 +176,64 @@ export class MissedCheckInDetector implements OnModuleInit {
       this.logger.error(`Alert expiration job failed: ${errorMessage}`);
     }
   }
+
+  // ============================================================
+  // Reminder Notification System - TASK-029
+  // ============================================================
+
+  /**
+   * Reminder job - runs every minute to send reminders to users
+   * who haven't checked in yet and are within their reminder window
+   *
+   * TODO(B): Implement sendReminders - TASK-029
+   * Requirements:
+   * - Query all users with checkInSettings where reminderEnabled = true
+   * - For each user:
+   *   1. Check if current time in user's timezone is past reminderTime but before deadlineTime
+   *   2. Check if user has already checked in today (skip if yes)
+   *   3. Check if reminder was already sent today (lastReminderSentAt, skip if same day)
+   *   4. Send reminder email via EmailService.sendReminderEmail()
+   *   5. Update lastReminderSentAt in checkInSettings
+   * - Use batch processing with error handling per user
+   * - Log summary: users processed, reminders sent
+   */
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async sendReminders(): Promise<void> {
+  //   // TODO(B): Implement reminder logic - TASK-029
+  // }
+
+  /**
+   * Check if current time is within reminder window (after reminder, before deadline)
+   *
+   * TODO(B): Implement isWithinReminderWindow - TASK-029
+   * Requirements:
+   * - Parse reminderTime and deadlineTime (HH:mm format)
+   * - Get current time in user's timezone
+   * - Return true if: reminderTime <= currentTime < deadlineTime
+   * - Edge case: if reminderTime >= deadlineTime, no valid window exists
+   */
+  // private isWithinReminderWindow(
+  //   reminderTime: string,
+  //   deadlineTime: string,
+  //   timezone: string,
+  // ): boolean {
+  //   // TODO(B): Implement - TASK-029
+  //   return false;
+  // }
+
+  /**
+   * Check if reminder was already sent today
+   *
+   * TODO(B): Implement wasReminderSentToday - TASK-029
+   * Requirements:
+   * - Compare lastReminderSentAt with today's date in user's timezone
+   * - Return true if lastReminderSentAt is today
+   */
+  // private wasReminderSentToday(
+  //   lastReminderSentAt: Date | null,
+  //   timezone: string,
+  // ): boolean {
+  //   // TODO(B): Implement - TASK-029
+  //   return false;
+  // }
 }

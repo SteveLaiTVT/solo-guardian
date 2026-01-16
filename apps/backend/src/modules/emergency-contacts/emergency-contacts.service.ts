@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.service.ts
  * @description Service for emergency contacts business logic
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-031, TASK-033
+ * @design_state_version 2.0.0
  */
 import {
   Injectable,
@@ -176,4 +176,66 @@ export class EmergencyContactsService {
       updatedAt: contact.updatedAt,
     };
   }
+
+  // ============================================================
+  // Contact Verification - TASK-031, TASK-033
+  // ============================================================
+
+  /**
+   * Send verification email to a contact
+   *
+   * TODO(B): Implement sendVerification - TASK-031
+   * Requirements:
+   * - Verify contact exists and belongs to user
+   * - Generate verification token via repository.setVerificationToken()
+   * - Get user's name for email personalization
+   * - Send verification email via EmailService.sendVerificationEmail()
+   * - Return updated contact
+   * - Throw NotFoundException if contact not found
+   * - Throw BadRequestException if contact already verified
+   */
+  // async sendVerification(
+  //   contactId: string,
+  //   userId: string,
+  // ): Promise<ContactResponseDto> {
+  //   // TODO(B): Implement - TASK-031
+  //   throw new Error('Not implemented');
+  // }
+
+  /**
+   * Resend verification email to a contact
+   *
+   * TODO(B): Implement resendVerification - TASK-031
+   * Requirements:
+   * - Same as sendVerification but regenerates token
+   * - Can be called on contacts that haven't verified yet
+   * - Rate limit: max 3 resends per contact per 24 hours (implement in B session)
+   */
+  // async resendVerification(
+  //   contactId: string,
+  //   userId: string,
+  // ): Promise<ContactResponseDto> {
+  //   // TODO(B): Implement - TASK-031
+  //   throw new Error('Not implemented');
+  // }
+
+  /**
+   * Verify a contact via token (public endpoint, no auth)
+   *
+   * TODO(B): Implement verifyContact - TASK-033
+   * Requirements:
+   * - Find contact by verification token
+   * - Check token is not expired (verificationTokenExpiresAt > now)
+   * - Mark contact as verified via repository.markVerified()
+   * - Return success response with contact info
+   * - Throw BadRequestException if token invalid or expired
+   */
+  // async verifyContact(token: string): Promise<{
+  //   success: boolean;
+  //   contactName: string;
+  //   userName: string;
+  // }> {
+  //   // TODO(B): Implement - TASK-033
+  //   throw new Error('Not implemented');
+  // }
 }

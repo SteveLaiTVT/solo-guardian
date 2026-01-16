@@ -1,0 +1,157 @@
+# ============================================================
+# Handoff Document: Send Verification Emails
+# @task TASK-031
+# @design_state_version 2.0.0
+# ============================================================
+
+handoff_id: "HO-031"
+task_id: "TASK-031"
+title: "Backend: Send verification emails to contacts"
+design_state_version: "2.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the ability to send verification emails to emergency contacts.
+  When a user adds an emergency contact, we should send an email to that
+  contact asking them to verify they agree to be an emergency contact.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  database_changes:
+    - "Run: npx prisma migrate dev --name add_verification_tokens"
+    - "New fields on EmergencyContact:"
+    - "  - verificationToken: String?"
+    - "  - verificationTokenExpiresAt: DateTime?"
+
+  dependencies:
+    - "TASK-025: Email service"
+    - "TASK-015: Emergency contacts module"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    todos:
+      - "TODO(B): Implement setVerificationToken"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+    todos:
+      - "TODO(B): Implement sendVerification"
+      - "TODO(B): Implement resendVerification"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+    todos:
+      - "TODO(B): Implement sendVerification endpoint"
+      - "TODO(B): Implement resendVerification endpoint"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+    todos:
+      - "TODO(B): Import EmailModule"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  set_verification_token:
+    location: "emergency-contacts.repository.ts"
+    logic: |
+      1. Generate UUID token (or use provided token)
+      2. Set verificationToken on contact
+      3. Set verificationTokenExpiresAt to 24 hours from now
+      4. Return updated contact
+
+  send_verification:
+    location: "emergency-contacts.service.ts"
+    inputs:
+      - "contactId: string"
+      - "userId: string (current user)"
+    logic: |
+      1. Find contact, verify it belongs to user
+      2. Throw NotFoundException if not found
+      3. Throw BadRequestException if already verified
+      4. Generate verification token via repository
+      5. Get user's name for email personalization
+      6. Send verification email via EmailService
+      7. Return updated contact
+
+  resend_verification:
+    location: "emergency-contacts.service.ts"
+    inputs:
+      - "contactId: string"
+      - "userId: string"
+    logic: |
+      1. Same as sendVerification but allows resending
+      2. Generate new token (old one becomes invalid)
+      3. Consider rate limiting (max 3 per 24 hours)
+
+  endpoints:
+    send_verification:
+      method: "POST"
+      path: "/api/v1/emergency-contacts/:id/send-verification"
+      auth: "Required"
+      response: "ContactResponseDto"
+
+    resend_verification:
+      method: "POST"
+      path: "/api/v1/emergency-contacts/:id/resend-verification"
+      auth: "Required"
+      response: "ContactResponseDto"
+
+# ============================================================
+# Auto-send on Create
+# ============================================================
+auto_send_option: |
+  Consider automatically sending verification email when contact is created.
+  This can be done by modifying the create method in service:
+
+  ```typescript
+  async create(...) {
+    // ... existing create logic
+    const contact = await this.contactsRepository.create(...);
+
+    // Auto-send verification
+    await this.sendVerificationEmail(contact);
+
+    return this.mapToResponse(contact);
+  }
+  ```
+
+  NOTE: This is optional. User might want to add contact first, then send
+  verification manually. Discuss with team.
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Verification token generated and stored"
+  - "Token expires in 24 hours"
+  - "Email sent to contact's email address"
+  - "Cannot send if contact already verified"
+  - "Resend generates new token"
+  - "Rate limiting on resend (optional)"
+  - "Contact ownership validated"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Token must be UUID format"
+  - "Must validate contact belongs to user"
+  - "Single function < 50 lines"
+  - "No `any` types"
+  - "Use existing EmailService"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This task focuses on the sending side of verification.
+  TASK-032 handles the email content.
+  TASK-033 handles the verification endpoint (receiving clicks).

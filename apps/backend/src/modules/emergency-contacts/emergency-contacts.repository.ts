@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.repository.ts
  * @description Repository for emergency contacts database operations
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-031, TASK-033
+ * @design_state_version 2.0.0
  */
 import { Injectable } from '@nestjs/common';
 import { EmergencyContact, Prisma } from '@prisma/client';
@@ -153,4 +153,67 @@ export class EmergencyContactsRepository {
       orderBy: { priority: 'asc' },
     });
   }
+
+  // ============================================================
+  // Contact Verification - TASK-031, TASK-033
+  // ============================================================
+
+  /**
+   * Find contact by verification token
+   *
+   * TODO(B): Implement findByVerificationToken - TASK-033
+   * Requirements:
+   * - Query by verificationToken field
+   * - Return null if not found
+   * - Include user relation for getting userName in verification flow
+   */
+  // async findByVerificationToken(token: string): Promise<EmergencyContact | null> {
+  //   // TODO(B): Implement - TASK-033
+  //   return null;
+  // }
+
+  /**
+   * Set verification token for a contact
+   *
+   * TODO(B): Implement setVerificationToken - TASK-031
+   * Requirements:
+   * - Generate UUID token if not provided
+   * - Set verificationToken and verificationTokenExpiresAt (24 hours from now)
+   * - Return updated contact
+   */
+  // async setVerificationToken(
+  //   id: string,
+  //   token?: string,
+  // ): Promise<EmergencyContact> {
+  //   // TODO(B): Implement - TASK-031
+  //   return null as unknown as EmergencyContact;
+  // }
+
+  /**
+   * Mark contact as verified
+   *
+   * TODO(B): Implement markVerified - TASK-033
+   * Requirements:
+   * - Set isVerified = true
+   * - Clear verificationToken and verificationTokenExpiresAt
+   * - Return updated contact
+   */
+  // async markVerified(id: string): Promise<EmergencyContact> {
+  //   // TODO(B): Implement - TASK-033
+  //   return null as unknown as EmergencyContact;
+  // }
+
+  /**
+   * Clear expired verification tokens
+   *
+   * TODO(B): Implement clearExpiredTokens - TASK-033
+   * Requirements:
+   * - Find contacts where verificationTokenExpiresAt < now
+   * - Clear verificationToken and verificationTokenExpiresAt
+   * - Return count of cleared tokens
+   */
+  // async clearExpiredTokens(): Promise<number> {
+  //   // TODO(B): Implement - TASK-033
+  //   return 0;
+  // }
 }

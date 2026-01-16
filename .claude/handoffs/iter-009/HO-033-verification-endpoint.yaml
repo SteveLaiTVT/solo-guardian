@@ -1,0 +1,242 @@
+# ============================================================
+# Handoff Document: Verification Endpoint and Page
+# @task TASK-033
+# @design_state_version 2.0.0
+# ============================================================
+
+handoff_id: "HO-033"
+task_id: "TASK-033"
+title: "Backend + Frontend: Verification endpoint and page"
+design_state_version: "2.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the public endpoint that handles verification link clicks,
+  and the frontend page that shows the verification result.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - "TASK-031: Verification token generation"
+    - "TASK-032: Verification email sending"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  backend:
+    - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+      todos:
+        - "TODO(B): Implement findByVerificationToken"
+        - "TODO(B): Implement markVerified"
+        - "TODO(B): Implement clearExpiredTokens"
+
+    - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+      todos:
+        - "TODO(B): Implement verifyContact"
+
+    - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+      todos:
+        - "TODO(B): Create VerifyContactController"
+        - "TODO(B): Implement verify endpoint"
+
+    - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+      todos:
+        - "TODO(B): Add VerifyContactController"
+
+  frontend:
+    - path: "apps/user-web/src/pages/verify-contact/VerifyContactPage.tsx"
+      todos:
+        - "TODO(B): Implement verification page UI"
+
+    - path: "apps/user-web/src/App.tsx"
+      todos:
+        - "TODO(B): Add VerifyContactPage route"
+
+# ============================================================
+# Backend Requirements
+# ============================================================
+backend_requirements:
+  find_by_verification_token:
+    location: "emergency-contacts.repository.ts"
+    logic: |
+      1. Query EmergencyContact by verificationToken
+      2. Include user relation (for userName in response)
+      3. Return null if not found
+
+  mark_verified:
+    location: "emergency-contacts.repository.ts"
+    logic: |
+      1. Update contact: isVerified = true
+      2. Clear verificationToken = null
+      3. Clear verificationTokenExpiresAt = null
+      4. Return updated contact
+
+  clear_expired_tokens:
+    location: "emergency-contacts.repository.ts"
+    description: "Cleanup job for expired tokens (optional)"
+    logic: |
+      1. Find contacts where verificationTokenExpiresAt < now
+      2. Clear their verificationToken and verificationTokenExpiresAt
+      3. Return count of cleared tokens
+
+  verify_contact:
+    location: "emergency-contacts.service.ts"
+    inputs: "token: string"
+    output: "{ success: boolean; contactName: string; userName: string }"
+    logic: |
+      1. Find contact by token
+      2. If not found, throw BadRequestException('Invalid verification token')
+      3. If expired (tokenExpiresAt < now), throw BadRequestException('Token expired')
+      4. Mark contact as verified
+      5. Return success response with names
+
+  public_endpoint:
+    path: "/api/v1/verify-contact"
+    method: "GET"
+    query_params: "token: string"
+    auth: "None (public)"
+    response:
+      success: |
+        {
+          "success": true,
+          "contactName": "Alice",
+          "userName": "Bob"
+        }
+      error: |
+        {
+          "statusCode": 400,
+          "message": "Invalid verification token"
+        }
+
+# ============================================================
+# Frontend Requirements
+# ============================================================
+frontend_requirements:
+  route: "/verify-contact?token=xxx"
+  auth: "None (public route)"
+
+  page_states:
+    loading:
+      title: "Verifying..."
+      content: "Please wait while we verify your contact status."
+      ui: "Spinner or loading animation"
+
+    success:
+      title: "Verification Complete!"
+      content: |
+        You are now verified as an emergency contact for {userName}.
+        You will receive notifications if {userName} misses their daily check-in.
+      ui: "Success icon, green theme"
+      action: "Optional: Link to learn more about Solo Guardian"
+
+    error_invalid:
+      title: "Invalid Link"
+      content: "This verification link is invalid or has already been used."
+      ui: "Error icon, red theme"
+
+    error_expired:
+      title: "Link Expired"
+      content: |
+        This verification link has expired.
+        Please ask {userName} to send a new verification email.
+      ui: "Warning icon, yellow theme"
+
+    no_token:
+      title: "Missing Token"
+      content: "No verification token was provided."
+      ui: "Error icon"
+
+  api_integration:
+    hook: |
+      // Create a new API hook for verification
+      useVerifyContact: (token: string | null) =>
+        useQuery({
+          queryKey: ['verify-contact', token],
+          queryFn: () => api.verifyContact(token!),
+          enabled: !!token,
+          retry: false, // Don't retry on error
+        })
+
+    api_client: |
+      // Add to api.ts
+      verifyContact: (token: string) =>
+        client.get(`/api/v1/verify-contact`, { params: { token } })
+
+# ============================================================
+# Page UI Structure
+# ============================================================
+page_ui_structure: |
+  ┌─────────────────────────────────────────────┐
+  │              Solo Guardian Logo             │
+  │                                             │
+  │         ┌─────────────────────────┐         │
+  │         │     [Status Icon]       │         │
+  │         │                         │         │
+  │         │    [Title Text]         │         │
+  │         │                         │         │
+  │         │    [Description]        │         │
+  │         │                         │         │
+  │         │    [Optional Button]    │         │
+  │         └─────────────────────────┘         │
+  │                                             │
+  │              Footer / Branding              │
+  └─────────────────────────────────────────────┘
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  backend:
+    - "GET /api/v1/verify-contact?token=xxx works"
+    - "Valid token marks contact as verified"
+    - "Token cleared after verification"
+    - "Expired token returns 400 error"
+    - "Invalid token returns 400 error"
+    - "Returns contact and user names"
+
+  frontend:
+    - "Page accessible without authentication"
+    - "Loading state shown during API call"
+    - "Success state shows user name"
+    - "Error states are clear and helpful"
+    - "Page looks professional and trustworthy"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "No authentication required (public endpoint)"
+  - "GET method (safe for email link clicks)"
+  - "Single-use tokens (cleared after verification)"
+  - "No `any` types"
+  - "Functional components + hooks"
+
+# ============================================================
+# Security Considerations
+# ============================================================
+security:
+  - "Token is UUID (unpredictable)"
+  - "Token expires in 24 hours"
+  - "Token cleared after use (single-use)"
+  - "No sensitive data exposed in response"
+  - "No authentication bypass possible"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  The verification page is the first impression for emergency contacts.
+  It should:
+  - Look trustworthy and professional
+  - Clearly explain what happened
+  - Not require any account or login
+  - Work on mobile devices
+
+  Consider adding a "Learn more about Solo Guardian" link for curious contacts.

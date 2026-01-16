@@ -1,8 +1,8 @@
 /**
  * @file App.tsx
  * @description Main application component with routing configuration
- * @task TASK-010, TASK-016, TASK-019, TASK-022
- * @design_state_version 1.6.0
+ * @task TASK-010, TASK-016, TASK-019, TASK-022, TASK-033
+ * @design_state_version 2.0.0
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -34,6 +34,10 @@ function App(): JSX.Element {
           <Toaster position="top-right" />
           <BrowserRouter>
             <Routes>
+              {/* Public routes (no auth check) */}
+              {/* TODO(B): Add VerifyContactPage route - TASK-033 */}
+              {/* <Route path="/verify-contact" element={<VerifyContactPage />} /> */}
+
               {/* Guest routes (redirect if logged in) */}
               <Route element={<GuestRoute />}>
                 <Route path="/login" element={<LoginPage />} />
