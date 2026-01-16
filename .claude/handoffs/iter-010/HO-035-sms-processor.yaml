@@ -1,14 +1,15 @@
 # ============================================================
 # Handoff Document: SMS Notification Processor
 # @task TASK-035
-# @design_state_version 3.0.0
+# @design_state_version 3.0.1
 # ============================================================
 
 handoff_id: "HO-035"
 task_id: "TASK-035"
 title: "Backend: SMS notification processor"
-design_state_version: "3.0.0"
+design_state_version: "3.0.1"
 created_at: "2026-01-16"
+updated_at: "2026-01-16"
 created_by: "A Session"
 
 # ============================================================
@@ -16,73 +17,153 @@ created_by: "A Session"
 # ============================================================
 objective: |
   Extend the existing notification queue processor to support SMS channel.
-  When an alert is triggered, send SMS to contacts who have SMS enabled.
+  When an alert is triggered, contacts with SMS preference receive SMS notifications
+  instead of or in addition to email notifications.
 
 # ============================================================
 # Prerequisites
 # ============================================================
 prerequisites:
   dependencies:
-    - "TASK-034: SmsService"
-    - "TASK-026: Notification module (existing)"
+    - task: "TASK-034"
+      description: "SmsService with Twilio integration"
+      status: "must be completed first"
+    - task: "TASK-026"
+      description: "Notification module (existing)"
+      status: "completed"
+
+  existing_infrastructure:
+    - "SendSmsJobData interface already defined in queue.constants.ts"
+    - "NOTIFICATION_JOB_TYPES.SEND_SMS already defined"
+    - "Bull queue already configured for notifications"
 
 # ============================================================
 # Files to Modify
 # ============================================================
 files_to_modify:
   - path: "apps/backend/src/modules/notifications/notification.processor.ts"
-    changes:
-      - "Import SmsService"
-      - "Add SMS sending logic for NotificationChannel.sms"
-      - "Handle SMS-specific errors"
+    skeleton_updated: true
+    todos:
+      - marker: "TODO(B): Import SmsService from '../sms'"
+        description: "Import SmsService and add to constructor injection"
+      - marker: "TODO(B): Implement handleSendSms"
+        description: "Add SMS job handler with @Process decorator"
 
-  - path: "apps/backend/src/modules/notifications/notifications.module.ts"
-    changes:
-      - "Import SmsModule"
+  - path: "apps/backend/src/modules/notifications/notification.module.ts"
+    skeleton_updated: true
+    todos:
+      - marker: "TODO(B): Import SmsModule from '../sms'"
+        description: "Import SmsModule and add to imports array"
 
-  - path: "apps/backend/prisma/schema.prisma"
-    changes:
-      - "Ensure NotificationChannel enum has 'sms' value (already exists)"
+  - path: "apps/backend/src/modules/notifications/notification.service.ts"
+    skeleton_updated: true
+    todos:
+      - marker: "TODO(B): Update Queue type to union"
+        description: "Change Queue generic to support both job types"
+      - marker: "TODO(B): Add SMS channel support"
+        description: "Update queueAlertNotifications to handle SMS contacts"
+      - marker: "TODO(B): Determine channel based on preferredChannel"
+        description: "Logic to select email vs SMS channel"
+      - marker: "TODO(B): Queue appropriate job based on channel"
+        description: "Queue SMS job for SMS contacts, email for others"
 
 # ============================================================
-# Requirements
+# Implementation Details
 # ============================================================
-requirements:
-  notification_processor_update:
-    location: "notification.processor.ts"
-    changes: |
-      In processNotification method:
-      1. Check notification.channel
-      2. If 'email' → use existing EmailService
-      3. If 'sms' → use new SmsService.sendAlertSms()
-      4. Update notification status based on result
+implementation:
 
-  emergency_contact_update:
-    description: "Contacts need preferred channel field"
-    schema_change: |
-      model EmergencyContact {
-        // ... existing fields
-        preferredChannel NotificationChannel @default(email) @map("preferred_channel")
-      }
+  notification_processor:
+    file: "notification.processor.ts"
+    changes:
+      - section: "imports"
+        action: "Add SmsService import"
+        code: |
+          import { SmsService } from '../sms';
 
-  alert_creation_update:
-    location: "alert.service.ts"
-    changes: |
-      When creating notifications for an alert:
-      1. Check each contact's preferredChannel
-      2. Create notification with appropriate channel
-      3. If contact has phone but no email, use SMS
-      4. If contact has both, use preferredChannel
+      - section: "constructor"
+        action: "Inject SmsService"
+        code: |
+          constructor(
+            private readonly emailService: EmailService,
+            private readonly notificationService: NotificationService,
+            private readonly smsService: SmsService,
+          ) {}
+
+      - section: "handleSendSms method"
+        action: "Implement SMS job handler"
+        pattern: |
+          Mirror handleSendEmail pattern:
+          1. Extract data from job.data (SendSmsJobData)
+          2. Log with masked phone (last 4 digits only)
+          3. Call smsService.sendAlertSms()
+          4. Handle success/failure like email handler
+          5. Re-throw on failure for Bull retry
+
+  notification_module:
+    file: "notification.module.ts"
+    changes:
+      - action: "Import and add SmsModule"
+        code: |
+          import { SmsModule } from '../sms';
+
+          @Module({
+            imports: [
+              PrismaModule,
+              EmailModule,
+              SmsModule,  // Add this
+              BullModule.registerQueue({ name: QUEUE_NAMES.NOTIFICATION }),
+            ],
+            ...
+          })
+
+  notification_service:
+    file: "notification.service.ts"
+    changes:
+      - section: "queueAlertNotifications"
+        action: "Add channel selection logic"
+        logic: |
+          For each contact:
+          1. Determine channel:
+             - If contact.preferredChannel === 'sms' && contact.phone:
+               channel = 'sms'
+             - Else:
+               channel = 'email'
+          2. Create notification with determined channel
+          3. Queue appropriate job:
+             - 'sms': NOTIFICATION_JOB_TYPES.SEND_SMS with SendSmsJobData
+             - 'email': NOTIFICATION_JOB_TYPES.SEND_EMAIL with SendEmailJobData
 
 # ============================================================
 # Acceptance Criteria
 # ============================================================
 acceptance_criteria:
-  - "SMS notifications processed from queue"
-  - "Contact's preferred channel respected"
-  - "SMS sent via SmsService"
-  - "Notification status updated correctly"
-  - "Fallback to email if SMS fails (optional)"
+  - id: "AC-01"
+    description: "SMS jobs processed from notification queue"
+    verification: "handleSendSms method exists with @Process decorator"
+
+  - id: "AC-02"
+    description: "SmsService injected and used for SMS sending"
+    verification: "smsService.sendAlertSms called in handleSendSms"
+
+  - id: "AC-03"
+    description: "Contact's preferred channel respected"
+    verification: "SMS contacts get SMS, email contacts get email"
+
+  - id: "AC-04"
+    description: "Notification status updated correctly"
+    verification: "handleNotificationSent/Failed called after job completion"
+
+  - id: "AC-05"
+    description: "Phone numbers not fully logged (privacy)"
+    verification: "Only last 4 digits in log messages"
+
+  - id: "AC-06"
+    description: "Existing email functionality unchanged"
+    verification: "Email notifications still work as before"
+
+  - id: "AC-07"
+    description: "Fallback to email if no phone number"
+    verification: "Contact with preferredChannel='sms' but no phone gets email"
 
 # ============================================================
 # Constraints
@@ -90,5 +171,72 @@ acceptance_criteria:
 constraints:
   - "Single function < 50 lines"
   - "No `any` types"
-  - "Use existing queue infrastructure"
+  - "Use existing queue infrastructure (no new queues)"
   - "Don't break existing email notifications"
+  - "Don't log full phone numbers (privacy)"
+  - "Mirror existing code patterns from handleSendEmail"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  manual_test_steps:
+    - "Complete TASK-034 (SmsService) first"
+    - "Create alert with contact that has phone + preferredChannel='sms'"
+    - "Verify SMS job queued"
+    - "Verify SMS sent via Twilio"
+    - "Verify notification status updated to 'sent'"
+
+  test_scenarios:
+    - scenario: "Email contact"
+      input: "Contact with preferredChannel='email'"
+      expected: "Email notification queued and sent"
+
+    - scenario: "SMS contact with phone"
+      input: "Contact with preferredChannel='sms' and phone number"
+      expected: "SMS notification queued and sent"
+
+    - scenario: "SMS contact without phone"
+      input: "Contact with preferredChannel='sms' but no phone"
+      expected: "Falls back to email notification"
+
+    - scenario: "SMS failure"
+      input: "Invalid phone number"
+      expected: "Job retried, then marked as failed"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Phone number verification (TASK-036)"
+  - "UI for SMS preferences (TASK-037)"
+  - "SMS rate limiting"
+  - "SMS delivery confirmation webhooks"
+  - "Dual channel (both email AND SMS)"
+
+# ============================================================
+# Reference Files
+# ============================================================
+reference_files:
+  - path: "apps/backend/src/modules/queue/queue.constants.ts"
+    note: "SendSmsJobData interface and NOTIFICATION_JOB_TYPES"
+
+  - path: "apps/backend/src/modules/email/email.service.ts"
+    note: "Reference pattern for sendAlertEmail method"
+
+  - path: ".claude/handoffs/iter-010/HO-034-sms-provider.yaml"
+    note: "SmsService specification (dependency)"
+
+# ============================================================
+# Commit Message Template
+# ============================================================
+commit_message: |
+  feat(notifications): add SMS channel to notification processor
+
+  - Add handleSendSms to NotificationProcessor
+  - Inject SmsService for SMS sending
+  - Update queueAlertNotifications for channel selection
+  - Respect contact's preferredChannel setting
+  - Fallback to email if SMS not possible
+
+  Task: TASK-035

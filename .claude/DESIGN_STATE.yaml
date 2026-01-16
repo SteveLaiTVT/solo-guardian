@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "3.2.0"
+  version: "3.3.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
   branch: "main"
@@ -572,11 +572,18 @@ current_iterations:
 
       - id: "TASK-035"
         title: "Backend: SMS notification processor"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-035-sms-processor.yaml"
         depends_on: ["TASK-034"]
         description: "Add SMS channel to notification queue processor"
+        skeleton_files:
+          - "apps/backend/src/modules/notifications/notification.processor.ts"
+          - "apps/backend/src/modules/notifications/notification.module.ts"
+          - "apps/backend/src/modules/notifications/notification.service.ts"
+        skeleton_version: "3.2.1"
+        review_verdict: "pass"
+        completed_at: "2026-01-16"
 
       - id: "TASK-036"
         title: "Backend: Phone number verification"
