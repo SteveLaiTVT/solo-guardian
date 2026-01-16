@@ -1,0 +1,284 @@
+# ============================================================
+# Review Report: iter-009 Reminder Notifications & Contact Verification
+# @design_state_version 3.0.0
+# ============================================================
+
+report_id: "RR-iter-009"
+task_id: "TASK-029, TASK-031, TASK-032, TASK-033"
+implementation_report_id: "IR-iter-009"
+reviewed_at: "2026-01-16"
+reviewer: "C Session"
+
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 12
+    issues_found: 2
+    critical_issues: 0
+    errors: 0
+    warnings: 1
+    suggestions: 1
+  brief: |
+    Implementation is complete and meets all acceptance criteria.
+    Code is well-structured with proper separation of concerns.
+    Security measures properly implemented (UUID tokens, 24hr expiry, single-use).
+    Minor suggestions for improvement but no blocking issues.
+
+# ============================================================
+# TODO Completion Check
+# ============================================================
+todo_check:
+  - file: "apps/backend/prisma/schema.prisma"
+    status: "complete"
+    todos_found: 2
+    todos_filled: 2
+    notes: "lastReminderSentAt and verificationToken fields added with proper mapping"
+
+  - file: "apps/backend/src/modules/detector/missed-checkin.detector.ts"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes: "sendReminders() cron job implemented with helper methods"
+
+  - file: "apps/backend/src/modules/email/email.service.ts"
+    status: "complete"
+    todos_found: 2
+    todos_filled: 2
+    notes: "sendReminderEmail() and sendVerificationEmail() implemented"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    status: "complete"
+    todos_found: 4
+    todos_filled: 4
+    notes: "setVerificationToken, findByVerificationToken, markVerified, clearExpiredTokens"
+
+  - file: "apps/backend/src/modules/emergency-contacts/contact-verification.service.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes: "sendVerification, resendVerification, verifyContact"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes: "sendVerification, resendVerification endpoints + VerifyContactController"
+
+  - file: "apps/user-web/src/pages/verify-contact/VerifyContactPage.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes: "Complete verification page with loading/success/error states"
+
+  - file: "apps/user-web/src/App.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes: "VerifyContactPage route added as public route"
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "No `any` type allowed"
+    status: "pass"
+    verification: "No `any` types found in implementation files"
+
+  - constraint: "All functions must have return type declaration"
+    status: "pass"
+    verification: "All functions have explicit return types"
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    verification: |
+      - missed-checkin.detector.ts: 181 lines
+      - email.service.ts: 138 lines
+      - contact-verification.service.ts: 146 lines
+      - emergency-contacts.repository.ts: 232 lines
+      - VerifyContactPage.tsx: 170 lines
+
+  - constraint: "Single function < 50 lines"
+    status: "pass"
+    verification: |
+      Longest functions:
+      - sendReminders(): ~47 lines (within limit)
+      - detectMissedCheckIns(): ~44 lines (within limit)
+
+  - constraint: "Controller only validates and calls Service"
+    status: "pass"
+    verification: |
+      - EmergencyContactsController delegates to ContactVerificationService
+      - VerifyContactController validates token parameter and delegates
+
+  - constraint: "Service contains business logic"
+    status: "pass"
+    verification: "ContactVerificationService handles verification logic, ownership validation"
+
+  - constraint: "Repository handles database operations"
+    status: "pass"
+    verification: "EmergencyContactsRepository handles all token operations"
+
+  - constraint: "Sensitive operations must be logged"
+    status: "pass"
+    verification: |
+      - Verification email sent: logged
+      - Contact verified: logged
+      - Reminder sent: logged
+      - Failed emails: logged with error
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - criterion: "Reminder cron job runs every minute"
+    status: "pass"
+    verification: "@Cron(CronExpression.EVERY_MINUTE) on sendReminders()"
+
+  - criterion: "Reminders sent before check-in deadline"
+    status: "pass"
+    verification: "isWithinReminderWindow() checks reminderTime < currentTime < deadlineTime"
+
+  - criterion: "No duplicate reminders same day"
+    status: "pass"
+    verification: "wasReminderSentToday() checks lastReminderSentAt against today's date"
+
+  - criterion: "Verification token is UUID"
+    status: "pass"
+    verification: "crypto.randomUUID() used in setVerificationToken()"
+
+  - criterion: "Token expires in 24 hours"
+    status: "pass"
+    verification: "expiresAt.setHours(expiresAt.getHours() + 24)"
+
+  - criterion: "Token is single-use"
+    status: "pass"
+    verification: "markVerified() clears verificationToken and verificationTokenExpiresAt"
+
+  - criterion: "Public verification endpoint"
+    status: "pass"
+    verification: "VerifyContactController has no @UseGuards(JwtAuthGuard)"
+
+  - criterion: "Frontend verification page"
+    status: "pass"
+    verification: "VerifyContactPage.tsx with loading/success/error/expired states"
+
+  - criterion: "Contact ownership validated"
+    status: "pass"
+    verification: "sendVerification checks contact.userId === userId"
+
+# ============================================================
+# Code Quality Review
+# ============================================================
+code_quality:
+
+  error_handling:
+    status: "pass"
+    notes: |
+      - Proper use of NotFoundException and BadRequestException
+      - Token expiry handled with specific error message
+      - Email send failures logged but don't throw (graceful degradation)
+
+  security:
+    status: "pass"
+    notes: |
+      - UUID tokens are cryptographically secure (unpredictable)
+      - 24-hour token expiry limits window of attack
+      - Tokens cleared after use (prevents replay)
+      - Ownership validation before sending verification
+      - Public endpoint doesn't expose user information
+
+  performance:
+    status: "pass"
+    notes: |
+      - Index on verificationToken for fast lookup
+      - Reminder check doesn't N+1 query (includes user in initial query)
+      - Efficient date comparison using timezone-aware helpers
+
+  maintainability:
+    status: "pass"
+    notes: |
+      - Good separation: ContactVerificationService separate from EmergencyContactsService
+      - Helper methods well named (isWithinReminderWindow, wasReminderSentToday)
+      - Email templates separated into template files
+      - Clean React component structure with StatusCard reusable component
+
+# ============================================================
+# Issues Found
+# ============================================================
+issues:
+  - id: "ISS-015"
+    severity: "warning"
+    type: "error_handling"
+    title: "sendVerification returns success even if email fails"
+    location:
+      file: "apps/backend/src/modules/emergency-contacts/contact-verification.service.ts"
+      lines: "60-65"
+    description: |
+      When sendVerificationEmail() returns false, the service logs an error
+      but still returns the contact with a new token. The user doesn't know
+      the email failed to send.
+    recommendation: |
+      Consider either:
+      1. Throwing an exception when email fails (requires UI handling)
+      2. Adding a 'verificationEmailSent' field to the response
+      3. Document this as expected behavior (token created, email may fail)
+    effort: "low"
+
+  - id: "ISS-016"
+    severity: "suggestion"
+    type: "consistency"
+    title: "Verification page missing i18n support"
+    location:
+      file: "apps/user-web/src/pages/verify-contact/VerifyContactPage.tsx"
+    description: |
+      The verification page has hardcoded English strings. Other pages in the
+      app use react-i18next for internationalization.
+    recommendation: |
+      Add i18n support for verification page strings:
+      - "Verifying..."
+      - "Verification Complete!"
+      - "Link Expired"
+      - "Invalid Link"
+      - etc.
+      This is already noted in the known_limitations of the IR.
+    effort: "low"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Clean separation of verification logic into dedicated ContactVerificationService"
+  - "Timezone-aware reminder window calculation using Intl.DateTimeFormat"
+  - "Well-designed verification page with clear status states and visual feedback"
+  - "Proper security measures: UUID tokens, 24hr expiry, single-use"
+  - "Email templates have both HTML and plain text versions"
+  - "Good error handling with specific messages for expired vs invalid tokens"
+  - "API client types properly updated with VerifyContactResult"
+  - "Database index on verificationToken for efficient lookups"
+
+# ============================================================
+# Architecture Notes
+# ============================================================
+architecture_notes:
+  - note: "Good decision to create separate ContactVerificationService"
+    impact: "Keeps EmergencyContactsService focused on CRUD operations"
+
+  - note: "VerifyContactController is a separate controller"
+    impact: "Clean separation of public vs authenticated endpoints"
+
+  - note: "Reminder emails sent from detector module"
+    impact: "Centralizes scheduled email operations (alerts and reminders)"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  required_before_merge: []
+  suggested_improvements:
+    - "Add i18n support to verification page (non-blocking)"
+    - "Consider indicating email send failure to user (non-blocking)"
+  next_steps:
+    - "Iteration can be marked as completed"
+    - "i18n for verification page can be added in future iteration"

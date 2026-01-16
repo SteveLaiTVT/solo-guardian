@@ -15,9 +15,10 @@ created_by: "A Session"
 # Objective
 # ============================================================
 objective: |
-  Integrate Twilio SMS API to enable sending SMS notifications to emergency
-  contacts. This is the foundation for SMS-based alerts as an alternative
-  or complement to email notifications.
+  Implement SMS sending service using Twilio SDK.
+  Provides SMS alert capability for notifying emergency contacts.
+  This is the foundation for SMS notifications - processor integration
+  comes in TASK-035.
 
 # ============================================================
 # Prerequisites
@@ -29,131 +30,232 @@ prerequisites:
 
   environment_variables:
     - name: "TWILIO_ACCOUNT_SID"
-      description: "Twilio Account SID"
+      description: "Twilio Account SID (starts with AC)"
+      example: "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
       required: true
+
     - name: "TWILIO_AUTH_TOKEN"
       description: "Twilio Auth Token"
+      example: "your-auth-token"
       required: true
+
     - name: "TWILIO_PHONE_NUMBER"
-      description: "Twilio phone number to send from"
+      description: "Twilio phone number to send SMS from (E.164 format)"
+      example: "+15551234567"
       required: true
 
-  twilio_setup:
-    - "Create Twilio account at twilio.com"
-    - "Get Account SID and Auth Token from Console"
-    - "Purchase or use trial phone number"
-    - "Verify recipient numbers (trial accounts only)"
+  twilio_setup: |
+    Development Setup:
+    1. Create free Twilio account at https://www.twilio.com
+    2. Get Account SID and Auth Token from Console Dashboard
+    3. Get a phone number from Twilio (trial accounts get a free number)
+    4. Add credentials to .env file
+
+    Note: Trial accounts can only send to verified phone numbers.
+    For production, upgrade to a paid account.
 
 # ============================================================
-# Files to Create
+# Skeleton Files
 # ============================================================
-files_to_create:
-  - path: "apps/backend/src/modules/sms/sms.module.ts"
-    description: "NestJS module for SMS functionality"
-
+skeleton_files:
   - path: "apps/backend/src/modules/sms/sms.service.ts"
-    description: "Service to send SMS via Twilio"
+    todos:
+      - "TODO(B): Import Injectable, Logger, OnModuleInit"
+      - "TODO(B): Import Twilio client"
+      - "TODO(B): Define SmsService class with @Injectable"
+      - "TODO(B): Add private logger"
+      - "TODO(B): Add private twilioClient property"
+      - "TODO(B): Add private fromNumber property"
+      - "TODO(B): Implement onModuleInit"
+      - "TODO(B): Implement sendAlertSms"
+      - "TODO(B): Implement sendVerificationSms"
+      - "TODO(B): Implement validatePhoneNumber"
+
+  - path: "apps/backend/src/modules/sms/sms.module.ts"
+    todos:
+      - "TODO(B): Import Module from @nestjs/common"
+      - "TODO(B): Import SmsService"
+      - "TODO(B): Define SmsModule class with @Module decorator"
 
   - path: "apps/backend/src/modules/sms/index.ts"
-    description: "Module exports"
+    status: "complete"
+    notes: "Module exports already written"
 
 # ============================================================
 # Requirements
 # ============================================================
 requirements:
-  sms_service:
-    methods:
-      - name: "sendSms"
-        signature: "(to: string, body: string) => Promise<boolean>"
-        description: "Send SMS to a phone number"
-        logic: |
-          1. Validate phone number format (E.164)
-          2. Call Twilio API to send SMS
-          3. Log attempt and result
-          4. Return true on success, false on failure
+  on_module_init:
+    - "Read TWILIO_ACCOUNT_SID from environment"
+    - "Read TWILIO_AUTH_TOKEN from environment"
+    - "Read TWILIO_PHONE_NUMBER from environment"
+    - "Create Twilio client if credentials present"
+    - "Store fromNumber for use in send methods"
+    - "Log success message on successful init"
+    - "Log warning if credentials missing (don't throw)"
+    - "App must start even without Twilio configured"
 
-      - name: "sendAlertSms"
-        signature: "(to: string, contactName: string, userName: string, alertDate: string) => Promise<boolean>"
-        description: "Send alert SMS to emergency contact"
-        logic: |
-          1. Format alert message (keep under 160 chars if possible)
-          2. Call sendSms with formatted message
-          3. Return result
+  send_alert_sms:
+    - "Send SMS to phone number in E.164 format"
+    - "Use Twilio messages.create() API"
+    - "Message format: '[Solo Guardian] Alert: {userName} has not checked in today. Please check on them.'"
+    - "Return true on success, false on failure"
+    - "Log all send attempts with phone number (last 4 digits only for privacy)"
+    - "Handle errors gracefully - never throw"
 
-    message_templates:
-      alert: |
-        [Solo Guardian] ALERT: {userName} has not checked in today ({alertDate}).
-        Please check on them. This is an automated safety alert.
+  send_verification_sms:
+    - "Send SMS with 6-digit OTP code"
+    - "Message format: '[Solo Guardian] Your verification code is: {code}. Valid for 10 minutes.'"
+    - "Return true on success, false on failure"
+    - "Log attempts without exposing the code"
 
-  phone_number_format:
-    format: "E.164"
-    examples:
-      - "+14155551234"
-      - "+8613800138000"
-    validation: |
-      - Must start with +
-      - Must contain only digits after +
-      - Length: 7-15 digits
-
-  error_handling:
-    - "Log all SMS attempts with phone (last 4 digits only)"
-    - "Don't expose Twilio errors to users"
-    - "Retry once on network errors"
-    - "Return false on failure (don't throw)"
+  validate_phone_number:
+    - "Validate E.164 format: +[country code][number]"
+    - "Regex: /^\\+[1-9]\\d{1,14}$/"
+    - "Return boolean"
 
 # ============================================================
-# Module Structure
+# Twilio API Reference
 # ============================================================
-module_structure: |
-  apps/backend/src/modules/sms/
-  ├── sms.module.ts      # NestJS module
-  ├── sms.service.ts     # Twilio integration
-  └── index.ts           # Exports
+twilio_api_reference:
+  initialization: |
+    import * as twilio from 'twilio';
+    const client = twilio(accountSid, authToken);
+
+  send_sms: |
+    await client.messages.create({
+      body: 'Message text here',
+      from: '+15551234567',  // Your Twilio number
+      to: '+15559876543',    // Recipient number
+    });
+
+  response_fields:
+    - "sid: Message SID (unique identifier)"
+    - "status: queued, sending, sent, delivered, failed"
+    - "errorCode: Error code if failed"
+    - "errorMessage: Error message if failed"
+
+# ============================================================
+# Phone Number Format (E.164)
+# ============================================================
+phone_format:
+  description: "E.164 is the international phone number format"
+  pattern: "+[country code][subscriber number]"
+  examples:
+    - "+14155551234 (US)"
+    - "+447700900123 (UK)"
+    - "+81312345678 (Japan)"
+    - "+8613812345678 (China)"
+  max_length: 15
+  validation_regex: '/^\+[1-9]\d{1,14}$/'
 
 # ============================================================
 # Acceptance Criteria
 # ============================================================
 acceptance_criteria:
-  - "SmsService can send SMS via Twilio"
-  - "Phone numbers validated before sending"
-  - "Alert SMS formatted correctly"
-  - "Errors handled gracefully"
-  - "SMS attempts logged (without full phone number)"
-  - "Works with Twilio trial account"
+  - "Twilio client created on startup (when credentials provided)"
+  - "Missing credentials logged as warning (not error)"
+  - "App starts even without Twilio configured"
+  - "sendAlertSms sends SMS successfully"
+  - "sendVerificationSms sends SMS successfully"
+  - "Both methods return boolean (no throwing)"
+  - "All send attempts logged"
+  - "Phone numbers validated before send"
+  - "SmsModule exports SmsService"
 
 # ============================================================
 # Constraints
 # ============================================================
 constraints:
   - "Single function < 50 lines"
-  - "No `any` types"
+  - "No hardcoded Twilio credentials"
+  - "All operations logged"
+  - "No throwing on SMS failure (return false)"
   - "Phone numbers must be E.164 format"
-  - "Don't log full phone numbers (privacy)"
-  - "SMS body < 160 chars for single segment"
-
-# ============================================================
-# Security
-# ============================================================
-security:
-  - "Store Twilio credentials in environment variables"
-  - "Never log full phone numbers"
-  - "Validate phone numbers before API call"
-  - "Rate limit SMS sending (future)"
+  - "SMS messages must be under 160 characters (single segment)"
+  - "Follow same patterns as EmailService"
+  - "No `any` types"
 
 # ============================================================
 # Testing
 # ============================================================
 testing:
-  manual_test_steps:
-    - "Configure Twilio trial account"
-    - "Verify your phone number in Twilio"
-    - "Call SmsService.sendSms with verified number"
-    - "Verify SMS received"
+  development:
+    option_1: |
+      Twilio Test Credentials (Messages appear in console, not sent):
+      1. Use Twilio test credentials from console
+      2. Messages will be logged but not actually sent
+      3. Good for development without costs
 
-  test_scenarios:
-    - scenario: "Valid phone number"
-      expected: "SMS sent successfully"
-    - scenario: "Invalid phone number format"
-      expected: "Return false, log error"
-    - scenario: "Twilio API error"
-      expected: "Return false, log error"
+    option_2: |
+      Twilio Trial Account (Real SMS to verified numbers):
+      1. Create free trial account
+      2. Verify your phone number
+      3. Send real SMS to verified number only
+      4. Limited to ~$15 worth of messages
+
+  manual_test: |
+    1. Set up Twilio credentials in .env
+    2. Start backend
+    3. Call SmsService.sendAlertSms directly (or via test endpoint)
+    4. Verify SMS received on phone (if using real credentials)
+    5. Check logs for send attempt
+
+  unit_test_approach: |
+    Mock the Twilio client in unit tests:
+    - Mock twilio() function
+    - Mock client.messages.create()
+    - Verify correct parameters passed
+    - Test error handling paths
+
+# ============================================================
+# Security Considerations
+# ============================================================
+security:
+  - "Never log full phone numbers - only last 4 digits"
+  - "Never log auth tokens or account SIDs"
+  - "Store credentials in environment variables only"
+  - "Validate phone number format before sending"
+  - "Rate limit SMS sends in production (future)"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "SMS delivery status webhooks"
+  - "SMS cost tracking"
+  - "Multiple SMS providers (only Twilio)"
+  - "MMS (multimedia messages)"
+  - "Two-way SMS (receiving)"
+  - "Integration with notification queue (TASK-035)"
+  - "Phone number verification flow (TASK-036)"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on: []
+
+# ============================================================
+# Downstream Tasks
+# ============================================================
+downstream_tasks:
+  - task_id: "TASK-035"
+    title: "SMS notification processor"
+    description: "Integrates SmsService with notification queue"
+
+  - task_id: "TASK-036"
+    title: "Phone number verification"
+    description: "Uses sendVerificationSms for OTP flow"
+
+# ============================================================
+# Reference Files
+# ============================================================
+reference_files:
+  - path: "apps/backend/src/modules/email/email.service.ts"
+    description: "Follow same patterns for init, send, error handling"
+
+  - path: "apps/backend/src/modules/email/email.module.ts"
+    description: "Follow same module structure"
+
+  - path: "apps/backend/src/modules/queue/queue.constants.ts"
+    description: "SendSmsJobData interface already defined"
