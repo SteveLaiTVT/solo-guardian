@@ -1,4 +1,4 @@
-# B SESSION - Implementation (Claude Sonnet 4.5)
+# B SESSION - Implementation (Claude Opus 4.5)
 
 ## Your Role
 

@@ -1,4 +1,4 @@
-# C SESSION - Code Review (Claude Sonnet 4.5)
+# C SESSION - Code Review (Claude Opus 4.5)
 
 ## Your Role
 
