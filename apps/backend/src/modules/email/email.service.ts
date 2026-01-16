@@ -167,57 +167,113 @@ You received this because you are listed as an emergency contact.
 
   /**
    * Send a reminder email to user before deadline
-   *
-   * TODO(B): Implement sendReminderEmail - TASK-029
-   * Requirements:
-   * - Parameters: to (email), userName, deadlineTime (HH:mm), timezone
-   * - Subject: "[Solo Guardian] Reminder: Check in before {deadlineTime}"
-   * - Include link to check-in page (use APP_URL env var)
-   * - Return true on success, false on failure
-   * - Log attempts and results
+   * DONE(B): Implement sendReminderEmail - TASK-029
    */
-  // async sendReminderEmail(
-  //   to: string,
-  //   userName: string,
-  //   deadlineTime: string,
-  //   timezone: string,
-  // ): Promise<boolean> {
-  //   // TODO(B): Implement - TASK-029
-  //   return false;
-  // }
+  async sendReminderEmail(
+    to: string,
+    userName: string,
+    deadlineTime: string,
+    timezone: string,
+  ): Promise<boolean> {
+    this.logger.log(`Attempting to send reminder email to: ${to}`);
+
+    if (!this.transporter) {
+      this.logger.error('Email transporter not initialized');
+      return false;
+    }
+
+    try {
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      const subject = `[Solo Guardian] Reminder: Check in before ${deadlineTime}`;
+      const html = this.getReminderEmailHtml(userName, deadlineTime, appUrl);
+      const text = this.getReminderEmailText(userName, deadlineTime, appUrl);
+
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || 'Solo Guardian <noreply@sologuardian.app>',
+        to,
+        subject,
+        html,
+        text,
+      });
+
+      this.logger.log(`Reminder email sent successfully to: ${to}`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed to send reminder email to ${to}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return false;
+    }
+  }
 
   /**
    * Generate HTML content for reminder email
-   *
-   * TODO(B): Implement getReminderEmailHtml - TASK-029
-   * Requirements:
-   * - Friendly greeting with userName
-   * - Reminder message about deadline (format: HH:mm in user's timezone)
-   * - Call-to-action button linking to check-in page
-   * - Warm, encouraging tone (not alarming)
+   * DONE(B): Implement getReminderEmailHtml - TASK-029
    */
-  // private getReminderEmailHtml(
-  //   userName: string,
-  //   deadlineTime: string,
-  //   appUrl: string,
-  // ): string {
-  //   // TODO(B): Implement - TASK-029
-  //   return '';
-  // }
+  private getReminderEmailHtml(
+    userName: string,
+    deadlineTime: string,
+    appUrl: string,
+  ): string {
+    const checkInUrl = `${appUrl}/check-in`;
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
+    <h2 style="color: #4A90A4; margin-top: 0;">Good Morning!</h2>
+    <p>Hi ${userName},</p>
+    <p>This is a friendly reminder to check in today. Your deadline is <strong>${deadlineTime}</strong>.</p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${checkInUrl}"
+         style="background: #28a745; color: white; padding: 15px 30px;
+                text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+        Check In Now
+      </a>
+    </div>
+    <p style="color: #666;">Checking in takes just a second and helps your loved ones know you're safe.</p>
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #dee2e6;">
+    <p style="color: #6c757d; font-size: 12px; margin-bottom: 0;">
+      This is an automated reminder from Solo Guardian.<br>
+      You can adjust your reminder settings in the app.
+    </p>
+  </div>
+</body>
+</html>`.trim();
+  }
 
   /**
    * Generate plain text content for reminder email
-   *
-   * TODO(B): Implement getReminderEmailText - TASK-029
+   * DONE(B): Implement getReminderEmailText - TASK-029
    */
-  // private getReminderEmailText(
-  //   userName: string,
-  //   deadlineTime: string,
-  //   appUrl: string,
-  // ): string {
-  //   // TODO(B): Implement - TASK-029
-  //   return '';
-  // }
+  private getReminderEmailText(
+    userName: string,
+    deadlineTime: string,
+    appUrl: string,
+  ): string {
+    const checkInUrl = `${appUrl}/check-in`;
+
+    return `
+Good Morning!
+
+Hi ${userName},
+
+This is a friendly reminder to check in today. Your deadline is ${deadlineTime}.
+
+Check in now: ${checkInUrl}
+
+Checking in takes just a second and helps your loved ones know you're safe.
+
+---
+This is an automated reminder from Solo Guardian.
+You can adjust your reminder settings in the app.
+    `.trim();
+  }
 
   // ============================================================
   // Contact Verification Email - TASK-032
@@ -225,56 +281,122 @@ You received this because you are listed as an emergency contact.
 
   /**
    * Send verification email to new emergency contact
-   *
-   * TODO(B): Implement sendVerificationEmail - TASK-032
-   * Requirements:
-   * - Parameters: to (email), contactName, userName, verificationToken
-   * - Subject: "[Solo Guardian] Please verify your emergency contact status"
-   * - Include verification link: {APP_URL}/verify-contact?token={verificationToken}
-   * - Explain why they received this email
-   * - Return true on success, false on failure
+   * DONE(B): Implement sendVerificationEmail - TASK-032
    */
-  // async sendVerificationEmail(
-  //   to: string,
-  //   contactName: string,
-  //   userName: string,
-  //   verificationToken: string,
-  // ): Promise<boolean> {
-  //   // TODO(B): Implement - TASK-032
-  //   return false;
-  // }
+  async sendVerificationEmail(
+    to: string,
+    contactName: string,
+    userName: string,
+    verificationToken: string,
+  ): Promise<boolean> {
+    this.logger.log(`Attempting to send verification email to: ${to}`);
+
+    if (!this.transporter) {
+      this.logger.error('Email transporter not initialized');
+      return false;
+    }
+
+    try {
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      const verificationLink = `${appUrl}/verify-contact?token=${verificationToken}`;
+      const subject = '[Solo Guardian] Please verify your emergency contact status';
+      const html = this.getVerificationEmailHtml(contactName, userName, verificationLink);
+      const text = this.getVerificationEmailText(contactName, userName, verificationLink);
+
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || 'Solo Guardian <noreply@sologuardian.app>',
+        to,
+        subject,
+        html,
+        text,
+      });
+
+      this.logger.log(`Verification email sent successfully to: ${to}`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed to send verification email to ${to}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return false;
+    }
+  }
 
   /**
    * Generate HTML content for verification email
-   *
-   * TODO(B): Implement getVerificationEmailHtml - TASK-032
-   * Requirements:
-   * - Explain that {userName} added them as an emergency contact
-   * - Explain what Solo Guardian is and what being a contact means
-   * - Clear call-to-action button to verify
-   * - Link expires in 24 hours
-   * - Option to decline/ignore if they don't want to be a contact
+   * DONE(B): Implement getVerificationEmailHtml - TASK-032
    */
-  // private getVerificationEmailHtml(
-  //   contactName: string,
-  //   userName: string,
-  //   verificationLink: string,
-  // ): string {
-  //   // TODO(B): Implement - TASK-032
-  //   return '';
-  // }
+  private getVerificationEmailHtml(
+    contactName: string,
+    userName: string,
+    verificationLink: string,
+  ): string {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px;">
+    <h2 style="color: #333; margin-top: 0;">Emergency Contact Request</h2>
+    <p>Dear ${contactName},</p>
+    <p><strong>${userName}</strong> has added you as an emergency contact on Solo Guardian.</p>
+    <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+      <p style="margin: 0;"><strong>What is Solo Guardian?</strong></p>
+      <p style="margin: 10px 0 0 0;">Solo Guardian helps people living alone stay safe by checking in daily. If ${userName} misses their check-in, you'll be notified so you can check on them.</p>
+    </div>
+    <p>Please verify that you agree to be an emergency contact:</p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${verificationLink}"
+         style="background: #28a745; color: white; padding: 15px 30px;
+                text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+        Verify Now
+      </a>
+    </div>
+    <p style="color: #666; font-size: 14px;">
+      This link expires in 24 hours. If you didn't expect this email or don't wish to be an emergency contact, you can simply ignore it.
+    </p>
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+    <p style="color: #999; font-size: 12px; margin-bottom: 0;">
+      Solo Guardian - Keeping loved ones safe
+    </p>
+  </div>
+</body>
+</html>`.trim();
+  }
 
   /**
    * Generate plain text content for verification email
-   *
-   * TODO(B): Implement getVerificationEmailText - TASK-032
+   * DONE(B): Implement getVerificationEmailText - TASK-032
    */
-  // private getVerificationEmailText(
-  //   contactName: string,
-  //   userName: string,
-  //   verificationLink: string,
-  // ): string {
-  //   // TODO(B): Implement - TASK-032
-  //   return '';
-  // }
+  private getVerificationEmailText(
+    contactName: string,
+    userName: string,
+    verificationLink: string,
+  ): string {
+    return `
+EMERGENCY CONTACT REQUEST
+
+Dear ${contactName},
+
+${userName} has added you as an emergency contact on Solo Guardian.
+
+What is Solo Guardian?
+Solo Guardian helps people living alone stay safe by checking in daily.
+If ${userName} misses their check-in, you'll be notified so you can check on them.
+
+Please verify that you agree to be an emergency contact by clicking this link:
+
+${verificationLink}
+
+This link expires in 24 hours.
+
+If you didn't expect this email or don't wish to be an emergency contact,
+you can simply ignore it.
+
+---
+Solo Guardian - Keeping loved ones safe
+    `.trim();
+  }
 }

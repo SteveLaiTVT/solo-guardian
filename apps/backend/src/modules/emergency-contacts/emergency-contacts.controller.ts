@@ -12,9 +12,11 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { EmergencyContactsService } from './emergency-contacts.service';
 import {
@@ -95,40 +97,30 @@ export class EmergencyContactsController {
   /**
    * Send verification email to contact
    * POST /api/v1/emergency-contacts/:id/send-verification
-   *
-   * TODO(B): Implement sendVerification endpoint - TASK-031
-   * Requirements:
-   * - Requires authentication
-   * - Validates contact belongs to current user
-   * - Returns updated contact with verification pending status
+   * DONE(B): Implemented sendVerification endpoint - TASK-031
    */
-  // @Post(':id/send-verification')
-  // @HttpCode(HttpStatus.OK)
-  // async sendVerification(
-  //   @Param('id') id: string,
-  //   @CurrentUser() userId: string,
-  // ): Promise<ContactResponseDto> {
-  //   return this.contactsService.sendVerification(id, userId);
-  // }
+  @Post(':id/send-verification')
+  @HttpCode(HttpStatus.OK)
+  async sendVerification(
+    @Param('id') id: string,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto> {
+    return this.contactsService.sendVerification(id, userId);
+  }
 
   /**
    * Resend verification email to contact
    * POST /api/v1/emergency-contacts/:id/resend-verification
-   *
-   * TODO(B): Implement resendVerification endpoint - TASK-031
-   * Requirements:
-   * - Requires authentication
-   * - Regenerates token and resends email
-   * - Rate limited (handled in service)
+   * DONE(B): Implemented resendVerification endpoint - TASK-031
    */
-  // @Post(':id/resend-verification')
-  // @HttpCode(HttpStatus.OK)
-  // async resendVerification(
-  //   @Param('id') id: string,
-  //   @CurrentUser() userId: string,
-  // ): Promise<ContactResponseDto> {
-  //   return this.contactsService.resendVerification(id, userId);
-  // }
+  @Post(':id/resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(
+    @Param('id') id: string,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto> {
+    return this.contactsService.resendVerification(id, userId);
+  }
 }
 
 // ============================================================
@@ -137,31 +129,26 @@ export class EmergencyContactsController {
 // ============================================================
 
 /**
- * TODO(B): Create VerifyContactController - TASK-033
- * Requirements:
- * - Route: /api/v1/verify-contact
- * - No authentication required (public endpoint)
- * - Single endpoint: GET /api/v1/verify-contact?token=xxx
- * - Returns success page data or error
+ * DONE(B): Created VerifyContactController - TASK-033
+ * Route: /api/v1/verify-contact
+ * No authentication required (public endpoint)
  */
-// @Controller('api/v1/verify-contact')
-// export class VerifyContactController {
-//   constructor(private readonly contactsService: EmergencyContactsService) {}
-//
-//   /**
-//    * Verify contact via token
-//    * GET /api/v1/verify-contact?token=xxx
-//    *
-//    * TODO(B): Implement verify endpoint - TASK-033
-//    * Requirements:
-//    * - Extract token from query parameter
-//    * - Call service.verifyContact(token)
-//    * - Return verification result
-//    */
-//   // @Get()
-//   // async verify(
-//   //   @Query('token') token: string,
-//   // ): Promise<{ success: boolean; contactName: string; userName: string }> {
-//   //   return this.contactsService.verifyContact(token);
-//   // }
-// }
+@Controller('api/v1/verify-contact')
+export class VerifyContactController {
+  constructor(private readonly contactsService: EmergencyContactsService) {}
+
+  /**
+   * Verify contact via token
+   * GET /api/v1/verify-contact?token=xxx
+   * DONE(B): Implemented verify endpoint - TASK-033
+   */
+  @Get()
+  async verify(
+    @Query('token') token: string,
+  ): Promise<{ success: boolean; contactName: string; userName: string }> {
+    if (!token) {
+      throw new BadRequestException('Token is required');
+    }
+    return this.contactsService.verifyContact(token);
+  }
+}

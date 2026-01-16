@@ -160,60 +160,73 @@ export class EmergencyContactsRepository {
 
   /**
    * Find contact by verification token
-   *
-   * TODO(B): Implement findByVerificationToken - TASK-033
-   * Requirements:
-   * - Query by verificationToken field
-   * - Return null if not found
-   * - Include user relation for getting userName in verification flow
+   * DONE(B): Implement findByVerificationToken - TASK-033
    */
-  // async findByVerificationToken(token: string): Promise<EmergencyContact | null> {
-  //   // TODO(B): Implement - TASK-033
-  //   return null;
-  // }
+  async findByVerificationToken(
+    token: string,
+  ): Promise<(EmergencyContact & { user: { id: string; name: string } }) | null> {
+    return this.prisma.emergencyContact.findFirst({
+      where: { verificationToken: token },
+      include: {
+        user: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+  }
 
   /**
    * Set verification token for a contact
-   *
-   * TODO(B): Implement setVerificationToken - TASK-031
-   * Requirements:
-   * - Generate UUID token if not provided
-   * - Set verificationToken and verificationTokenExpiresAt (24 hours from now)
-   * - Return updated contact
+   * DONE(B): Implement setVerificationToken - TASK-031
    */
-  // async setVerificationToken(
-  //   id: string,
-  //   token?: string,
-  // ): Promise<EmergencyContact> {
-  //   // TODO(B): Implement - TASK-031
-  //   return null as unknown as EmergencyContact;
-  // }
+  async setVerificationToken(
+    id: string,
+    token?: string,
+  ): Promise<EmergencyContact> {
+    const verificationToken = token ?? crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours from now
+
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        verificationToken,
+        verificationTokenExpiresAt: expiresAt,
+      },
+    });
+  }
 
   /**
    * Mark contact as verified
-   *
-   * TODO(B): Implement markVerified - TASK-033
-   * Requirements:
-   * - Set isVerified = true
-   * - Clear verificationToken and verificationTokenExpiresAt
-   * - Return updated contact
+   * DONE(B): Implement markVerified - TASK-033
    */
-  // async markVerified(id: string): Promise<EmergencyContact> {
-  //   // TODO(B): Implement - TASK-033
-  //   return null as unknown as EmergencyContact;
-  // }
+  async markVerified(id: string): Promise<EmergencyContact> {
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        isVerified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    });
+  }
 
   /**
    * Clear expired verification tokens
-   *
-   * TODO(B): Implement clearExpiredTokens - TASK-033
-   * Requirements:
-   * - Find contacts where verificationTokenExpiresAt < now
-   * - Clear verificationToken and verificationTokenExpiresAt
-   * - Return count of cleared tokens
+   * DONE(B): Implement clearExpiredTokens - TASK-033
    */
-  // async clearExpiredTokens(): Promise<number> {
-  //   // TODO(B): Implement - TASK-033
-  //   return 0;
-  // }
+  async clearExpiredTokens(): Promise<number> {
+    const result = await this.prisma.emergencyContact.updateMany({
+      where: {
+        verificationTokenExpiresAt: { lt: new Date() },
+        verificationToken: { not: null },
+      },
+      data: {
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    });
+
+    return result.count;
+  }
 }

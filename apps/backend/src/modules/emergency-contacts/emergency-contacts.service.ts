@@ -17,6 +17,9 @@ import {
   UpdateContactDto,
   ContactResponseDto,
 } from './dto';
+// DONE(B): Import EmailService and PrismaService - TASK-031
+import { EmailService } from '../email';
+import { PrismaService } from '../../prisma/prisma.service';
 
 const MAX_CONTACTS = 5;
 
@@ -24,7 +27,12 @@ const MAX_CONTACTS = 5;
 export class EmergencyContactsService {
   private readonly logger = new Logger(EmergencyContactsService.name);
 
-  constructor(private readonly contactsRepository: EmergencyContactsRepository) {}
+  constructor(
+    private readonly contactsRepository: EmergencyContactsRepository,
+    // DONE(B): Inject EmailService and PrismaService - TASK-031
+    private readonly emailService: EmailService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   // DONE(B): Implemented findAll - TASK-015
   async findAll(userId: string): Promise<ContactResponseDto[]> {
@@ -183,59 +191,132 @@ export class EmergencyContactsService {
 
   /**
    * Send verification email to a contact
-   *
-   * TODO(B): Implement sendVerification - TASK-031
-   * Requirements:
-   * - Verify contact exists and belongs to user
-   * - Generate verification token via repository.setVerificationToken()
-   * - Get user's name for email personalization
-   * - Send verification email via EmailService.sendVerificationEmail()
-   * - Return updated contact
-   * - Throw NotFoundException if contact not found
-   * - Throw BadRequestException if contact already verified
+   * DONE(B): Implemented sendVerification - TASK-031
    */
-  // async sendVerification(
-  //   contactId: string,
-  //   userId: string,
-  // ): Promise<ContactResponseDto> {
-  //   // TODO(B): Implement - TASK-031
-  //   throw new Error('Not implemented');
-  // }
+  async sendVerification(
+    contactId: string,
+    userId: string,
+  ): Promise<ContactResponseDto> {
+    // Verify contact exists and belongs to user
+    const contact = await this.contactsRepository.findById(contactId);
+    if (!contact || contact.userId !== userId || contact.deletedAt) {
+      throw new NotFoundException('Contact not found');
+    }
+
+    // Check if already verified
+    if (contact.isVerified) {
+      throw new BadRequestException('Contact is already verified');
+    }
+
+    // Get user's name for email personalization
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Generate verification token
+    const updatedContact = await this.contactsRepository.setVerificationToken(contactId);
+
+    // Send verification email
+    const emailSent = await this.emailService.sendVerificationEmail(
+      contact.email,
+      contact.name,
+      user.name,
+      updatedContact.verificationToken!,
+    );
+
+    if (!emailSent) {
+      this.logger.error(`Failed to send verification email to ${contact.email}`);
+    }
+
+    this.logger.log(`Verification email sent to contact ${contactId}`);
+
+    return this.mapToResponse(updatedContact);
+  }
 
   /**
    * Resend verification email to a contact
-   *
-   * TODO(B): Implement resendVerification - TASK-031
-   * Requirements:
-   * - Same as sendVerification but regenerates token
-   * - Can be called on contacts that haven't verified yet
-   * - Rate limit: max 3 resends per contact per 24 hours (implement in B session)
+   * DONE(B): Implemented resendVerification - TASK-031
    */
-  // async resendVerification(
-  //   contactId: string,
-  //   userId: string,
-  // ): Promise<ContactResponseDto> {
-  //   // TODO(B): Implement - TASK-031
-  //   throw new Error('Not implemented');
-  // }
+  async resendVerification(
+    contactId: string,
+    userId: string,
+  ): Promise<ContactResponseDto> {
+    // Verify contact exists and belongs to user
+    const contact = await this.contactsRepository.findById(contactId);
+    if (!contact || contact.userId !== userId || contact.deletedAt) {
+      throw new NotFoundException('Contact not found');
+    }
+
+    // Check if already verified
+    if (contact.isVerified) {
+      throw new BadRequestException('Contact is already verified');
+    }
+
+    // Get user's name for email personalization
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Regenerate verification token (always generate new token for resend)
+    const updatedContact = await this.contactsRepository.setVerificationToken(contactId);
+
+    // Send verification email
+    const emailSent = await this.emailService.sendVerificationEmail(
+      contact.email,
+      contact.name,
+      user.name,
+      updatedContact.verificationToken!,
+    );
+
+    if (!emailSent) {
+      this.logger.error(`Failed to resend verification email to ${contact.email}`);
+    }
+
+    this.logger.log(`Verification email resent to contact ${contactId}`);
+
+    return this.mapToResponse(updatedContact);
+  }
 
   /**
    * Verify a contact via token (public endpoint, no auth)
-   *
-   * TODO(B): Implement verifyContact - TASK-033
-   * Requirements:
-   * - Find contact by verification token
-   * - Check token is not expired (verificationTokenExpiresAt > now)
-   * - Mark contact as verified via repository.markVerified()
-   * - Return success response with contact info
-   * - Throw BadRequestException if token invalid or expired
+   * DONE(B): Implemented verifyContact - TASK-033
    */
-  // async verifyContact(token: string): Promise<{
-  //   success: boolean;
-  //   contactName: string;
-  //   userName: string;
-  // }> {
-  //   // TODO(B): Implement - TASK-033
-  //   throw new Error('Not implemented');
-  // }
+  async verifyContact(token: string): Promise<{
+    success: boolean;
+    contactName: string;
+    userName: string;
+  }> {
+    // Find contact by verification token
+    const contact = await this.contactsRepository.findByVerificationToken(token);
+
+    if (!contact) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    // Check token is not expired
+    if (!contact.verificationTokenExpiresAt || contact.verificationTokenExpiresAt < new Date()) {
+      throw new BadRequestException('Verification token has expired');
+    }
+
+    // Mark contact as verified
+    await this.contactsRepository.markVerified(contact.id);
+
+    this.logger.log(`Contact ${contact.id} verified successfully`);
+
+    return {
+      success: true,
+      contactName: contact.name,
+      userName: contact.user.name,
+    };
+  }
 }

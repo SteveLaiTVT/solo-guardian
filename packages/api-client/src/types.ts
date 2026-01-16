@@ -140,3 +140,10 @@ export interface UpdatePreferencesRequest {
 export interface ToggleFeatureRequest {
   enabled: boolean
 }
+
+// Contact Verification types
+export interface VerifyContactResult {
+  success: boolean
+  contactName: string
+  userName: string
+}

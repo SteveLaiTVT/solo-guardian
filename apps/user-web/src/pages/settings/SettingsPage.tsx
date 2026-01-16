@@ -1,12 +1,12 @@
 /**
  * @file SettingsPage.tsx
  * @description Settings page for check-in preferences, features, visual, and account
- * @task TASK-013, TASK-022
- * @design_state_version 1.6.0
+ * @task TASK-013, TASK-022, TASK-030
+ * @design_state_version 2.0.0
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { hooks } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth.store'
@@ -16,7 +16,14 @@ import { TimePicker } from '@/components/ui/TimePicker'
 import { Label } from '@/components/ui/label'
 import { FeaturesSection, VisualSection } from '@/components/settings'
 
+// DONE(B): Helper to convert time string to minutes for comparison - TASK-030
+function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
 // DONE(B): Added i18n support - TASK-013
+// DONE(B): Added reminder settings validation - TASK-030
 export function SettingsPage(): JSX.Element {
   const { t } = useTranslation('settings')
   const { t: tCommon } = useTranslation('common')
@@ -36,7 +43,17 @@ export function SettingsPage(): JSX.Element {
   const reminderTime = localReminderTime ?? settings?.reminderTime ?? '09:00'
   const reminderEnabled = localReminderEnabled ?? settings?.reminderEnabled ?? true
 
+  // DONE(B): Validate reminder time is before deadline - TASK-030
+  const reminderTimeError = useMemo(() => {
+    if (!reminderEnabled) return null
+    if (timeToMinutes(reminderTime) >= timeToMinutes(deadline)) {
+      return t('checkIn.reminderError', 'Reminder time must be before deadline')
+    }
+    return null
+  }, [reminderTime, deadline, reminderEnabled, t])
+
   const handleSave = (): void => {
+    if (reminderTimeError) return
     updateMutation.mutate(
       {
         deadlineTime: deadline,
@@ -99,28 +116,49 @@ export function SettingsPage(): JSX.Element {
             onChange={setLocalDeadline}
           />
 
-          <TimePicker
-            id="reminder"
-            label={t('checkIn.reminder')}
-            value={reminderTime}
-            onChange={setLocalReminderTime}
-          />
+          {/* DONE(B): Reminder settings section - TASK-030 */}
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-sm font-medium mb-3">{t('checkIn.reminderTitle', 'Reminder Settings')}</h3>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="reminderEnabled"
-              checked={reminderEnabled}
-              onChange={(e) => setLocalReminderEnabled(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            <Label htmlFor="reminderEnabled">{t('checkIn.enableReminder')}</Label>
+            <div className="flex items-center space-x-2 mb-3">
+              <input
+                type="checkbox"
+                id="reminderEnabled"
+                checked={reminderEnabled}
+                onChange={(e) => setLocalReminderEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <div>
+                <Label htmlFor="reminderEnabled">{t('checkIn.enableReminder')}</Label>
+                <p className="text-xs text-muted-foreground">
+                  {t('checkIn.enableReminderDesc', 'Receive an email reminder before your check-in deadline')}
+                </p>
+              </div>
+            </div>
+
+            {/* DONE(B): Conditionally show reminder time picker - TASK-030 */}
+            {reminderEnabled && (
+              <div className="ml-6 space-y-2">
+                <TimePicker
+                  id="reminder"
+                  label={t('checkIn.reminder')}
+                  value={reminderTime}
+                  onChange={setLocalReminderTime}
+                />
+                {reminderTimeError && (
+                  <div className="flex items-center gap-2 text-sm text-red-500">
+                    <AlertCircle className="h-4 w-4" />
+                    {reminderTimeError}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {hasChanges && (
             <Button
               onClick={handleSave}
-              disabled={updateMutation.isPending}
+              disabled={updateMutation.isPending || !!reminderTimeError}
               className="w-full"
             >
               {updateMutation.isPending ? tCommon('saving') : tCommon('save')}

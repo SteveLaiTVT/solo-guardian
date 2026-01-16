@@ -16,6 +16,8 @@ import { DashboardPage, HistoryPage } from '@/pages/dashboard'
 import { SettingsPage } from '@/pages/settings'
 import { ContactsPage } from '@/pages/contacts'
 import { OnboardingPage } from '@/pages/onboarding'
+// DONE(B): Import VerifyContactPage - TASK-033
+import { VerifyContactPage } from '@/pages/verify-contact'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,8 +37,8 @@ function App(): JSX.Element {
           <BrowserRouter>
             <Routes>
               {/* Public routes (no auth check) */}
-              {/* TODO(B): Add VerifyContactPage route - TASK-033 */}
-              {/* <Route path="/verify-contact" element={<VerifyContactPage />} /> */}
+              {/* DONE(B): Add VerifyContactPage route - TASK-033 */}
+              <Route path="/verify-contact" element={<VerifyContactPage />} />
 
               {/* Guest routes (redirect if logged in) */}
               <Route element={<GuestRoute />}>

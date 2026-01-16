@@ -12,8 +12,8 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { AlertModule } from '../alerts';
 // DONE(B): Import CheckInModule for check-in queries - TASK-028
 import { CheckInModule } from '../check-in';
-// TODO(B): Import EmailModule for reminder notifications - TASK-029
-// import { EmailModule } from '../email';
+// DONE(B): Import EmailModule for reminder notifications - TASK-029
+import { EmailModule } from '../email';
 import { MissedCheckInDetector } from './missed-checkin.detector';
 
 // DONE(B): Completed DetectorModule setup - TASK-028
@@ -24,8 +24,8 @@ import { MissedCheckInDetector } from './missed-checkin.detector';
     AlertModule,
     // DONE(B): Import CheckInModule - TASK-028
     CheckInModule,
-    // TODO(B): Import EmailModule for reminders - TASK-029
-    // EmailModule,
+    // DONE(B): Import EmailModule for reminders - TASK-029
+    EmailModule,
   ],
   providers: [MissedCheckInDetector],
 })
