@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.7.0"
+  version: "1.8.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
-  branch: "feature/iter-007-preferences-errors"
+  branch: "feature/iter-008-notifications"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "User Preferences & Error Handling Complete"
+  milestone: "Notification System In Progress"
 
 # ============================================================
 # 1. Technical Architecture
@@ -277,6 +277,69 @@ modules:
         description: "React error boundary for unexpected errors"
         completed_task: "TASK-019"
 
+  alerts:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Alert system for missed check-ins"
+    started_iteration: "iter-008"
+    skeleton_created: true
+    skeleton_version: "0.1.0"
+    features:
+      - name: "Alert Creation"
+        priority: "P0"
+        status: "designing"
+        description: "Create alert when user misses check-in deadline"
+      - name: "Alert Resolution"
+        priority: "P0"
+        status: "designing"
+        description: "Resolve alert when user checks in (late check-in)"
+      - name: "Alert History"
+        priority: "P1"
+        status: "pending"
+        description: "View past alerts for user"
+
+  notifications:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Notification delivery to emergency contacts"
+    started_iteration: "iter-008"
+    skeleton_created: true
+    skeleton_version: "0.1.0"
+    features:
+      - name: "Email Notifications"
+        priority: "P0"
+        status: "designing"
+        description: "Send email alerts to emergency contacts"
+      - name: "Notification Queue"
+        priority: "P0"
+        status: "designing"
+        description: "Bull queue for reliable notification delivery"
+      - name: "Notification History"
+        priority: "P0"
+        status: "designing"
+        description: "Track sent notifications and their status"
+      - name: "SMS Notifications"
+        priority: "P2"
+        status: "pending"
+        description: "Send SMS alerts (future)"
+
+  missed_checkin_detector:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Scheduled job to detect users who missed check-in"
+    started_iteration: "iter-008"
+    skeleton_created: true
+    skeleton_version: "0.1.0"
+    features:
+      - name: "Cron Job"
+        priority: "P0"
+        status: "designing"
+        description: "Run every minute to check for overdue users"
+      - name: "Timezone-Aware Detection"
+        priority: "P0"
+        status: "designing"
+        description: "Respect user timezone when checking deadline"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -343,65 +406,58 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-007"
-  goal: "User preferences system and error handling infrastructure"
-  started_at: "2026-01-15"
-  completed_at: "2026-01-16"
-  status: "completed"
+  id: "iter-008"
+  goal: "Notification system and missed check-in detection - core safety feature"
+  started_at: "2026-01-16"
+  status: "in_progress"
   tasks:
-    - id: "TASK-017"
-      title: "Shared: Error codes and types"
-      status: "completed"
+    - id: "TASK-023"
+      title: "Database: Alert and Notification models"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-017-error-codes.yaml"
+      handoff: "HO-023-alert-notification-db.yaml"
       depends_on: []
-      description: "Shared error codes, categories, and types in packages/types"
-      review_verdict: "pass"
+      description: "Prisma schema for Alert and Notification with status tracking"
 
-    - id: "TASK-018"
-      title: "Backend: Error handling infrastructure"
-      status: "completed"
+    - id: "TASK-024"
+      title: "Backend: Bull queue infrastructure"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-018-backend-errors.yaml"
-      depends_on: ["TASK-017"]
-      description: "BusinessException, GlobalExceptionFilter, i18n-ready error responses"
-      review_verdict: "pass"
-
-    - id: "TASK-019"
-      title: "Frontend: Error handling hooks and i18n"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-019-frontend-errors.yaml"
-      depends_on: ["TASK-017"]
-      description: "useErrorHandler hook, error.json translations, ErrorBoundary"
-      review_verdict: "pass"
-
-    - id: "TASK-020"
-      title: "Database: UserPreferences model"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-020-preferences-db.yaml"
+      handoff: "HO-024-queue-infrastructure.yaml"
       depends_on: []
-      description: "Prisma schema for user preferences with feature toggles"
-      review_verdict: "pass"
+      description: "Bull queue module with Redis connection for job processing"
 
-    - id: "TASK-021"
-      title: "Backend: User preferences module"
-      status: "completed"
+    - id: "TASK-025"
+      title: "Backend: Email service"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-021-preferences-backend.yaml"
-      depends_on: ["TASK-020", "TASK-018"]
-      description: "CRUD endpoints for user preferences"
-      review_verdict: "pass"
+      handoff: "HO-025-email-service.yaml"
+      depends_on: []
+      description: "Email service with nodemailer and alert templates"
 
-    - id: "TASK-022"
-      title: "Frontend: Preferences and onboarding"
-      status: "completed"
+    - id: "TASK-026"
+      title: "Backend: Notification module"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-022-preferences-frontend.yaml"
-      depends_on: ["TASK-021", "TASK-019"]
-      description: "Onboarding flow, settings page, theme system"
-      review_verdict: "pass"
+      handoff: "HO-026-notification-module.yaml"
+      depends_on: ["TASK-023", "TASK-024", "TASK-025"]
+      description: "NotificationService, Repository, and queue processor"
+
+    - id: "TASK-027"
+      title: "Backend: Alert module"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-027-alert-module.yaml"
+      depends_on: ["TASK-023", "TASK-026"]
+      description: "AlertService, Repository, Controller for alert management"
+
+    - id: "TASK-028"
+      title: "Backend: Missed check-in detector"
+      status: "pending"
+      priority: "P0"
+      handoff: "HO-028-missed-checkin-detector.yaml"
+      depends_on: ["TASK-027"]
+      description: "Cron job to detect overdue users and trigger alerts"
 
 # ============================================================
 # 5.1 Iteration History
@@ -746,6 +802,64 @@ decision_log:
         details: {}
         field: "email"
         timestamp: "2026-01-15T10:00:00Z"
+
+  - id: "ADR-013"
+    date: "2026-01-16"
+    decision: "Notification system with Bull queue and Redis"
+    rationale: |
+      - Bull queue for reliable job processing with retries
+      - Redis for queue storage (already available)
+      - Separate notification from detection (async decoupling)
+      - Track notification status (pending, sent, delivered, failed)
+      - Email via nodemailer with SMTP (flexible provider)
+    architecture:
+      flow: |
+        1. Cron job runs every minute
+        2. Detects users past deadline without check-in today
+        3. Creates Alert record (triggered status)
+        4. Queues notification jobs for each emergency contact
+        5. Worker processes jobs, sends emails
+        6. Updates notification status
+      retry_policy: "3 retries with exponential backoff"
+      job_timeout: "30 seconds"
+    schema:
+      alert:
+        - "id: UUID primary key"
+        - "userId: FK to User"
+        - "status: triggered | notified | resolved | expired"
+        - "triggeredAt: When deadline passed"
+        - "resolvedAt: When user checked in (late)"
+        - "createdAt, updatedAt"
+      notification:
+        - "id: UUID primary key"
+        - "alertId: FK to Alert"
+        - "contactId: FK to EmergencyContact"
+        - "channel: email | sms (future)"
+        - "status: pending | sent | delivered | failed"
+        - "sentAt: When notification sent"
+        - "error: Error message if failed"
+        - "createdAt, updatedAt"
+
+  - id: "ADR-014"
+    date: "2026-01-16"
+    decision: "Missed check-in detection with timezone awareness"
+    rationale: |
+      - Users have different timezones and deadlines
+      - Cron runs every minute, checks all users
+      - Convert user deadline to UTC for comparison
+      - Only trigger alert once per day per user
+      - Alert status prevents duplicate notifications
+    detection_logic: |
+      For each user with settings:
+        1. Get user's deadline time (e.g., "10:00") and timezone
+        2. Convert to today's UTC timestamp
+        3. If NOW() > deadline AND no check-in today AND no active alert today:
+           - Create Alert
+           - Queue notifications
+    considerations:
+      - "Must handle timezone edge cases (DST transitions)"
+      - "Must not create duplicate alerts for same day"
+      - "Must not notify already-notified contacts"
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

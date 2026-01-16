@@ -1,0 +1,200 @@
+# ============================================================
+# Handoff Document: Alert Module
+# @task TASK-027
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-027"
+task_id: "TASK-027"
+title: "Backend: Alert module"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement alert module for managing missed check-in alerts.
+  Provides CRUD operations and integrates with notification system.
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/alerts/alert.repository.ts"
+    todos:
+      - "TODO(B): Import types from @prisma/client"
+      - "TODO(B): Implement create"
+      - "TODO(B): Implement markAsNotified"
+      - "TODO(B): Implement resolve"
+      - "TODO(B): Implement expire"
+      - "TODO(B): Implement findById"
+      - "TODO(B): Implement findActiveByUserAndDate"
+      - "TODO(B): Implement findByUserId"
+      - "TODO(B): Implement countByUserId"
+      - "TODO(B): Implement findExpirableAlerts"
+
+  - path: "apps/backend/src/modules/alerts/alert.service.ts"
+    todos:
+      - "TODO(B): Inject EmergencyContactsRepository"
+      - "TODO(B): Implement createAlert"
+      - "TODO(B): Implement resolveAlert"
+      - "TODO(B): Implement markAlertNotified"
+      - "TODO(B): Implement getUserAlerts"
+      - "TODO(B): Implement getAlertDetails"
+      - "TODO(B): Implement expireOldAlerts"
+
+  - path: "apps/backend/src/modules/alerts/alert.controller.ts"
+    todos:
+      - "TODO(B): Add JwtAuthGuard and decorators"
+      - "TODO(B): Implement getAlerts"
+      - "TODO(B): Implement getAlertById"
+
+  - path: "apps/backend/src/modules/alerts/alert.module.ts"
+    todos:
+      - "TODO(B): Import EmergencyContactsModule"
+
+# ============================================================
+# API Endpoints
+# ============================================================
+api_endpoints:
+  - method: "GET"
+    path: "/api/v1/alerts"
+    description: "Get user's alert history"
+    auth: "Required (JWT)"
+    query_params:
+      - "page: number (default 1)"
+      - "limit: number (default 10)"
+    response:
+      success: true
+      data: "[Array of alerts]"
+      meta:
+        page: 1
+        limit: 10
+        total: 25
+
+  - method: "GET"
+    path: "/api/v1/alerts/:id"
+    description: "Get alert details with notifications"
+    auth: "Required (JWT)"
+    response:
+      success: true
+      data:
+        id: "uuid"
+        alertDate: "2026-01-16"
+        status: "notified"
+        triggeredAt: "2026-01-16T10:00:00Z"
+        notifications:
+          - id: "uuid"
+            contactName: "John"
+            status: "sent"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  repository:
+    create:
+      - "Create alert with 'triggered' status"
+      - "Set alertDate and triggeredAt"
+
+    find_active_by_user_and_date:
+      - "Find alert with status 'triggered' or 'notified'"
+      - "For given user and alertDate"
+      - "Used to prevent duplicate alerts"
+
+    find_expirable_alerts:
+      - "Find alerts before given date"
+      - "With status 'triggered' or 'notified'"
+      - "Used by cleanup job"
+
+  service:
+    create_alert:
+      steps:
+        - "Check for existing alert (prevent duplicates)"
+        - "Create alert record"
+        - "Get user's active emergency contacts"
+        - "Call notificationService.queueAlertNotifications"
+        - "Return created alert"
+      constraints:
+        - "Must not create duplicate alerts for same user+date"
+        - "Must not notify if no contacts"
+        - "Must log alert creation"
+
+    resolve_alert:
+      steps:
+        - "Find active alert for user+date"
+        - "Update status to 'resolved'"
+        - "Set resolvedAt"
+      usage: "Called when user does late check-in"
+
+    expire_old_alerts:
+      steps:
+        - "Find alerts from before today"
+        - "Update status to 'expired'"
+        - "Return count"
+      usage: "Called by scheduled cleanup job"
+
+  controller:
+    get_alerts:
+      - "Use @Get() decorator"
+      - "Use @UseGuards(JwtAuthGuard)"
+      - "Use @CurrentUser('userId') to get user"
+      - "Support pagination"
+
+    get_alert_by_id:
+      - "Use @Get(':id') decorator"
+      - "Validate UUID with ParseUUIDPipe"
+      - "Verify user owns the alert"
+      - "Return 404 if not found"
+
+# ============================================================
+# Integration Points
+# ============================================================
+integration_points:
+  check_in_module:
+    description: "When user checks in after deadline"
+    action: "Call alertService.resolveAlert()"
+    location: "check-in.service.ts performCheckIn method"
+    note: "Add this integration when implementing TASK-028"
+
+  emergency_contacts_module:
+    description: "Get user's emergency contacts"
+    action: "Inject and use EmergencyContactsRepository"
+    query: "findActiveByUserId(userId)"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Alert CRUD operations work"
+  - "GET /alerts returns paginated history"
+  - "GET /alerts/:id returns details with notifications"
+  - "Authorization enforced (user can only see own alerts)"
+  - "Duplicate prevention works"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Controller validates only"
+  - "Service contains business logic"
+  - "Repository handles database"
+  - "Single function < 50 lines"
+  - "All operations logged"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Manual alert creation (only detector creates)"
+  - "Alert deletion"
+  - "Alert editing"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on:
+  - "TASK-023: Alert and Notification models"
+  - "TASK-026: Notification module"

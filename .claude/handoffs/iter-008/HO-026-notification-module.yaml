@@ -1,0 +1,147 @@
+# ============================================================
+# Handoff Document: Notification Module
+# @task TASK-026
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-026"
+task_id: "TASK-026"
+title: "Backend: Notification module"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement notification module for queuing and processing notifications.
+  Uses Bull queue for reliable delivery with retries.
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/notifications/notification.repository.ts"
+    todos:
+      - "TODO(B): Import types from @prisma/client"
+      - "TODO(B): Implement create"
+      - "TODO(B): Implement createMany"
+      - "TODO(B): Implement markAsSent"
+      - "TODO(B): Implement markAsFailed"
+      - "TODO(B): Implement findByAlertId"
+      - "TODO(B): Implement findById"
+      - "TODO(B): Implement countByAlertAndStatus"
+
+  - path: "apps/backend/src/modules/notifications/notification.service.ts"
+    todos:
+      - "TODO(B): Import and inject Queue"
+      - "TODO(B): Implement queueAlertNotifications"
+      - "TODO(B): Implement handleNotificationSent"
+      - "TODO(B): Implement handleNotificationFailed"
+      - "TODO(B): Implement getAlertNotifications"
+
+  - path: "apps/backend/src/modules/notifications/notification.processor.ts"
+    todos:
+      - "TODO(B): Add @Processor decorator"
+      - "TODO(B): Implement handleSendEmail with @Process decorator"
+
+  - path: "apps/backend/src/modules/notifications/notification.module.ts"
+    todos:
+      - "TODO(B): Import BullModule and register queue"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  repository:
+    create:
+      - "Create notification with pending status"
+      - "Link to alert and contact"
+      - "Set channel (email/sms)"
+
+    create_many:
+      - "Batch create for efficiency"
+      - "Use prisma createMany"
+
+    mark_as_sent:
+      - "Update status to 'sent'"
+      - "Set sentAt to now()"
+
+    mark_as_failed:
+      - "Update status to 'failed'"
+      - "Store error message"
+
+  service:
+    queue_alert_notifications:
+      - "Create notification records for each contact"
+      - "Add jobs to Bull queue for each notification"
+      - "Job data: SendEmailJobData (from queue.constants.ts)"
+      - "Return notification IDs"
+
+    handle_notification_sent:
+      - "Update notification status"
+      - "Check if all notifications for alert are sent"
+      - "If all sent, call alertService.markAlertNotified"
+
+    handle_notification_failed:
+      - "Update notification status to failed"
+      - "Store error message"
+
+  processor:
+    handle_send_email:
+      - "Add @Process(NOTIFICATION_JOB_TYPES.SEND_EMAIL) decorator"
+      - "Extract SendEmailJobData from job.data"
+      - "Call emailService.sendAlertEmail"
+      - "On success: call handleNotificationSent"
+      - "On failure: call handleNotificationFailed"
+      - "Throw error to trigger Bull retry"
+
+# ============================================================
+# Queue Job Flow
+# ============================================================
+job_flow: |
+  1. AlertService calls notificationService.queueAlertNotifications()
+  2. Service creates Notification records (status: pending)
+  3. Service adds jobs to queue with SendEmailJobData
+  4. Bull worker picks up job
+  5. Processor calls emailService.sendAlertEmail()
+  6. On success: updates notification to 'sent'
+  7. On failure: Bull retries (3 attempts), then marks 'failed'
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Notifications created in database"
+  - "Jobs added to Bull queue"
+  - "Processor processes jobs"
+  - "Emails sent via EmailService"
+  - "Status updated correctly"
+  - "Retries work on failure"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Repository handles DB only"
+  - "Service handles business logic"
+  - "Processor handles queue processing"
+  - "Single function < 50 lines"
+  - "Log all operations"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "SMS notifications (future)"
+  - "Notification preferences"
+  - "Rate limiting"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on:
+  - "TASK-023: Alert and Notification models"
+  - "TASK-024: Queue infrastructure"
+  - "TASK-025: Email service"

@@ -1,0 +1,177 @@
+# ============================================================
+# Handoff Document: Email Service
+# @task TASK-025
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-025"
+task_id: "TASK-025"
+title: "Backend: Email service"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement email sending service using nodemailer.
+  Provides alert email templates for notifying emergency contacts.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  npm_packages:
+    - "nodemailer"
+    - "@types/nodemailer"
+  npm_install: "cd apps/backend && npm install nodemailer && npm install -D @types/nodemailer"
+
+  environment_variables:
+    - name: "SMTP_HOST"
+      description: "SMTP server hostname"
+      example: "smtp.ethereal.email"
+
+    - name: "SMTP_PORT"
+      description: "SMTP server port"
+      default: "587"
+      example: "587"
+
+    - name: "SMTP_USER"
+      description: "SMTP username/email"
+      example: "your-user@ethereal.email"
+
+    - name: "SMTP_PASS"
+      description: "SMTP password"
+      example: "your-password"
+
+    - name: "SMTP_FROM"
+      description: "Default sender email"
+      example: "Solo Guardian <noreply@sologuardian.app>"
+
+    - name: "SMTP_SECURE"
+      description: "Use TLS (true for port 465)"
+      default: "false"
+      example: "false"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/email/email.service.ts"
+    todos:
+      - "TODO(B): Import nodemailer and Transporter type"
+      - "TODO(B): Implement onModuleInit (create transporter)"
+      - "TODO(B): Implement sendAlertEmail"
+      - "TODO(B): Implement getAlertEmailHtml"
+      - "TODO(B): Implement getAlertEmailText"
+
+  - path: "apps/backend/src/modules/email/email.module.ts"
+    todos:
+      - "Already complete - just verify"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  on_module_init:
+    - "Create nodemailer transporter with SMTP config"
+    - "Read all config from environment variables"
+    - "Verify transporter connection (transporter.verify())"
+    - "Log success or warning (don't throw - allow app to start)"
+
+  send_alert_email:
+    - "Send email with subject: '[Solo Guardian] Safety Alert: {userName}'"
+    - "Use HTML template with plain text fallback"
+    - "Return boolean (true=success, false=failure)"
+    - "Log all send attempts with recipient"
+    - "Catch errors and return false (no throwing)"
+
+  email_template:
+    subject: "[Solo Guardian] Safety Alert: {userName}"
+    content_requirements:
+      - "Greeting with contact name"
+      - "Clear message: '{userName} has not checked in today'"
+      - "Date and time of missed check-in"
+      - "Call to action: 'Please check on them'"
+      - "Footer: 'This is an automated safety alert from Solo Guardian'"
+    style:
+      - "Clean, simple HTML"
+      - "Mobile-friendly"
+      - "Professional appearance"
+
+# ============================================================
+# Email Template Example
+# ============================================================
+email_template_example: |
+  Subject: [Solo Guardian] Safety Alert: John Doe
+
+  HTML Body:
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: #dc3545;">Safety Alert</h2>
+    <p>Dear {contactName},</p>
+    <p><strong>{userName}</strong> has not checked in today.</p>
+    <p>
+      <strong>Date:</strong> {alertDate}<br>
+      <strong>Expected by:</strong> {triggeredAt}
+    </p>
+    <p style="background: #fff3cd; padding: 15px; border-radius: 5px;">
+      Please check on {userName} to ensure they are safe.
+    </p>
+    <hr>
+    <p style="color: #6c757d; font-size: 12px;">
+      This is an automated safety alert from Solo Guardian.<br>
+      You received this because you are listed as an emergency contact.
+    </p>
+  </div>
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Transporter created on startup"
+  - "Connection verified (logged)"
+  - "Alert emails sent successfully"
+  - "HTML and plain text content"
+  - "Errors handled gracefully (no crashes)"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single function < 50 lines"
+  - "No hardcoded SMTP config"
+  - "All operations logged"
+  - "No throwing on email failure (return false)"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  development:
+    service: "Ethereal Email (fake SMTP)"
+    setup: |
+      1. Go to https://ethereal.email
+      2. Create test account
+      3. Copy SMTP credentials to .env
+      4. Sent emails viewable at https://ethereal.email/messages
+
+  manual_test: |
+    1. Set up Ethereal credentials in .env
+    2. Start backend
+    3. Trigger an alert (or call service directly)
+    4. Check Ethereal inbox for email
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Email tracking (open rates)"
+  - "Email queueing (handled by Bull)"
+  - "Multiple email providers"
+  - "Email attachments"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on: []

@@ -1,7 +1,7 @@
 // ============================================================
 // Prisma Schema for Solo Guardian
-// @task TASK-001-A, TASK-005, TASK-014, TASK-020
-// @design_state_version 1.6.0
+// @task TASK-001-A, TASK-005, TASK-014, TASK-020, TASK-023
+// @design_state_version 1.8.0
 // ============================================================
 
 generator client {
@@ -29,6 +29,7 @@ model User {
   checkInSettings   CheckInSettings?
   emergencyContacts EmergencyContact[]
   preferences       UserPreferences?
+  // TODO(B): Add alerts relation - Alert[]
 
   @@map("users")
 }
@@ -111,6 +112,7 @@ model EmergencyContact {
   deletedAt  DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // TODO(B): Add notifications relation - Notification[]
 
   // Unique constraints are partial indexes (see migration)
   // Only active (non-deleted) contacts have uniqueness enforced
@@ -154,3 +156,77 @@ model UserPreferences {
 
   @@map("user_preferences")
 }
+
+// ============================================================
+// Alert Model - Missed check-in alerts
+// @task TASK-023
+// @design_state_version 1.8.0
+// ============================================================
+// TODO(B): Implement Alert model
+// Requirements:
+// - id: UUID primary key
+// - userId: FK to User (cascade delete)
+// - alertDate: DATE string (YYYY-MM-DD) - the date the alert is for
+// - status: AlertStatus enum (triggered, notified, resolved, expired)
+// - triggeredAt: When the alert was created (deadline passed)
+// - resolvedAt: Optional, when user checked in late
+// - createdAt, updatedAt: Timestamps
+//
+// Constraints:
+// - Unique constraint on (userId, alertDate) - one alert per day per user
+// - Index on userId for user's alert history
+// - Index on status for finding active alerts
+// - Relation: User has many Alerts
+// - Relation: Alert has many Notifications
+//
+// Acceptance:
+// - Migration runs successfully
+// - AlertStatus enum created
+// - Can create/query alerts
+
+// TODO(B): Create AlertStatus enum
+// Values: triggered, notified, resolved, expired
+// - triggered: Alert created, notifications queued
+// - notified: All notifications sent
+// - resolved: User checked in late
+// - expired: Alert expired without resolution (next day)
+
+// ============================================================
+// Notification Model - Notifications sent to emergency contacts
+// @task TASK-023
+// @design_state_version 1.8.0
+// ============================================================
+// TODO(B): Implement Notification model
+// Requirements:
+// - id: UUID primary key
+// - alertId: FK to Alert (cascade delete)
+// - contactId: FK to EmergencyContact (set null on delete - preserve history)
+// - channel: NotificationChannel enum (email, sms)
+// - status: NotificationStatus enum (pending, sent, delivered, failed)
+// - sentAt: Optional, when notification was sent
+// - deliveredAt: Optional, when delivery confirmed
+// - error: Optional, error message if failed
+// - createdAt, updatedAt: Timestamps
+//
+// Constraints:
+// - Index on alertId for alert's notifications
+// - Index on status for finding pending notifications
+// - Relation: Alert has many Notifications
+// - Relation: EmergencyContact has many Notifications (optional - can be null if contact deleted)
+//
+// Acceptance:
+// - Migration runs successfully
+// - NotificationChannel and NotificationStatus enums created
+// - Can create/query notifications
+
+// TODO(B): Create NotificationChannel enum
+// Values: email, sms
+// - email: Email notification (MVP)
+// - sms: SMS notification (future)
+
+// TODO(B): Create NotificationStatus enum
+// Values: pending, sent, delivered, failed
+// - pending: Notification queued, not yet processed
+// - sent: Notification sent to provider
+// - delivered: Delivery confirmed (future)
+// - failed: Notification failed after retries

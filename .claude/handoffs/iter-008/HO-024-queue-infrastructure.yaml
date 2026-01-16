@@ -1,0 +1,147 @@
+# ============================================================
+# Handoff Document: Bull Queue Infrastructure
+# @task TASK-024
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-024"
+task_id: "TASK-024"
+title: "Backend: Bull queue infrastructure"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Set up Bull queue infrastructure with Redis for async job processing.
+  This provides reliable notification delivery with retries and persistence.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  npm_packages:
+    - "@nestjs/bull"
+    - "bull"
+  npm_install: "cd apps/backend && npm install @nestjs/bull bull"
+
+  environment_variables:
+    - name: "REDIS_URL"
+      description: "Redis connection URL"
+      default: "redis://localhost:6379"
+      example: "redis://localhost:6379"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/queue/queue.module.ts"
+    todos:
+      - "TODO(B): Import BullModule from @nestjs/bull"
+      - "TODO(B): Configure BullModule.forRoot() with Redis"
+      - "TODO(B): Export BullModule"
+
+  - path: "apps/backend/src/modules/queue/queue.constants.ts"
+    todos:
+      - "Already complete - just verify constants"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  queue_module:
+    - "Import BullModule from @nestjs/bull"
+    - "Parse REDIS_URL from environment"
+    - "Handle URL format: redis://host:port"
+    - "Configure default job options for reliability"
+    - "Export BullModule for other modules"
+
+  bull_configuration:
+    redis:
+      - "Read from process.env.REDIS_URL"
+      - "Default: redis://localhost:6379"
+      - "Parse URL to get host and port"
+
+    default_job_options:
+      attempts: 3
+      backoff:
+        type: "exponential"
+        delay: 1000
+      removeOnComplete: true
+      removeOnFail: false
+
+  app_module_update:
+    - "Import QueueModule in AppModule"
+    - "QueueModule provides global Bull configuration"
+
+# ============================================================
+# Implementation Guide
+# ============================================================
+implementation_guide: |
+  1. Parse Redis URL:
+  ```typescript
+  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  const url = new URL(redisUrl);
+  ```
+
+  2. Configure BullModule:
+  ```typescript
+  BullModule.forRoot({
+    redis: {
+      host: url.hostname,
+      port: parseInt(url.port) || 6379,
+    },
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    },
+  })
+  ```
+
+  3. Add to AppModule imports
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "QueueModule loads without errors"
+  - "Redis connection established on startup"
+  - "BullModule available for other modules to register queues"
+  - "No hardcoded Redis URL (uses environment variable)"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single file < 300 lines"
+  - "No hardcoded configuration values"
+  - "Must handle missing REDIS_URL gracefully (use default)"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  manual:
+    - "Start Redis: redis-server (or docker)"
+    - "Start backend: npm run start:dev"
+    - "Check logs for successful Redis connection"
+
+  verify_redis:
+    - "redis-cli ping → PONG"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Redis authentication (user/password)"
+  - "Redis cluster support"
+  - "Bull dashboard UI"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on: []

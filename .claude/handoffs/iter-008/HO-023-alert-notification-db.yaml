@@ -1,0 +1,126 @@
+# ============================================================
+# Handoff Document: Alert and Notification Database Models
+# @task TASK-023
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-023"
+task_id: "TASK-023"
+title: "Database: Alert and Notification models"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Add Alert and Notification models to Prisma schema.
+  These models track when users miss check-ins and the notifications
+  sent to their emergency contacts.
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/prisma/schema.prisma"
+    todos:
+      - "TODO(B): Create AlertStatus enum"
+      - "TODO(B): Implement Alert model"
+      - "TODO(B): Create NotificationChannel enum"
+      - "TODO(B): Create NotificationStatus enum"
+      - "TODO(B): Implement Notification model"
+      - "TODO(B): Add alerts relation to User model"
+      - "TODO(B): Add notifications relation to EmergencyContact model"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  alert_model:
+    - "id: UUID primary key (@id @default(uuid()))"
+    - "userId: String, FK to User (cascade delete)"
+    - "alertDate: String (YYYY-MM-DD format) - date of missed check-in"
+    - "status: AlertStatus enum"
+    - "triggeredAt: DateTime - when alert created"
+    - "resolvedAt: DateTime? - when user checked in late (optional)"
+    - "createdAt, updatedAt: DateTime timestamps"
+    - "Unique constraint on (userId, alertDate)"
+    - "Index on userId"
+    - "Index on status"
+    - "Relation to User (many-to-one)"
+    - "Relation to Notification (one-to-many)"
+
+  alert_status_enum:
+    values:
+      - "triggered: Alert created, notifications being sent"
+      - "notified: All notifications sent"
+      - "resolved: User checked in late"
+      - "expired: Alert expired (next day passed)"
+
+  notification_model:
+    - "id: UUID primary key"
+    - "alertId: String, FK to Alert (cascade delete)"
+    - "contactId: String?, FK to EmergencyContact (set null on delete)"
+    - "channel: NotificationChannel enum"
+    - "status: NotificationStatus enum"
+    - "sentAt: DateTime? - when sent"
+    - "deliveredAt: DateTime? - delivery confirmation (future)"
+    - "error: String? - error message if failed"
+    - "createdAt, updatedAt: DateTime timestamps"
+    - "Index on alertId"
+    - "Index on status"
+
+  notification_channel_enum:
+    values:
+      - "email: Email notification (MVP)"
+      - "sms: SMS notification (future)"
+
+  notification_status_enum:
+    values:
+      - "pending: Queued, not yet processed"
+      - "sent: Sent to provider"
+      - "delivered: Delivery confirmed (future)"
+      - "failed: Failed after retries"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "npx prisma migrate dev runs successfully"
+  - "AlertStatus, NotificationChannel, NotificationStatus enums created"
+  - "Alert model with all required fields"
+  - "Notification model with all required fields"
+  - "Relations properly defined"
+  - "Indexes created for performance"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use proper Prisma annotations (@map for snake_case columns)"
+  - "Table names: alerts, notifications (lowercase, snake_case)"
+  - "Foreign key columns: user_id, alert_id, contact_id"
+  - "Use onDelete: Cascade for Alert->User"
+  - "Use onDelete: SetNull for Notification->EmergencyContact (preserve history)"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Push notification support"
+  - "Notification preferences per contact"
+  - "Alert escalation levels"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on: []
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  - Run migration with descriptive name:
+    npx prisma migrate dev --name add_alert_notification_models
+  - Test with Prisma Studio: npx prisma studio

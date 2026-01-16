@@ -1,0 +1,223 @@
+# ============================================================
+# Handoff Document: Missed Check-in Detector
+# @task TASK-028
+# @design_state_version 1.8.0
+# ============================================================
+
+handoff_id: "HO-028"
+task_id: "TASK-028"
+title: "Backend: Missed check-in detector"
+design_state_version: "1.8.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement scheduled cron job to detect users who missed their daily check-in.
+  When a user is past their deadline without checking in, create an alert
+  and notify their emergency contacts.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  npm_packages:
+    - "@nestjs/schedule"
+  npm_install: "cd apps/backend && npm install @nestjs/schedule"
+
+  app_module_update:
+    - "Import ScheduleModule.forRoot() in AppModule"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/detector/missed-checkin.detector.ts"
+    todos:
+      - "TODO(B): Import Cron, CronExpression from @nestjs/schedule"
+      - "TODO(B): Inject CheckInService/Repository"
+      - "TODO(B): Inject CheckInSettingsRepository"
+      - "TODO(B): Inject UserRepository (for names)"
+      - "TODO(B): Implement detectMissedCheckIns"
+      - "TODO(B): Implement isPastDeadline"
+      - "TODO(B): Implement getTodayInTimezone"
+      - "TODO(B): Implement expireOldAlerts"
+
+  - path: "apps/backend/src/modules/detector/detector.module.ts"
+    todos:
+      - "TODO(B): Import ScheduleModule"
+      - "TODO(B): Import CheckInModule"
+
+  - path: "apps/backend/src/app.module.ts"
+    todos:
+      - "TODO(B): Import ScheduleModule.forRoot()"
+      - "TODO(B): Import DetectorModule"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  detect_missed_checkins:
+    schedule: "Every minute (CronExpression.EVERY_MINUTE)"
+    algorithm: |
+      1. Prevent concurrent runs (use isRunning flag)
+      2. Get all users with check-in settings
+      3. For each user:
+         a. Get deadline time and timezone
+         b. Calculate today's date in user's timezone
+         c. Check if current time is past deadline
+         d. If past deadline:
+            - Check if user has checked in today
+            - Check if alert exists for today
+            - If no check-in AND no alert → create alert
+      4. Log summary
+
+    optimizations:
+      - "Query only users who COULD be past deadline"
+      - "Use batch queries where possible"
+      - "Skip users without settings"
+
+  is_past_deadline:
+    inputs:
+      - "deadlineTime: string (HH:mm format, e.g., '10:00')"
+      - "timezone: string (e.g., 'Asia/Shanghai')"
+    output: "boolean"
+    logic: |
+      1. Get current time in user's timezone
+      2. Parse deadline time
+      3. Create deadline datetime for today
+      4. Return currentTime > deadline
+
+  get_today_in_timezone:
+    inputs:
+      - "timezone: string"
+    output: "string (YYYY-MM-DD)"
+    note: |
+      Important: "today" depends on timezone.
+      User in Tokyo may be on 2026-01-17 while UTC is still 2026-01-16.
+
+  expire_old_alerts:
+    schedule: "Daily at midnight UTC (0 0 * * *)"
+    logic: |
+      1. Get today's date (UTC)
+      2. Find alerts where alertDate < today AND status IN ('triggered', 'notified')
+      3. Update status to 'expired'
+      4. Log count
+
+# ============================================================
+# Timezone Handling
+# ============================================================
+timezone_handling:
+  library: "Intl.DateTimeFormat or date-fns-tz"
+  examples:
+    get_current_time_in_timezone: |
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      const timeStr = formatter.format(new Date());
+
+    get_today_in_timezone: |
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(new Date()); // Returns YYYY-MM-DD
+
+# ============================================================
+# Integration with Check-in Module
+# ============================================================
+checkin_integration:
+  resolve_on_late_checkin:
+    description: "When user checks in after deadline, resolve any active alert"
+    location: "check-in.service.ts"
+    modification: |
+      In performCheckIn method, after creating check-in:
+      ```typescript
+      // Check if user was overdue and resolve alert
+      await this.alertService.resolveAlert(userId, checkInDate);
+      ```
+    note: "This makes late check-in clear the alert"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Cron job runs every minute"
+  - "Overdue users detected correctly"
+  - "Timezone handled properly"
+  - "Alerts created for overdue users"
+  - "No duplicate alerts for same user+date"
+  - "Late check-in resolves alert"
+  - "Old alerts expired daily"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Must complete within 50 seconds (before next run)"
+  - "Must handle errors gracefully (single user failure doesn't crash)"
+  - "Must be idempotent"
+  - "Must respect user timezone"
+  - "Single function < 50 lines"
+  - "Log all operations"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  manual_test_steps:
+    - "Create user with check-in settings (deadline in past)"
+    - "Ensure no check-in for today"
+    - "Wait for cron to run (or call manually)"
+    - "Verify alert created"
+    - "Verify notifications queued"
+    - "Check email received (Ethereal)"
+
+  test_scenarios:
+    - scenario: "User past deadline, no check-in"
+      expected: "Alert created, notifications sent"
+
+    - scenario: "User past deadline, has check-in"
+      expected: "No alert created"
+
+    - scenario: "User not past deadline"
+      expected: "No alert created"
+
+    - scenario: "User past deadline, alert exists"
+      expected: "No duplicate alert"
+
+    - scenario: "User checks in late"
+      expected: "Alert resolved"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Reminder notifications before deadline"
+  - "Escalation (notify different contacts at different times)"
+  - "Snooze functionality"
+
+# ============================================================
+# Dependencies
+# ============================================================
+depends_on:
+  - "TASK-027: Alert module"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  This is the heart of the safety system. The cron job runs continuously
+  and ensures no user falls through the cracks.
+
+  Performance considerations:
+  - With 10,000 users, job should still complete in <30 seconds
+  - Use efficient queries (batch where possible)
+  - Consider pagination for very large user bases
