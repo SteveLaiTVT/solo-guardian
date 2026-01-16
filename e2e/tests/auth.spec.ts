@@ -33,8 +33,6 @@ test.describe('Authentication', () => {
 
       await loginPage.login('nonexistent@example.com', 'wrongpassword');
 
-      // Error message pattern matches common auth error responses
-      // Covers: "Invalid credentials", "Incorrect email or password", "Login failed"
       await loginPage.expectError(/invalid credentials|incorrect email or password|login failed/i);
     });
 
