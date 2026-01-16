@@ -13,7 +13,6 @@ import {
   Param,
   Res,
   UseGuards,
-  HttpStatus,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
