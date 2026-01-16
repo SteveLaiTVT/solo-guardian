@@ -1,40 +1,27 @@
-// ============================================================
-// Detector Module - Scheduled job infrastructure
-// @task TASK-028
-// @design_state_version 1.8.0
-// ============================================================
+/**
+ * @file detector.module.ts
+ * @description Detector Module - Scheduled job infrastructure
+ * @task TASK-028
+ * @design_state_version 1.8.0
+ */
 
 import { Module } from '@nestjs/common';
-// TODO(B): Import ScheduleModule from '@nestjs/schedule'
+// DONE(B): Import ScheduleModule from '@nestjs/schedule' - TASK-028
+// Note: ScheduleModule.forRoot() imported in AppModule
 import { PrismaModule } from '../../prisma/prisma.module';
 import { AlertModule } from '../alerts';
-// TODO(B): Import CheckInModule for check-in queries
+// DONE(B): Import CheckInModule for check-in queries - TASK-028
+import { CheckInModule } from '../check-in';
 import { MissedCheckInDetector } from './missed-checkin.detector';
 
-/**
- * Detector Module - Scheduled jobs for detection
- *
- * TODO(B): Complete module setup
- * Requirements:
- * - Import ScheduleModule.forRoot() for cron jobs
- * - Import PrismaModule for database access
- * - Import AlertModule for creating alerts
- * - Import CheckInModule for querying check-ins
- * - Provide MissedCheckInDetector
- *
- * Note: ScheduleModule.forRoot() should be imported in AppModule
- * if used by multiple modules, or here if only used by detector.
- *
- * Acceptance:
- * - Module loads without errors
- * - Cron jobs registered and running
- */
+// DONE(B): Completed DetectorModule setup - TASK-028
 @Module({
   imports: [
-    // TODO(B): Import ScheduleModule.forRoot() if not in AppModule
+    // Note: ScheduleModule.forRoot() is imported in AppModule
     PrismaModule,
     AlertModule,
-    // TODO(B): Import CheckInModule
+    // DONE(B): Import CheckInModule - TASK-028
+    CheckInModule,
   ],
   providers: [MissedCheckInDetector],
 })

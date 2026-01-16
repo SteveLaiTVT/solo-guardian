@@ -1,8 +1,9 @@
-// ============================================================
-// Alert Controller - API endpoints for alerts
-// @task TASK-027
-// @design_state_version 1.8.0
-// ============================================================
+/**
+ * @file alert.controller.ts
+ * @description Alert Controller - API endpoints for alerts
+ * @task TASK-027
+ * @design_state_version 1.8.0
+ */
 
 import {
   Controller,
@@ -11,86 +12,70 @@ import {
   Query,
   UseGuards,
   ParseUUIDPipe,
+  NotFoundException,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
-// TODO(B): Import JwtAuthGuard and CurrentUser decorator
+// DONE(B): Import JwtAuthGuard and CurrentUser decorator - TASK-027
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AlertService } from './alert.service';
 
-/**
- * Alert Controller - Exposes alert API endpoints
- *
- * TODO(B): Implement this controller
- * Requirements:
- * - GET /alerts - List user's alert history
- * - GET /alerts/:id - Get alert details with notifications
- *
- * Constraints:
- * - All endpoints protected with JwtAuthGuard
- * - Use CurrentUser decorator to get userId
- * - Controller only validates and calls Service
- * - Single function < 50 lines
- *
- * API Response Format:
- * {
- *   success: true,
- *   data: { ... },
- *   meta: { page, limit, total }
- * }
- */
+// DONE(B): Implemented AlertController - TASK-027
 @Controller('alerts')
-// TODO(B): Add @UseGuards(JwtAuthGuard)
+// DONE(B): Add @UseGuards(JwtAuthGuard) - TASK-027
+@UseGuards(JwtAuthGuard)
 export class AlertController {
   constructor(private readonly alertService: AlertService) {}
 
   /**
    * Get user's alert history
-   *
-   * TODO(B): Implement getAlerts
-   * Requirements:
-   * - Add @Get() decorator
-   * - Use @CurrentUser('userId') to get user ID
-   * - Support pagination with @Query('page') and @Query('limit')
-   * - Default: page=1, limit=10
-   * - Return paginated alerts
-   *
-   * @param userId - Current user ID (from JWT)
-   * @param page - Page number
-   * @param limit - Items per page
-   * @returns Paginated alert list
+   * DONE(B): Implement getAlerts - TASK-027
    */
+  @Get()
   async getAlerts(
-    // @CurrentUser('userId') userId: string,
-    // @Query('page') page: number = 1,
-    // @Query('limit') limit: number = 10,
+    @CurrentUser('userId') userId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ): Promise<{
     success: boolean;
     data: unknown[];
     meta: { page: number; limit: number; total: number };
   }> {
-    throw new Error('Not implemented - TODO(B)');
+    const result = await this.alertService.getUserAlerts(userId, page, limit);
+
+    return {
+      success: true,
+      data: result.data,
+      meta: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+      },
+    };
   }
 
   /**
    * Get alert details with notifications
-   *
-   * TODO(B): Implement getAlertById
-   * Requirements:
-   * - Add @Get(':id') decorator
-   * - Use @Param('id', ParseUUIDPipe) to validate ID
-   * - Use @CurrentUser('userId') to get user ID
-   * - Return alert with notification details
-   * - Return 404 if not found or not owned by user
-   *
-   * @param id - Alert ID
-   * @param userId - Current user ID (for authorization)
-   * @returns Alert details with notifications
+   * DONE(B): Implement getAlertById - TASK-027
    */
+  @Get(':id')
   async getAlertById(
-    // @Param('id', ParseUUIDPipe) id: string,
-    // @CurrentUser('userId') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser('userId') userId: string,
   ): Promise<{
     success: boolean;
     data: unknown;
   }> {
-    throw new Error('Not implemented - TODO(B)');
+    const result = await this.alertService.getAlertDetails(id, userId);
+
+    if (!result) {
+      throw new NotFoundException('Alert not found');
+    }
+
+    return {
+      success: true,
+      data: result,
+    };
   }
 }

@@ -1,152 +1,148 @@
-// ============================================================
-// Notification Repository - Database operations for notifications
-// @task TASK-026
-// @design_state_version 1.8.0
-// ============================================================
+/**
+ * @file notification.repository.ts
+ * @description Notification Repository - Database operations for notifications
+ * @task TASK-026
+ * @design_state_version 1.8.0
+ */
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-// TODO(B): Import Notification, NotificationStatus, NotificationChannel from @prisma/client
+// DONE(B): Import types from @prisma/client - TASK-026
+import type {
+  Notification,
+  NotificationStatus,
+  NotificationChannel,
+} from '@prisma/client';
 
-/**
- * Notification Repository - Handles notification database operations
- *
- * TODO(B): Implement this repository
- * Requirements:
- * - Create notification records
- * - Update notification status
- * - Find notifications by alert
- * - Find pending notifications
- *
- * Constraints:
- * - All database operations must use PrismaService
- * - Single function < 50 lines
- * - All functions must have return types
- */
+// DONE(B): Implemented NotificationRepository - TASK-026
 @Injectable()
 export class NotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Create a notification record
-   *
-   * TODO(B): Implement create
-   * Requirements:
-   * - Create notification with pending status
-   * - Set channel (email/sms)
-   * - Link to alert and contact
-   *
-   * @param data - Notification data
-   * @returns Created notification
+   * DONE(B): Implement create - TASK-026
    */
   async create(data: {
     alertId: string;
     contactId: string;
-    channel: 'email' | 'sms';
-  }): Promise<unknown> {
-    // TODO(B): Return proper Notification type
-    throw new Error('Not implemented - TODO(B)');
+    channel: NotificationChannel;
+  }): Promise<Notification> {
+    return this.prisma.notification.create({
+      data: {
+        alertId: data.alertId,
+        contactId: data.contactId,
+        channel: data.channel,
+        status: 'pending',
+      },
+    });
   }
 
   /**
    * Create multiple notifications in a batch
-   *
-   * TODO(B): Implement createMany
-   * Requirements:
-   * - Create multiple notifications in one query
-   * - All with pending status
-   * - Return created notifications
-   *
-   * @param data - Array of notification data
-   * @returns Created notifications
+   * DONE(B): Implement createMany - TASK-026
    */
   async createMany(
     data: Array<{
       alertId: string;
       contactId: string;
-      channel: 'email' | 'sms';
+      channel: NotificationChannel;
     }>,
   ): Promise<{ count: number }> {
-    throw new Error('Not implemented - TODO(B)');
+    return this.prisma.notification.createMany({
+      data: data.map((d) => ({
+        alertId: d.alertId,
+        contactId: d.contactId,
+        channel: d.channel,
+        status: 'pending' as NotificationStatus,
+      })),
+    });
   }
 
   /**
    * Update notification status to sent
-   *
-   * TODO(B): Implement markAsSent
-   * Requirements:
-   * - Update status to 'sent'
-   * - Set sentAt to current time
-   *
-   * @param id - Notification ID
-   * @returns Updated notification
+   * DONE(B): Implement markAsSent - TASK-026
    */
-  async markAsSent(id: string): Promise<unknown> {
-    throw new Error('Not implemented - TODO(B)');
+  async markAsSent(id: string): Promise<Notification> {
+    return this.prisma.notification.update({
+      where: { id },
+      data: {
+        status: 'sent',
+        sentAt: new Date(),
+      },
+    });
   }
 
   /**
    * Update notification status to failed
-   *
-   * TODO(B): Implement markAsFailed
-   * Requirements:
-   * - Update status to 'failed'
-   * - Set error message
-   *
-   * @param id - Notification ID
-   * @param error - Error message
-   * @returns Updated notification
+   * DONE(B): Implement markAsFailed - TASK-026
    */
-  async markAsFailed(id: string, error: string): Promise<unknown> {
-    throw new Error('Not implemented - TODO(B)');
+  async markAsFailed(id: string, error: string): Promise<Notification> {
+    return this.prisma.notification.update({
+      where: { id },
+      data: {
+        status: 'failed',
+        error,
+      },
+    });
   }
 
   /**
    * Find all notifications for an alert
-   *
-   * TODO(B): Implement findByAlertId
-   * Requirements:
-   * - Find all notifications for given alert
-   * - Include contact information
-   * - Order by createdAt
-   *
-   * @param alertId - Alert ID
-   * @returns Notifications with contact info
+   * DONE(B): Implement findByAlertId - TASK-026
    */
-  async findByAlertId(alertId: string): Promise<unknown[]> {
-    throw new Error('Not implemented - TODO(B)');
+  async findByAlertId(alertId: string): Promise<
+    Array<
+      Notification & {
+        contact: { id: string; name: string; email: string } | null;
+      }
+    >
+  > {
+    return this.prisma.notification.findMany({
+      where: { alertId },
+      include: {
+        contact: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
   }
 
   /**
    * Find notification by ID
-   *
-   * TODO(B): Implement findById
-   * Requirements:
-   * - Find notification by ID
-   * - Include contact and alert information
-   *
-   * @param id - Notification ID
-   * @returns Notification or null
+   * DONE(B): Implement findById - TASK-026
    */
-  async findById(id: string): Promise<unknown | null> {
-    throw new Error('Not implemented - TODO(B)');
+  async findById(id: string): Promise<
+    | (Notification & {
+        contact: { id: string; name: string; email: string } | null;
+        alert: { id: string; alertDate: string; status: string };
+      })
+    | null
+  > {
+    return this.prisma.notification.findUnique({
+      where: { id },
+      include: {
+        contact: {
+          select: { id: true, name: true, email: true },
+        },
+        alert: {
+          select: { id: true, alertDate: true, status: true },
+        },
+      },
+    });
   }
 
   /**
    * Count notifications by status for an alert
-   *
-   * TODO(B): Implement countByAlertAndStatus
-   * Requirements:
-   * - Count notifications with given status for alert
-   *
-   * @param alertId - Alert ID
-   * @param status - Notification status
-   * @returns Count
+   * DONE(B): Implement countByAlertAndStatus - TASK-026
    */
   async countByAlertAndStatus(
     alertId: string,
-    status: 'pending' | 'sent' | 'delivered' | 'failed',
+    status: NotificationStatus,
   ): Promise<number> {
-    throw new Error('Not implemented - TODO(B)');
+    return this.prisma.notification.count({
+      where: { alertId, status },
+    });
   }
 }

@@ -1,79 +1,51 @@
-// ============================================================
-// Email Service - Send emails via nodemailer
-// @task TASK-025
-// @design_state_version 1.8.0
-// ============================================================
+/**
+ * @file email.service.ts
+ * @description Email Service - Send emails via nodemailer
+ * @task TASK-025
+ * @design_state_version 1.8.0
+ */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-// TODO(B): Import nodemailer and Transporter type
+// DONE(B): Import nodemailer and Transporter type - TASK-025
+import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
-/**
- * Email Service - Handles sending emails via SMTP
- *
- * TODO(B): Implement this service
- * Requirements:
- * - Create nodemailer transporter on module init
- * - Read SMTP config from environment variables
- * - Verify transporter connection on startup
- * - Provide method to send alert emails
- *
- * Environment Variables:
- * - SMTP_HOST: SMTP server host
- * - SMTP_PORT: SMTP server port (default: 587)
- * - SMTP_USER: SMTP username
- * - SMTP_PASS: SMTP password
- * - SMTP_FROM: Default from address (e.g., noreply@sologuardian.app)
- * - SMTP_SECURE: Use TLS (default: false, use STARTTLS)
- *
- * Acceptance:
- * - Transporter created and verified on startup
- * - Can send alert emails
- * - Errors logged but don't crash app
- *
- * Constraints:
- * - Single function < 50 lines
- * - Log all email operations
- * - Handle errors gracefully
- */
+// DONE(B): Implemented EmailService - TASK-025
 @Injectable()
 export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name);
-  // TODO(B): Add private transporter: Transporter
+  // DONE(B): Add private transporter - TASK-025
+  private transporter: Transporter | null = null;
 
   /**
    * Initialize transporter on module init
-   *
-   * TODO(B): Implement onModuleInit
-   * Requirements:
-   * - Create nodemailer transporter with SMTP config from env
-   * - Verify transporter connection
-   * - Log success or failure
-   * - Don't throw on failure (allow app to start, log warning)
+   * DONE(B): Implement onModuleInit - TASK-025
    */
   async onModuleInit(): Promise<void> {
-    throw new Error('Not implemented - TODO(B)');
+    try {
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await this.transporter.verify();
+      this.logger.log('SMTP transporter verified successfully');
+    } catch (error) {
+      this.logger.warn(
+        `SMTP transporter verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      // Don't throw - allow app to start even if SMTP is not configured
+    }
   }
 
   /**
    * Send an alert email to emergency contact
-   *
-   * TODO(B): Implement sendAlertEmail
-   * Requirements:
-   * - Send email with subject: "[Solo Guardian] Safety Alert: {userName}"
-   * - Use HTML template (see getAlertEmailHtml method)
-   * - Return boolean indicating success
-   * - Log send attempts and results
-   *
-   * @param to - Recipient email address
-   * @param contactName - Emergency contact's name
-   * @param userName - User who missed check-in
-   * @param alertDate - Date of missed check-in (YYYY-MM-DD)
-   * @param triggeredAt - When alert was triggered (ISO string)
-   * @returns Promise<boolean> - true if sent successfully
-   *
-   * Constraints:
-   * - Must not throw (return false on error)
-   * - Must log all attempts
+   * DONE(B): Implement sendAlertEmail - TASK-025
    */
   async sendAlertEmail(
     to: string,
@@ -82,25 +54,39 @@ export class EmailService implements OnModuleInit {
     alertDate: string,
     triggeredAt: string,
   ): Promise<boolean> {
-    throw new Error('Not implemented - TODO(B)');
+    this.logger.log(`Attempting to send alert email to: ${to}`);
+
+    if (!this.transporter) {
+      this.logger.error('Email transporter not initialized');
+      return false;
+    }
+
+    try {
+      const subject = `[Solo Guardian] Safety Alert: ${userName}`;
+      const html = this.getAlertEmailHtml(contactName, userName, alertDate, triggeredAt);
+      const text = this.getAlertEmailText(contactName, userName, alertDate, triggeredAt);
+
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || 'Solo Guardian <noreply@sologuardian.app>',
+        to,
+        subject,
+        html,
+        text,
+      });
+
+      this.logger.log(`Alert email sent successfully to: ${to}`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed to send alert email to ${to}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return false;
+    }
   }
 
   /**
    * Generate HTML content for alert email
-   *
-   * TODO(B): Implement getAlertEmailHtml
-   * Requirements:
-   * - Professional, clear email template
-   * - Include: contact name, user name, date, time
-   * - Include: "This is an automated safety alert"
-   * - Include: "Please check on {userName}"
-   * - Keep it simple and mobile-friendly
-   *
-   * @param contactName - Emergency contact's name
-   * @param userName - User who missed check-in
-   * @param alertDate - Date of missed check-in
-   * @param triggeredAt - When alert was triggered
-   * @returns HTML string
+   * DONE(B): Implement getAlertEmailHtml - TASK-025
    */
   private getAlertEmailHtml(
     contactName: string,
@@ -108,16 +94,43 @@ export class EmailService implements OnModuleInit {
     alertDate: string,
     triggeredAt: string,
   ): string {
-    throw new Error('Not implemented - TODO(B)');
+    const formattedTime = new Date(triggeredAt).toLocaleString('en-US', {
+      dateStyle: 'full',
+      timeStyle: 'short',
+    });
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
+    <h2 style="color: #dc3545; margin-top: 0;">⚠️ Safety Alert</h2>
+    <p>Dear ${contactName},</p>
+    <p><strong>${userName}</strong> has not checked in today.</p>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+      <p style="margin: 5px 0;"><strong>Date:</strong> ${alertDate}</p>
+      <p style="margin: 5px 0;"><strong>Expected by:</strong> ${formattedTime}</p>
+    </div>
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+      <p style="margin: 0;"><strong>Please check on ${userName} to ensure they are safe.</strong></p>
+    </div>
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #dee2e6;">
+    <p style="color: #6c757d; font-size: 12px; margin-bottom: 0;">
+      This is an automated safety alert from Solo Guardian.<br>
+      You received this because you are listed as an emergency contact.
+    </p>
+  </div>
+</body>
+</html>`.trim();
   }
 
   /**
    * Generate plain text content for alert email (fallback)
-   *
-   * TODO(B): Implement getAlertEmailText
-   * Requirements:
-   * - Plain text version of alert email
-   * - Same content as HTML but without formatting
+   * DONE(B): Implement getAlertEmailText - TASK-025
    */
   private getAlertEmailText(
     contactName: string,
@@ -125,6 +138,26 @@ export class EmailService implements OnModuleInit {
     alertDate: string,
     triggeredAt: string,
   ): string {
-    throw new Error('Not implemented - TODO(B)');
+    const formattedTime = new Date(triggeredAt).toLocaleString('en-US', {
+      dateStyle: 'full',
+      timeStyle: 'short',
+    });
+
+    return `
+SAFETY ALERT
+
+Dear ${contactName},
+
+${userName} has not checked in today.
+
+Date: ${alertDate}
+Expected by: ${formattedTime}
+
+Please check on ${userName} to ensure they are safe.
+
+---
+This is an automated safety alert from Solo Guardian.
+You received this because you are listed as an emergency contact.
+    `.trim();
   }
 }

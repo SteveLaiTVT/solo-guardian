@@ -29,7 +29,8 @@ model User {
   checkInSettings   CheckInSettings?
   emergencyContacts EmergencyContact[]
   preferences       UserPreferences?
-  // TODO(B): Add alerts relation - Alert[]
+  // DONE(B): Add alerts relation - TASK-023
+  alerts            Alert[]
 
   @@map("users")
 }
@@ -112,7 +113,8 @@ model EmergencyContact {
   deletedAt  DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // TODO(B): Add notifications relation - Notification[]
+  // DONE(B): Add notifications relation - TASK-023
+  notifications Notification[]
 
   // Unique constraints are partial indexes (see migration)
   // Only active (non-deleted) contacts have uniqueness enforced
@@ -158,75 +160,89 @@ model UserPreferences {
 }
 
 // ============================================================
+// AlertStatus Enum - Status of missed check-in alerts
+// @task TASK-023
+// @design_state_version 1.8.0
+// ============================================================
+// DONE(B): Created AlertStatus enum - TASK-023
+enum AlertStatus {
+  triggered // Alert created, notifications queued
+  notified  // All notifications sent
+  resolved  // User checked in late
+  expired   // Alert expired without resolution (next day)
+}
+
+// ============================================================
+// NotificationChannel Enum - Notification delivery channel
+// @task TASK-023
+// @design_state_version 1.8.0
+// ============================================================
+// DONE(B): Created NotificationChannel enum - TASK-023
+enum NotificationChannel {
+  email // Email notification (MVP)
+  sms   // SMS notification (future)
+}
+
+// ============================================================
+// NotificationStatus Enum - Status of notification delivery
+// @task TASK-023
+// @design_state_version 1.8.0
+// ============================================================
+// DONE(B): Created NotificationStatus enum - TASK-023
+enum NotificationStatus {
+  pending   // Notification queued, not yet processed
+  sent      // Notification sent to provider
+  delivered // Delivery confirmed (future)
+  failed    // Notification failed after retries
+}
+
+// ============================================================
 // Alert Model - Missed check-in alerts
 // @task TASK-023
 // @design_state_version 1.8.0
 // ============================================================
-// TODO(B): Implement Alert model
-// Requirements:
-// - id: UUID primary key
-// - userId: FK to User (cascade delete)
-// - alertDate: DATE string (YYYY-MM-DD) - the date the alert is for
-// - status: AlertStatus enum (triggered, notified, resolved, expired)
-// - triggeredAt: When the alert was created (deadline passed)
-// - resolvedAt: Optional, when user checked in late
-// - createdAt, updatedAt: Timestamps
-//
-// Constraints:
-// - Unique constraint on (userId, alertDate) - one alert per day per user
-// - Index on userId for user's alert history
-// - Index on status for finding active alerts
-// - Relation: User has many Alerts
-// - Relation: Alert has many Notifications
-//
-// Acceptance:
-// - Migration runs successfully
-// - AlertStatus enum created
-// - Can create/query alerts
+// DONE(B): Implemented Alert model - TASK-023
+model Alert {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  alertDate   String      @map("alert_date") // YYYY-MM-DD format
+  status      AlertStatus @default(triggered)
+  triggeredAt DateTime    @default(now()) @map("triggered_at")
+  resolvedAt  DateTime?   @map("resolved_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
-// TODO(B): Create AlertStatus enum
-// Values: triggered, notified, resolved, expired
-// - triggered: Alert created, notifications queued
-// - notified: All notifications sent
-// - resolved: User checked in late
-// - expired: Alert expired without resolution (next day)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@unique([userId, alertDate]) // One alert per day per user
+  @@index([userId])
+  @@index([status])
+  @@map("alerts")
+}
 
 // ============================================================
 // Notification Model - Notifications sent to emergency contacts
 // @task TASK-023
 // @design_state_version 1.8.0
 // ============================================================
-// TODO(B): Implement Notification model
-// Requirements:
-// - id: UUID primary key
-// - alertId: FK to Alert (cascade delete)
-// - contactId: FK to EmergencyContact (set null on delete - preserve history)
-// - channel: NotificationChannel enum (email, sms)
-// - status: NotificationStatus enum (pending, sent, delivered, failed)
-// - sentAt: Optional, when notification was sent
-// - deliveredAt: Optional, when delivery confirmed
-// - error: Optional, error message if failed
-// - createdAt, updatedAt: Timestamps
-//
-// Constraints:
-// - Index on alertId for alert's notifications
-// - Index on status for finding pending notifications
-// - Relation: Alert has many Notifications
-// - Relation: EmergencyContact has many Notifications (optional - can be null if contact deleted)
-//
-// Acceptance:
-// - Migration runs successfully
-// - NotificationChannel and NotificationStatus enums created
-// - Can create/query notifications
+// DONE(B): Implemented Notification model - TASK-023
+model Notification {
+  id          String             @id @default(uuid())
+  alertId     String             @map("alert_id")
+  contactId   String?            @map("contact_id")
+  channel     NotificationChannel @default(email)
+  status      NotificationStatus  @default(pending)
+  sentAt      DateTime?          @map("sent_at")
+  deliveredAt DateTime?          @map("delivered_at")
+  error       String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
 
-// TODO(B): Create NotificationChannel enum
-// Values: email, sms
-// - email: Email notification (MVP)
-// - sms: SMS notification (future)
+  alert   Alert             @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  contact EmergencyContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
-// TODO(B): Create NotificationStatus enum
-// Values: pending, sent, delivered, failed
-// - pending: Notification queued, not yet processed
-// - sent: Notification sent to provider
-// - delivered: Delivery confirmed (future)
-// - failed: Notification failed after retries
+  @@index([alertId])
+  @@index([status])
+  @@map("notifications")
+}

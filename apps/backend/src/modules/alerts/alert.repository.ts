@@ -1,179 +1,142 @@
-// ============================================================
-// Alert Repository - Database operations for alerts
-// @task TASK-027
-// @design_state_version 1.8.0
-// ============================================================
+/**
+ * @file alert.repository.ts
+ * @description Alert Repository - Database operations for alerts
+ * @task TASK-027
+ * @design_state_version 1.8.0
+ */
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-// TODO(B): Import Alert, AlertStatus from @prisma/client
+// DONE(B): Import Alert, AlertStatus from @prisma/client - TASK-027
+import type { Alert, AlertStatus } from '@prisma/client';
 
-/**
- * Alert Repository - Handles alert database operations
- *
- * TODO(B): Implement this repository
- * Requirements:
- * - Create alert records
- * - Update alert status
- * - Find alerts by user
- * - Find active alerts for today
- *
- * Constraints:
- * - All database operations must use PrismaService
- * - Single function < 50 lines
- * - All functions must have return types
- */
+// DONE(B): Implemented AlertRepository - TASK-027
 @Injectable()
 export class AlertRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Create a new alert
-   *
-   * TODO(B): Implement create
-   * Requirements:
-   * - Create alert with 'triggered' status
-   * - Set alertDate and triggeredAt
-   *
-   * @param data - Alert data
-   * @returns Created alert
+   * DONE(B): Implement create - TASK-027
    */
   async create(data: {
     userId: string;
     alertDate: string;
     triggeredAt: Date;
-  }): Promise<unknown> {
-    // TODO(B): Return proper Alert type
-    throw new Error('Not implemented - TODO(B)');
+  }): Promise<Alert> {
+    return this.prisma.alert.create({
+      data: {
+        userId: data.userId,
+        alertDate: data.alertDate,
+        triggeredAt: data.triggeredAt,
+        status: 'triggered',
+      },
+    });
   }
 
   /**
    * Update alert status to 'notified'
-   *
-   * TODO(B): Implement markAsNotified
-   * Requirements:
-   * - Update status to 'notified'
-   *
-   * @param id - Alert ID
-   * @returns Updated alert
+   * DONE(B): Implement markAsNotified - TASK-027
    */
-  async markAsNotified(id: string): Promise<unknown> {
-    throw new Error('Not implemented - TODO(B)');
+  async markAsNotified(id: string): Promise<Alert> {
+    return this.prisma.alert.update({
+      where: { id },
+      data: { status: 'notified' },
+    });
   }
 
   /**
    * Update alert status to 'resolved' (user checked in late)
-   *
-   * TODO(B): Implement resolve
-   * Requirements:
-   * - Update status to 'resolved'
-   * - Set resolvedAt to current time
-   *
-   * @param id - Alert ID
-   * @returns Updated alert
+   * DONE(B): Implement resolve - TASK-027
    */
-  async resolve(id: string): Promise<unknown> {
-    throw new Error('Not implemented - TODO(B)');
+  async resolve(id: string): Promise<Alert> {
+    return this.prisma.alert.update({
+      where: { id },
+      data: {
+        status: 'resolved',
+        resolvedAt: new Date(),
+      },
+    });
   }
 
   /**
    * Update alert status to 'expired'
-   *
-   * TODO(B): Implement expire
-   * Requirements:
-   * - Update status to 'expired'
-   * - Used when day passes without resolution
-   *
-   * @param id - Alert ID
-   * @returns Updated alert
+   * DONE(B): Implement expire - TASK-027
    */
-  async expire(id: string): Promise<unknown> {
-    throw new Error('Not implemented - TODO(B)');
+  async expire(id: string): Promise<Alert> {
+    return this.prisma.alert.update({
+      where: { id },
+      data: { status: 'expired' },
+    });
   }
 
   /**
    * Find alert by ID
-   *
-   * TODO(B): Implement findById
-   * Requirements:
-   * - Find alert by ID
-   * - Include user information
-   *
-   * @param id - Alert ID
-   * @returns Alert or null
+   * DONE(B): Implement findById - TASK-027
    */
-  async findById(id: string): Promise<unknown | null> {
-    throw new Error('Not implemented - TODO(B)');
+  async findById(
+    id: string,
+  ): Promise<(Alert & { user: { id: string; name: string; email: string } }) | null> {
+    return this.prisma.alert.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
   }
 
   /**
    * Find active alert for user on given date
-   *
-   * TODO(B): Implement findActiveByUserAndDate
-   * Requirements:
-   * - Find alert with status 'triggered' or 'notified'
-   * - For given user and date
-   *
-   * @param userId - User ID
-   * @param alertDate - Alert date (YYYY-MM-DD)
-   * @returns Alert or null
+   * DONE(B): Implement findActiveByUserAndDate - TASK-027
    */
   async findActiveByUserAndDate(
     userId: string,
     alertDate: string,
-  ): Promise<unknown | null> {
-    throw new Error('Not implemented - TODO(B)');
+  ): Promise<Alert | null> {
+    return this.prisma.alert.findFirst({
+      where: {
+        userId,
+        alertDate,
+        status: { in: ['triggered', 'notified'] },
+      },
+    });
   }
 
   /**
    * Find alerts for user with pagination
-   *
-   * TODO(B): Implement findByUserId
-   * Requirements:
-   * - Find all alerts for user
-   * - Order by triggeredAt descending (newest first)
-   * - Support pagination (skip, take)
-   *
-   * @param userId - User ID
-   * @param skip - Offset for pagination
-   * @param take - Limit for pagination
-   * @returns Alerts array
+   * DONE(B): Implement findByUserId - TASK-027
    */
-  async findByUserId(
-    userId: string,
-    skip: number,
-    take: number,
-  ): Promise<unknown[]> {
-    throw new Error('Not implemented - TODO(B)');
+  async findByUserId(userId: string, skip: number, take: number): Promise<Alert[]> {
+    return this.prisma.alert.findMany({
+      where: { userId },
+      orderBy: { triggeredAt: 'desc' },
+      skip,
+      take,
+    });
   }
 
   /**
    * Count alerts for user
-   *
-   * TODO(B): Implement countByUserId
-   * Requirements:
-   * - Count total alerts for user
-   *
-   * @param userId - User ID
-   * @returns Count
+   * DONE(B): Implement countByUserId - TASK-027
    */
   async countByUserId(userId: string): Promise<number> {
-    throw new Error('Not implemented - TODO(B)');
+    return this.prisma.alert.count({
+      where: { userId },
+    });
   }
 
   /**
    * Find all triggered alerts that need expiring
-   *
-   * TODO(B): Implement findExpirableAlerts
-   * Requirements:
-   * - Find alerts with status 'triggered' or 'notified'
-   * - Where alertDate is before given date
-   * - Used by cleanup job to expire old alerts
-   *
-   * @param beforeDate - Expire alerts before this date
-   * @returns Alerts to expire
+   * DONE(B): Implement findExpirableAlerts - TASK-027
    */
-  async findExpirableAlerts(beforeDate: string): Promise<unknown[]> {
-    throw new Error('Not implemented - TODO(B)');
+  async findExpirableAlerts(beforeDate: string): Promise<Alert[]> {
+    return this.prisma.alert.findMany({
+      where: {
+        alertDate: { lt: beforeDate },
+        status: { in: ['triggered', 'notified'] },
+      },
+    });
   }
 }
