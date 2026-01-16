@@ -87,12 +87,7 @@ model CheckInSettings {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  // TODO(B): Add lastReminderSentAt field - TASK-029
-  // Requirements:
-  // - DateTime? (nullable)
-  // - Tracks when last reminder was sent
-  // - Used to prevent sending multiple reminders per day
-  // - Map to: last_reminder_sent_at
+  // DONE(B): Added lastReminderSentAt field - TASK-029
   lastReminderSentAt DateTime? @map("last_reminder_sent_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -120,12 +115,7 @@ model EmergencyContact {
   updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
-  // TODO(B): Add verification token fields - TASK-029
-  // Requirements:
-  // - verificationToken: String? - UUID token for email verification
-  // - verificationTokenExpiresAt: DateTime? - Token expiration (24 hours from creation)
-  // - Map to: verification_token, verification_token_expires_at
-  // - Index on verificationToken for quick lookup
+  // DONE(B): Added verification token fields - TASK-029
   verificationToken          String?   @map("verification_token")
   verificationTokenExpiresAt DateTime? @map("verification_token_expires_at")
 

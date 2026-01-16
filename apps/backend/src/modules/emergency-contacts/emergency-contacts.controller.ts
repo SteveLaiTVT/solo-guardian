@@ -19,6 +19,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { EmergencyContactsService } from './emergency-contacts.service';
+import { ContactVerificationService } from './contact-verification.service';
 import {
   CreateContactDto,
   UpdateContactDto,
@@ -31,17 +32,16 @@ import { JwtAuthGuard } from '@/modules/auth/guards';
 @Controller('api/v1/emergency-contacts')
 @UseGuards(JwtAuthGuard)
 export class EmergencyContactsController {
-  constructor(private readonly contactsService: EmergencyContactsService) {}
+  constructor(
+    private readonly contactsService: EmergencyContactsService,
+    private readonly verificationService: ContactVerificationService,
+  ) {}
 
-  // DONE(B): Implemented list all contacts endpoint - TASK-015
   @Get()
-  async findAll(
-    @CurrentUser() userId: string,
-  ): Promise<ContactResponseDto[]> {
+  async findAll(@CurrentUser() userId: string): Promise<ContactResponseDto[]> {
     return this.contactsService.findAll(userId);
   }
 
-  // DONE(B): Implemented get single contact endpoint - TASK-015
   @Get(':id')
   async findOne(
     @Param('id') id: string,
@@ -50,7 +50,6 @@ export class EmergencyContactsController {
     return this.contactsService.findOne(id, userId);
   }
 
-  // DONE(B): Implemented create contact endpoint - TASK-015
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -60,8 +59,6 @@ export class EmergencyContactsController {
     return this.contactsService.create(userId, dto);
   }
 
-  // DONE(B): Implemented reorder contacts endpoint - TASK-015
-  // NOTE: Must be before @Put(':id') to avoid route shadowing
   @Put('reorder')
   async reorder(
     @Body() dto: ReorderContactsDto,
@@ -70,7 +67,6 @@ export class EmergencyContactsController {
     return this.contactsService.reorder(userId, dto.contactIds);
   }
 
-  // DONE(B): Implemented update contact endpoint - TASK-015
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -80,7 +76,6 @@ export class EmergencyContactsController {
     return this.contactsService.update(id, userId, dto);
   }
 
-  // DONE(B): Implemented soft delete contact endpoint - TASK-015
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
@@ -90,58 +85,29 @@ export class EmergencyContactsController {
     return this.contactsService.remove(id, userId);
   }
 
-  // ============================================================
-  // Contact Verification Endpoints - TASK-031, TASK-033
-  // ============================================================
-
-  /**
-   * Send verification email to contact
-   * POST /api/v1/emergency-contacts/:id/send-verification
-   * DONE(B): Implemented sendVerification endpoint - TASK-031
-   */
   @Post(':id/send-verification')
   @HttpCode(HttpStatus.OK)
   async sendVerification(
     @Param('id') id: string,
     @CurrentUser() userId: string,
   ): Promise<ContactResponseDto> {
-    return this.contactsService.sendVerification(id, userId);
+    return this.verificationService.sendVerification(id, userId);
   }
 
-  /**
-   * Resend verification email to contact
-   * POST /api/v1/emergency-contacts/:id/resend-verification
-   * DONE(B): Implemented resendVerification endpoint - TASK-031
-   */
   @Post(':id/resend-verification')
   @HttpCode(HttpStatus.OK)
   async resendVerification(
     @Param('id') id: string,
     @CurrentUser() userId: string,
   ): Promise<ContactResponseDto> {
-    return this.contactsService.resendVerification(id, userId);
+    return this.verificationService.resendVerification(id, userId);
   }
 }
 
-// ============================================================
-// Public Verification Controller - TASK-033
-// No authentication required
-// ============================================================
-
-/**
- * DONE(B): Created VerifyContactController - TASK-033
- * Route: /api/v1/verify-contact
- * No authentication required (public endpoint)
- */
 @Controller('api/v1/verify-contact')
 export class VerifyContactController {
-  constructor(private readonly contactsService: EmergencyContactsService) {}
+  constructor(private readonly verificationService: ContactVerificationService) {}
 
-  /**
-   * Verify contact via token
-   * GET /api/v1/verify-contact?token=xxx
-   * DONE(B): Implemented verify endpoint - TASK-033
-   */
   @Get()
   async verify(
     @Query('token') token: string,
@@ -149,6 +115,6 @@ export class VerifyContactController {
     if (!token) {
       throw new BadRequestException('Token is required');
     }
-    return this.contactsService.verifyContact(token);
+    return this.verificationService.verifyContact(token);
   }
 }

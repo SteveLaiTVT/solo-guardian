@@ -10,21 +10,18 @@ import {
   VerifyContactController,
 } from './emergency-contacts.controller';
 import { EmergencyContactsService } from './emergency-contacts.service';
+import { ContactVerificationService } from './contact-verification.service';
 import { EmergencyContactsRepository } from './emergency-contacts.repository';
-// DONE(B): Import EmailModule for verification emails - TASK-032
 import { EmailModule } from '../email';
 
 @Module({
-  imports: [
-    // DONE(B): Import EmailModule - TASK-032
-    EmailModule,
+  imports: [EmailModule],
+  controllers: [EmergencyContactsController, VerifyContactController],
+  providers: [
+    EmergencyContactsService,
+    ContactVerificationService,
+    EmergencyContactsRepository,
   ],
-  controllers: [
-    EmergencyContactsController,
-    // DONE(B): Add VerifyContactController - TASK-033
-    VerifyContactController,
-  ],
-  providers: [EmergencyContactsService, EmergencyContactsRepository],
-  exports: [EmergencyContactsService],
+  exports: [EmergencyContactsService, ContactVerificationService],
 })
 export class EmergencyContactsModule {}

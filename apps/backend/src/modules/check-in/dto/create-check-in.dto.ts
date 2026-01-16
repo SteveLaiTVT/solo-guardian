@@ -8,11 +8,7 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 /**
  * DTO for creating a daily check-in
- *
- * TODO(B): Add validation decorators if needed
- * Requirements:
- * - note is optional (user can add a message)
- * - note max 500 characters
+ * DONE(B): Validation complete - TASK-006
  */
 export class CreateCheckInDto {
   @IsOptional()

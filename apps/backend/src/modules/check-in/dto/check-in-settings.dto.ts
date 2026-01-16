@@ -8,12 +8,7 @@ import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
 
 /**
  * DTO for updating check-in settings
- *
- * TODO(B): Implement time validation
- * Requirements:
- * - deadlineTime format: HH:mm (24-hour)
- * - reminderTime format: HH:mm (24-hour)
- * - reminderEnabled defaults to true
+ * DONE(B): Time validation complete - TASK-006
  */
 export class UpdateCheckInSettingsDto {
   @IsOptional()

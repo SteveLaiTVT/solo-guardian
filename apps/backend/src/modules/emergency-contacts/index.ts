@@ -6,4 +6,5 @@
 
 export * from './emergency-contacts.module';
 export * from './emergency-contacts.service';
+export * from './contact-verification.service';
 export * from './emergency-contacts.repository';

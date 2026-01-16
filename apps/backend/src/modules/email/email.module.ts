@@ -9,15 +9,7 @@ import { EmailService } from './email.service';
 
 /**
  * Email Module - Provides email sending capabilities
- *
- * TODO(B): Complete module setup
- * Requirements:
- * - Provide EmailService
- * - Export EmailService for use by other modules
- *
- * Acceptance:
- * - Module loads without errors
- * - EmailService can be injected in other modules
+ * DONE(B): Module setup complete - TASK-025
  */
 @Module({
   providers: [EmailService],
