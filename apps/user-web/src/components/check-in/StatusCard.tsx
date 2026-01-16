@@ -70,7 +70,7 @@ export function StatusCard({ status }: StatusCardProps): JSX.Element {
 
   if (status.hasCheckedIn && status.checkIn) {
     return (
-      <Card>
+      <Card data-testid="check-in-status">
         <CardContent className="pt-6 text-center">
           <p className="text-lg font-medium text-green-600">{t('status.safe')}</p>
           <p className="mt-1 text-sm text-muted-foreground">

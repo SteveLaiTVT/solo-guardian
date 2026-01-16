@@ -19,6 +19,7 @@ import { QueueModule } from './modules/queue';
 import { AlertModule } from './modules/alerts';
 import { NotificationModule } from './modules/notifications';
 import { DetectorModule } from './modules/detector';
+import { HealthModule } from './modules/health';
 
 @Module({
   imports: [
@@ -40,6 +41,8 @@ import { DetectorModule } from './modules/detector';
     AlertModule,
     // DONE(B): Add DetectorModule for missed check-in detection - TASK-028
     DetectorModule,
+    // Health check endpoint for monitoring
+    HealthModule,
   ],
 })
 export class AppModule {}

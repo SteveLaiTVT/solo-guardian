@@ -21,6 +21,7 @@ export function CheckInButton({ status, onCheckIn, isLoading }: CheckInButtonPro
 
   return (
     <button
+      data-testid="check-in-button"
       onClick={onCheckIn}
       disabled={isDisabled}
       className={cn(

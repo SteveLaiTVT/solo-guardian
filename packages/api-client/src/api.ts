@@ -112,6 +112,12 @@ export function createApi(client: AxiosInstance) {
       completeOnboarding: () =>
         client.post<UserPreferences>("/api/v1/preferences/onboarding/complete"),
     },
+
+    // OAuth endpoints
+    oauth: {
+      getProviders: () =>
+        client.get<{ providers: ('google' | 'apple')[] }>("/api/auth/oauth/providers"),
+    },
   }
 }
 

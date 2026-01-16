@@ -1,8 +1,8 @@
 /**
  * @file auth.module.ts
- * @description Auth module configuration with JwtModule and Passport
- * @task TASK-001-D, TASK-007
- * @design_state_version 0.9.0
+ * @description Auth module configuration with JwtModule, Passport, and OAuth
+ * @task TASK-001-D, TASK-007, TASK-038, TASK-039, TASK-040
+ * @design_state_version 3.6.0
  */
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { OAuthModule } from './oauth/oauth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
       }),
       inject: [ConfigService],
     }),
+    // OAuth module for Google/Apple sign-in
+    OAuthModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, JwtStrategy, JwtAuthGuard],

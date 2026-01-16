@@ -628,76 +628,112 @@ current_iterations:
   - id: "iter-011"
     goal: "OAuth Login (Google/Apple)"
     started_at: "2026-01-16"
-    status: "designing"
+    status: "implementing"
     tasks:
       - id: "TASK-038"
         title: "Backend: Google OAuth integration"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-038-google-oauth.yaml"
         depends_on: []
-        description: "Google OAuth strategy with Passport.js"
+        description: "Google OAuth strategy with BaseOAuthProvider pattern"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "apps/backend/src/modules/auth/oauth/oauth.types.ts"
+          - "apps/backend/src/modules/auth/oauth/base-oauth.provider.ts"
+          - "apps/backend/src/modules/auth/oauth/google-oauth.provider.ts"
+          - "apps/backend/src/modules/auth/oauth/oauth.service.ts"
+          - "apps/backend/src/modules/auth/oauth/oauth.controller.ts"
+          - "apps/backend/src/modules/auth/oauth/oauth.module.ts"
 
       - id: "TASK-039"
         title: "Backend: Apple OAuth integration"
-        status: "pending"
+        status: "completed"
         priority: "P1"
         handoff: "HO-039-apple-oauth.yaml"
         depends_on: []
-        description: "Apple Sign In with Passport.js"
+        description: "Apple Sign In with BaseOAuthProvider pattern"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "apps/backend/src/modules/auth/oauth/apple-oauth.provider.ts"
 
       - id: "TASK-040"
         title: "Backend: Account linking"
-        status: "pending"
+        status: "completed"
         priority: "P1"
         handoff: "HO-040-account-linking.yaml"
         depends_on: ["TASK-038"]
         description: "Link OAuth accounts to existing email accounts"
+        completed_at: "2026-01-16"
 
       - id: "TASK-041"
         title: "Frontend: OAuth login buttons"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-041-oauth-buttons.yaml"
         depends_on: ["TASK-038"]
         description: "Add Google/Apple sign-in buttons to login page"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "apps/user-web/src/components/auth/OAuthButtons.tsx"
+          - "apps/user-web/src/components/auth/OAuthCallback.tsx"
+          - "packages/api-client/src/api.ts"
+          - "packages/api-client/src/hooks.ts"
 
   - id: "iter-012"
     goal: "E2E Testing Infrastructure"
     started_at: "2026-01-16"
-    status: "designing"
+    status: "implementing"
     tasks:
       - id: "TASK-042"
         title: "Testing: Playwright setup and configuration"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-042-playwright-setup.yaml"
         depends_on: []
         description: "Install Playwright, configure browsers, create test utils"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "e2e/playwright.config.ts"
+          - "e2e/global-setup.ts"
+          - "e2e/global-teardown.ts"
+          - "e2e/fixtures/test-fixtures.ts"
+          - "e2e/package.json"
+          - "e2e/tsconfig.json"
 
       - id: "TASK-043"
         title: "Testing: Auth flow E2E tests"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-043-auth-e2e.yaml"
         depends_on: ["TASK-042"]
         description: "Test login, register, logout, password reset"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "e2e/tests/auth.setup.ts"
+          - "e2e/tests/auth.spec.ts"
 
       - id: "TASK-044"
         title: "Testing: Check-in flow E2E tests"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-044-checkin-e2e.yaml"
         depends_on: ["TASK-042"]
-        description: "Test check-in, settings, history pages"
+        description: "Test check-in, settings, history, contacts pages"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - "e2e/tests/check-in.spec.ts"
 
       - id: "TASK-045"
         title: "Testing: GitHub Actions CI integration"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-045-ci-integration.yaml"
         depends_on: ["TASK-043", "TASK-044"]
         description: "Run E2E tests on PR and main branch"
+        completed_at: "2026-01-16"
+        skeleton_files:
+          - ".github/workflows/e2e.yml"
 
 # ============================================================
 # 5.1 Iteration History

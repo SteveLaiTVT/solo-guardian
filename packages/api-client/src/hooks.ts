@@ -213,6 +213,14 @@ export function createHooks(client: AxiosInstance) {
         },
       })
     },
+
+    // OAuth hooks
+    useOAuthProviders: () =>
+      useQuery({
+        queryKey: ["oauth", "providers"],
+        queryFn: () =>
+          api.oauth.getProviders().then((r: AxiosResponse<{ providers: ('google' | 'apple')[] }>) => r.data),
+      }),
   }
 }
 
