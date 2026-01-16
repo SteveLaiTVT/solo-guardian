@@ -1,0 +1,213 @@
+# ============================================================
+# Implementation Report: iter-009 Reminder Notifications & Contact Verification
+# @design_state_version 2.1.0
+# ============================================================
+
+report_id: "IR-iter-009"
+iteration_id: "iter-009"
+title: "Reminder Notifications and Contact Verification"
+created_at: "2026-01-16"
+created_by: "B Session"
+reviewed_by: null
+
+# ============================================================
+# Summary
+# ============================================================
+summary: |
+  Implemented reminder notification system and emergency contact verification:
+
+  1. **Reminder Notifications (TASK-029)**
+     - Cron job runs every minute to check for users in reminder window
+     - Sends reminder email before check-in deadline
+     - Tracks lastReminderSentAt to prevent duplicate reminders
+     - Timezone-aware reminder window calculation
+
+  2. **Contact Verification (TASK-031, TASK-032, TASK-033)**
+     - Verification email sent when contact added or on request
+     - UUID token with 24-hour expiration
+     - Public endpoint for token verification
+     - Frontend verification page with success/error states
+
+# ============================================================
+# Tasks Implemented
+# ============================================================
+tasks_implemented:
+  - task_id: "TASK-029"
+    title: "Reminder notification system"
+    files_modified:
+      - path: "apps/backend/prisma/schema.prisma"
+        changes: "Added lastReminderSentAt field to CheckInSettings"
+      - path: "apps/backend/src/modules/detector/missed-checkin.detector.ts"
+        changes: |
+          - Imported EmailService
+          - Implemented sendReminders() cron job
+          - Implemented isWithinReminderWindow() helper
+          - Implemented wasReminderSentToday() helper
+      - path: "apps/backend/src/modules/detector/detector.module.ts"
+        changes: "Imported EmailModule"
+      - path: "apps/backend/src/modules/email/email.service.ts"
+        changes: |
+          - Implemented sendReminderEmail()
+          - Implemented getReminderEmailHtml()
+          - Implemented getReminderEmailText()
+
+  - task_id: "TASK-031"
+    title: "Send verification emails"
+    files_modified:
+      - path: "apps/backend/prisma/schema.prisma"
+        changes: "Added verificationToken and verificationTokenExpiresAt to EmergencyContact"
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+        changes: |
+          - Implemented setVerificationToken()
+          - Implemented findByVerificationToken()
+          - Implemented markVerified()
+          - Implemented clearExpiredTokens()
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+        changes: |
+          - Imported EmailService and PrismaService
+          - Implemented sendVerification()
+          - Implemented resendVerification()
+          - Implemented verifyContact()
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+        changes: |
+          - Added sendVerification endpoint
+          - Added resendVerification endpoint
+
+  - task_id: "TASK-032"
+    title: "Verification email templates"
+    files_modified:
+      - path: "apps/backend/src/modules/email/email.service.ts"
+        changes: |
+          - Implemented sendVerificationEmail()
+          - Implemented getVerificationEmailHtml()
+          - Implemented getVerificationEmailText()
+
+  - task_id: "TASK-033"
+    title: "Verification endpoint and page"
+    files_modified:
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+        changes: "Created VerifyContactController with GET /api/v1/verify-contact endpoint"
+      - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+        changes: |
+          - Imported EmailModule
+          - Added VerifyContactController
+      - path: "apps/user-web/src/pages/verify-contact/VerifyContactPage.tsx"
+        changes: "Created verification page with loading/success/error states"
+      - path: "apps/user-web/src/pages/verify-contact/index.ts"
+        changes: "Export barrel file"
+      - path: "apps/user-web/src/App.tsx"
+        changes: "Added /verify-contact route as public route"
+
+# ============================================================
+# API Endpoints Added
+# ============================================================
+api_endpoints_added:
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/send-verification"
+    auth: "Required"
+    description: "Send verification email to contact"
+    response: "ContactResponseDto"
+
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/resend-verification"
+    auth: "Required"
+    description: "Resend verification email with new token"
+    response: "ContactResponseDto"
+
+  - method: "GET"
+    path: "/api/v1/verify-contact?token=xxx"
+    auth: "None (public)"
+    description: "Verify contact via token"
+    response: "{ success: boolean, contactName: string, userName: string }"
+
+# ============================================================
+# Database Changes
+# ============================================================
+database_changes:
+  migrations_needed:
+    - "npx prisma migrate dev --name add_reminder_verification_fields"
+
+  new_fields:
+    - model: "CheckInSettings"
+      field: "lastReminderSentAt"
+      type: "DateTime?"
+      map: "last_reminder_sent_at"
+
+    - model: "EmergencyContact"
+      field: "verificationToken"
+      type: "String?"
+      map: "verification_token"
+
+    - model: "EmergencyContact"
+      field: "verificationTokenExpiresAt"
+      type: "DateTime?"
+      map: "verification_token_expires_at"
+
+  new_indexes:
+    - model: "EmergencyContact"
+      fields: ["verificationToken"]
+      purpose: "Quick token lookup during verification"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes:
+  manual_tests_performed:
+    - "Reminder email sent when user in reminder window"
+    - "No duplicate reminders sent on same day"
+    - "Verification email sent on request"
+    - "Token verification works with valid token"
+    - "Expired token returns appropriate error"
+    - "Invalid token returns appropriate error"
+    - "Verification page renders correctly"
+
+  test_environment:
+    smtp: "Ethereal (test SMTP)"
+    database: "Local PostgreSQL"
+
+# ============================================================
+# Known Limitations
+# ============================================================
+known_limitations:
+  - "TASK-030 (Frontend reminder settings UI) deferred - backend complete"
+  - "No rate limiting on resend verification yet"
+  - "Verification page does not have i18n support yet"
+
+# ============================================================
+# Review Checklist
+# ============================================================
+review_checklist:
+  code_constraints:
+    - item: "No `any` types"
+      status: "pass"
+    - item: "Functions < 50 lines"
+      status: "pass"
+    - item: "Files < 300 lines"
+      status: "pass"
+    - item: "Return types declared"
+      status: "pass"
+
+  architecture:
+    - item: "Controller only validates and calls Service"
+      status: "pass"
+    - item: "Service contains business logic"
+      status: "pass"
+    - item: "Repository handles database operations"
+      status: "pass"
+
+  security:
+    - item: "Verification tokens are UUIDs (unpredictable)"
+      status: "pass"
+    - item: "Tokens expire in 24 hours"
+      status: "pass"
+    - item: "Tokens cleared after use (single-use)"
+      status: "pass"
+    - item: "Contact ownership validated before sending"
+      status: "pass"
+
+# ============================================================
+# Commit Reference
+# ============================================================
+commit_reference:
+  hash: "302a92d"
+  message: "feat(iter-009): implement reminder notifications and contact verification"
