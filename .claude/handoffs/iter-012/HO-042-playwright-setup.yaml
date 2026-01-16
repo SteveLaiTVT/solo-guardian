@@ -1,0 +1,195 @@
+# ============================================================
+# Handoff Document: Playwright Setup and Configuration
+# @task TASK-042
+# @design_state_version 3.0.0
+# ============================================================
+
+handoff_id: "HO-042"
+task_id: "TASK-042"
+title: "Testing: Playwright setup and configuration"
+design_state_version: "3.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Set up Playwright for end-to-end testing of the user-web application.
+  Create test utilities, page objects, and configuration for running
+  tests locally and in CI.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  npm_packages:
+    - "@playwright/test"
+  npm_install: "cd apps/user-web && pnpm add -D @playwright/test && npx playwright install"
+
+# ============================================================
+# Files to Create
+# ============================================================
+files_to_create:
+  - path: "apps/user-web/playwright.config.ts"
+    description: "Playwright configuration"
+
+  - path: "apps/user-web/e2e/utils/test-utils.ts"
+    description: "Test utilities and helpers"
+
+  - path: "apps/user-web/e2e/utils/auth.ts"
+    description: "Authentication helpers for tests"
+
+  - path: "apps/user-web/e2e/fixtures/test-data.ts"
+    description: "Test data and fixtures"
+
+  - path: "apps/user-web/e2e/page-objects/login.page.ts"
+    description: "Login page object"
+
+  - path: "apps/user-web/e2e/page-objects/dashboard.page.ts"
+    description: "Dashboard page object"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  playwright_config:
+    location: "playwright.config.ts"
+    settings:
+      testDir: "./e2e"
+      timeout: 30000
+      retries: 2 (CI only)
+      workers: 1 (sequential for reliability)
+      reporter: "html"
+      browsers:
+        - chromium
+        - firefox (optional)
+        - webkit (optional)
+      webServer:
+        command: "pnpm run dev"
+        url: "http://localhost:3000"
+        reuseExistingServer: true
+
+  test_utilities:
+    location: "e2e/utils/test-utils.ts"
+    helpers:
+      - name: "waitForPageLoad"
+        description: "Wait for page to fully load"
+      - name: "takeScreenshotOnFailure"
+        description: "Auto-screenshot on test failure"
+      - name: "clearLocalStorage"
+        description: "Clear auth state between tests"
+
+  auth_helpers:
+    location: "e2e/utils/auth.ts"
+    helpers:
+      - name: "loginAsTestUser"
+        description: "Log in with test credentials"
+        logic: |
+          1. Navigate to /login
+          2. Fill email and password
+          3. Click submit
+          4. Wait for redirect to dashboard
+      - name: "createTestUser"
+        description: "Create a test user via API"
+      - name: "deleteTestUser"
+        description: "Clean up test user after tests"
+
+  page_objects:
+    pattern: "Page Object Model"
+    description: |
+      Each page has a class with:
+      - Selectors as properties
+      - Actions as methods
+      - Assertions as methods
+
+    example: |
+      class LoginPage {
+        readonly page: Page;
+        readonly emailInput = this.page.getByLabel('Email');
+        readonly passwordInput = this.page.getByLabel('Password');
+        readonly submitButton = this.page.getByRole('button', { name: 'Sign In' });
+
+        async login(email: string, password: string) {
+          await this.emailInput.fill(email);
+          await this.passwordInput.fill(password);
+          await this.submitButton.click();
+        }
+      }
+
+  test_data:
+    location: "e2e/fixtures/test-data.ts"
+    data:
+      - testUser:
+          email: "e2e-test@example.com"
+          password: "TestPassword123!"
+          name: "E2E Test User"
+      - invalidCredentials:
+          email: "wrong@example.com"
+          password: "wrongpassword"
+
+# ============================================================
+# Directory Structure
+# ============================================================
+directory_structure: |
+  apps/user-web/
+  ├── e2e/
+  │   ├── utils/
+  │   │   ├── test-utils.ts
+  │   │   └── auth.ts
+  │   ├── fixtures/
+  │   │   └── test-data.ts
+  │   ├── page-objects/
+  │   │   ├── login.page.ts
+  │   │   ├── register.page.ts
+  │   │   ├── dashboard.page.ts
+  │   │   └── settings.page.ts
+  │   ├── auth.spec.ts         (TASK-043)
+  │   ├── checkin.spec.ts      (TASK-044)
+  │   └── contacts.spec.ts     (future)
+  ├── playwright.config.ts
+  └── package.json (add scripts)
+
+# ============================================================
+# Package.json Scripts
+# ============================================================
+package_json_scripts:
+  - "test:e2e": "playwright test"
+  - "test:e2e:ui": "playwright test --ui"
+  - "test:e2e:debug": "playwright test --debug"
+  - "test:e2e:report": "playwright show-report"
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Playwright installed and configured"
+  - "Test utilities created"
+  - "Page objects for login and dashboard"
+  - "Can run tests locally with pnpm test:e2e"
+  - "Tests can authenticate as test user"
+  - "Screenshots on failure"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use Page Object Model pattern"
+  - "Tests should be independent"
+  - "Clean up test data after tests"
+  - "No hardcoded waits (use Playwright auto-wait)"
+  - "Selectors should be accessible (getByRole, getByLabel)"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  E2E tests require the backend to be running with a test database.
+  Consider creating a separate test environment or using database
+  transactions that rollback after each test.
+
+  For CI, we'll need to:
+  1. Start backend with test database
+  2. Start frontend dev server
+  3. Run Playwright tests
+  4. Stop services and clean up

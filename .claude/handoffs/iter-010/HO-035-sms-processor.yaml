@@ -1,0 +1,94 @@
+# ============================================================
+# Handoff Document: SMS Notification Processor
+# @task TASK-035
+# @design_state_version 3.0.0
+# ============================================================
+
+handoff_id: "HO-035"
+task_id: "TASK-035"
+title: "Backend: SMS notification processor"
+design_state_version: "3.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Extend the existing notification queue processor to support SMS channel.
+  When an alert is triggered, send SMS to contacts who have SMS enabled.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - "TASK-034: SmsService"
+    - "TASK-026: Notification module (existing)"
+
+# ============================================================
+# Files to Modify
+# ============================================================
+files_to_modify:
+  - path: "apps/backend/src/modules/notifications/notification.processor.ts"
+    changes:
+      - "Import SmsService"
+      - "Add SMS sending logic for NotificationChannel.sms"
+      - "Handle SMS-specific errors"
+
+  - path: "apps/backend/src/modules/notifications/notifications.module.ts"
+    changes:
+      - "Import SmsModule"
+
+  - path: "apps/backend/prisma/schema.prisma"
+    changes:
+      - "Ensure NotificationChannel enum has 'sms' value (already exists)"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  notification_processor_update:
+    location: "notification.processor.ts"
+    changes: |
+      In processNotification method:
+      1. Check notification.channel
+      2. If 'email' → use existing EmailService
+      3. If 'sms' → use new SmsService.sendAlertSms()
+      4. Update notification status based on result
+
+  emergency_contact_update:
+    description: "Contacts need preferred channel field"
+    schema_change: |
+      model EmergencyContact {
+        // ... existing fields
+        preferredChannel NotificationChannel @default(email) @map("preferred_channel")
+      }
+
+  alert_creation_update:
+    location: "alert.service.ts"
+    changes: |
+      When creating notifications for an alert:
+      1. Check each contact's preferredChannel
+      2. Create notification with appropriate channel
+      3. If contact has phone but no email, use SMS
+      4. If contact has both, use preferredChannel
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "SMS notifications processed from queue"
+  - "Contact's preferred channel respected"
+  - "SMS sent via SmsService"
+  - "Notification status updated correctly"
+  - "Fallback to email if SMS fails (optional)"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single function < 50 lines"
+  - "No `any` types"
+  - "Use existing queue infrastructure"
+  - "Don't break existing email notifications"
