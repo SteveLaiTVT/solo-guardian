@@ -1,0 +1,103 @@
+# ============================================================
+# Handoff Document: Reminder Settings UI
+# @task TASK-030
+# @design_state_version 2.0.0
+# ============================================================
+
+handoff_id: "HO-030"
+task_id: "TASK-030"
+title: "Frontend: Reminder settings UI"
+design_state_version: "2.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Update the Settings page to allow users to configure reminder notifications.
+  Users should be able to enable/disable reminders and set their reminder time.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - "Existing SettingsPage component"
+    - "Existing check-in settings API hooks"
+
+# ============================================================
+# Files to Modify
+# ============================================================
+files_to_modify:
+  - path: "apps/user-web/src/pages/settings/SettingsPage.tsx"
+    changes:
+      - "Add reminder enabled toggle"
+      - "Add reminder time picker"
+      - "Add validation: reminderTime < deadlineTime"
+
+  - path: "packages/api-client/src/types.ts"
+    changes:
+      - "Ensure UpdateSettingsRequest includes reminderEnabled and reminderTime"
+
+# ============================================================
+# UI Requirements
+# ============================================================
+ui_requirements:
+  reminder_toggle:
+    label: "Enable daily reminders"
+    description: "Receive an email reminder before your check-in deadline"
+    type: "Switch/Toggle"
+    default: true
+
+  reminder_time_picker:
+    label: "Reminder time"
+    description: "When to send the reminder email"
+    type: "Time picker (HH:mm)"
+    default: "09:00"
+    condition: "Only show when reminder is enabled"
+    validation: "Must be before deadline time"
+
+  error_states:
+    invalid_time: "Reminder time must be before deadline"
+
+# ============================================================
+# Layout
+# ============================================================
+layout: |
+  Settings Page
+  ├── Check-in Settings
+  │   ├── Deadline Time: [10:00]
+  │   ├── Timezone: [Asia/Shanghai]
+  │   └── Reminder Settings
+  │       ├── [Toggle] Enable daily reminders
+  │       └── Reminder Time: [09:00]  (conditional)
+  └── ... other settings
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Toggle shows current reminderEnabled state"
+  - "Time picker shows current reminderTime"
+  - "Changes save immediately (optimistic update)"
+  - "Validation prevents reminderTime >= deadlineTime"
+  - "Reminder time hidden when reminders disabled"
+  - "Loading states shown during save"
+  - "Error toast on save failure"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use existing UI components"
+  - "Follow existing settings page patterns"
+  - "Functional components + hooks only"
+  - "No `any` types"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  The backend already supports reminderEnabled and reminderTime fields
+  in CheckInSettings. This task is purely frontend UI work.

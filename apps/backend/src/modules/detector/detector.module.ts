@@ -1,8 +1,8 @@
 /**
  * @file detector.module.ts
  * @description Detector Module - Scheduled job infrastructure
- * @task TASK-028
- * @design_state_version 1.8.0
+ * @task TASK-028, TASK-029
+ * @design_state_version 2.0.0
  */
 
 import { Module } from '@nestjs/common';
@@ -12,6 +12,8 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { AlertModule } from '../alerts';
 // DONE(B): Import CheckInModule for check-in queries - TASK-028
 import { CheckInModule } from '../check-in';
+// DONE(B): Import EmailModule for reminder notifications - TASK-029
+import { EmailModule } from '../email';
 import { MissedCheckInDetector } from './missed-checkin.detector';
 
 // DONE(B): Completed DetectorModule setup - TASK-028
@@ -22,6 +24,8 @@ import { MissedCheckInDetector } from './missed-checkin.detector';
     AlertModule,
     // DONE(B): Import CheckInModule - TASK-028
     CheckInModule,
+    // DONE(B): Import EmailModule for reminders - TASK-029
+    EmailModule,
   ],
   providers: [MissedCheckInDetector],
 })

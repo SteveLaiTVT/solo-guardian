@@ -1,0 +1,194 @@
+# ============================================================
+# Handoff Document: Verification Email Templates
+# @task TASK-032
+# @design_state_version 2.0.0
+# ============================================================
+
+handoff_id: "HO-032"
+task_id: "TASK-032"
+title: "Backend: Verification email templates"
+design_state_version: "2.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement the email templates for contact verification emails.
+  These emails explain to the recipient why they received the email
+  and provide a link to verify their emergency contact status.
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/email/email.service.ts"
+    todos:
+      - "TODO(B): Implement sendVerificationEmail"
+      - "TODO(B): Implement getVerificationEmailHtml"
+      - "TODO(B): Implement getVerificationEmailText"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  send_verification_email:
+    inputs:
+      - "to: string (recipient email)"
+      - "contactName: string (recipient's name)"
+      - "userName: string (user who added them)"
+      - "verificationToken: string"
+    output: "boolean (success/failure)"
+    logic: |
+      1. Build verification link: {APP_URL}/verify-contact?token={token}
+      2. Generate HTML and text content
+      3. Send email with subject
+      4. Log attempt and result
+      5. Return true on success, false on failure
+
+  email_subject: "[Solo Guardian] Please verify your emergency contact status"
+
+  email_content:
+    introduction: |
+      Dear {contactName},
+
+      {userName} has added you as an emergency contact on Solo Guardian.
+
+    explanation: |
+      Solo Guardian is a daily check-in app for people living alone.
+      As an emergency contact, you will receive notifications if {userName}
+      misses their daily check-in, so you can check on their safety.
+
+    action: |
+      Please verify that you agree to be an emergency contact by clicking
+      the button below. This link expires in 24 hours.
+
+      [Verify Now] button → verification link
+
+    disclaimer: |
+      If you did not expect this email or do not wish to be an emergency
+      contact, you can simply ignore this email. The verification link
+      will expire automatically.
+
+    footer: |
+      This is an automated message from Solo Guardian.
+      Questions? Contact support@sologuardian.app
+
+# ============================================================
+# HTML Template Style
+# ============================================================
+html_template_style:
+  similar_to: "Alert email template (already implemented)"
+  colors:
+    primary: "#4A90A4 (calm blue)"
+    button: "#28a745 (green for positive action)"
+  layout:
+    - "Header with Solo Guardian branding"
+    - "Clear, readable body text"
+    - "Prominent CTA button"
+    - "Subtle footer with disclaimer"
+
+# ============================================================
+# Example HTML Structure
+# ============================================================
+example_html: |
+  <!DOCTYPE html>
+  <html>
+  <body style="font-family: Arial; background: #f4f4f4; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px;">
+      <h2 style="color: #333;">Emergency Contact Request</h2>
+
+      <p>Dear {contactName},</p>
+
+      <p><strong>{userName}</strong> has added you as an emergency contact on Solo Guardian.</p>
+
+      <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p>Solo Guardian helps people living alone stay safe by checking in daily.
+           If {userName} misses their check-in, you'll be notified so you can check on them.</p>
+      </div>
+
+      <p>Please verify that you agree to be an emergency contact:</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="{verificationLink}"
+           style="background: #28a745; color: white; padding: 15px 30px;
+                  text-decoration: none; border-radius: 5px; font-weight: bold;">
+          Verify Now
+        </a>
+      </div>
+
+      <p style="color: #666; font-size: 14px;">
+        This link expires in 24 hours. If you didn't expect this email,
+        you can ignore it.
+      </p>
+
+      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+      <p style="color: #999; font-size: 12px;">
+        Solo Guardian - Keeping loved ones safe
+      </p>
+    </div>
+  </body>
+  </html>
+
+# ============================================================
+# Plain Text Template
+# ============================================================
+plain_text_template: |
+  EMERGENCY CONTACT REQUEST
+
+  Dear {contactName},
+
+  {userName} has added you as an emergency contact on Solo Guardian.
+
+  What is Solo Guardian?
+  Solo Guardian helps people living alone stay safe by checking in daily.
+  If {userName} misses their check-in, you'll be notified so you can
+  check on them.
+
+  Please verify that you agree to be an emergency contact by clicking
+  this link:
+
+  {verificationLink}
+
+  This link expires in 24 hours.
+
+  If you didn't expect this email, you can ignore it.
+
+  ---
+  Solo Guardian - Keeping loved ones safe
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Email sends successfully"
+  - "HTML renders correctly in email clients"
+  - "Plain text fallback works"
+  - "Verification link is correct"
+  - "Contact name and user name personalized"
+  - "Professional, trustworthy appearance"
+  - "24-hour expiry mentioned"
+  - "Ignore option clearly stated"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "HTML must be inline-styled (no external CSS)"
+  - "Must provide plain text fallback"
+  - "APP_URL from environment variable"
+  - "Single function < 50 lines"
+
+# ============================================================
+# Notes
+# ============================================================
+notes: |
+  The email should be:
+  - Clear about who is sending and why
+  - Professional but friendly
+  - Not alarming or pushy
+  - Respectful of recipient's choice to decline
+
+  Consider future localization (i18n) but for now, English only.

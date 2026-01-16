@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.9.0"
+  version: "2.0.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
-  branch: "main"
+  branch: "feature/iter-009-reminders-verification"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Core Safety Feature Complete - Notification System"
+  milestone: "Reminder Notifications & Contact Verification"
 
 # ============================================================
 # 1. Technical Architecture
@@ -356,6 +356,50 @@ modules:
         description: "Daily job to expire old alerts"
         completed_task: "TASK-028"
 
+  reminder_notifications:
+    status: "designing"
+    owner: "A Session"
+    description: "Send reminder emails to users before their check-in deadline"
+    started_iteration: "iter-009"
+    skeleton_created: false
+    features:
+      - name: "Reminder Cron Job"
+        priority: "P0"
+        status: "designing"
+        description: "Scheduled job to send reminders at user's reminderTime"
+      - name: "Reminder Email"
+        priority: "P0"
+        status: "designing"
+        description: "Email template for check-in reminders"
+      - name: "Reminder Tracking"
+        priority: "P0"
+        status: "designing"
+        description: "Track last reminder sent to prevent duplicates"
+
+  contact_verification:
+    status: "designing"
+    owner: "A Session"
+    description: "Email verification for emergency contacts"
+    started_iteration: "iter-009"
+    skeleton_created: false
+    features:
+      - name: "Verification Email"
+        priority: "P0"
+        status: "designing"
+        description: "Send verification email when contact is added"
+      - name: "Verification Token"
+        priority: "P0"
+        status: "designing"
+        description: "Token-based verification with expiration"
+      - name: "Verification Endpoint"
+        priority: "P0"
+        status: "designing"
+        description: "Public endpoint to verify contact"
+      - name: "Resend Verification"
+        priority: "P1"
+        status: "designing"
+        description: "Allow resending verification email"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -422,65 +466,50 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-008"
-  goal: "Notification system and missed check-in detection - core safety feature"
+  id: "iter-009"
+  goal: "Reminder notifications and contact verification"
   started_at: "2026-01-16"
-  completed_at: "2026-01-16"
-  status: "completed"
+  status: "in_progress"
   tasks:
-    - id: "TASK-023"
-      title: "Database: Alert and Notification models"
-      status: "completed"
+    - id: "TASK-029"
+      title: "Database: Add reminder tracking and verification fields"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-023-alert-notification-db.yaml"
+      handoff: "HO-029-reminder-verification-db.yaml"
       depends_on: []
-      description: "Prisma schema for Alert and Notification with status tracking"
-      review_verdict: "pass"
+      description: "Add lastReminderSentAt to CheckInSettings, verificationToken to EmergencyContact"
 
-    - id: "TASK-024"
-      title: "Backend: Bull queue infrastructure"
-      status: "completed"
+    - id: "TASK-030"
+      title: "Backend: Reminder email template"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-024-queue-infrastructure.yaml"
+      handoff: "HO-030-reminder-email.yaml"
       depends_on: []
-      description: "Bull queue module with Redis connection for job processing"
-      review_verdict: "pass"
+      description: "Add reminder email template to EmailService"
 
-    - id: "TASK-025"
-      title: "Backend: Email service"
-      status: "completed"
+    - id: "TASK-031"
+      title: "Backend: Reminder notification detector"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-025-email-service.yaml"
-      depends_on: []
-      description: "Email service with nodemailer and alert templates"
-      review_verdict: "pass"
+      handoff: "HO-031-reminder-detector.yaml"
+      depends_on: ["TASK-029", "TASK-030"]
+      description: "Cron job to send reminders at user's reminderTime"
 
-    - id: "TASK-026"
-      title: "Backend: Notification module"
-      status: "completed"
+    - id: "TASK-032"
+      title: "Backend: Contact verification service"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-026-notification-module.yaml"
-      depends_on: ["TASK-023", "TASK-024", "TASK-025"]
-      description: "NotificationService, Repository, and queue processor"
-      review_verdict: "pass"
+      handoff: "HO-032-contact-verification.yaml"
+      depends_on: ["TASK-029"]
+      description: "Verification email, token generation, and verification endpoint"
 
-    - id: "TASK-027"
-      title: "Backend: Alert module"
-      status: "completed"
+    - id: "TASK-033"
+      title: "Frontend: Contact verification UI"
+      status: "pending"
       priority: "P0"
-      handoff: "HO-027-alert-module.yaml"
-      depends_on: ["TASK-023", "TASK-026"]
-      description: "AlertService, Repository, Controller for alert management"
-      review_verdict: "pass"
-
-    - id: "TASK-028"
-      title: "Backend: Missed check-in detector"
-      status: "completed"
-      priority: "P0"
-      handoff: "HO-028-missed-checkin-detector.yaml"
-      depends_on: ["TASK-027"]
-      description: "Cron job to detect overdue users and trigger alerts"
-      review_verdict: "pass"
+      handoff: "HO-033-verification-ui.yaml"
+      depends_on: ["TASK-032"]
+      description: "Show verification status, resend button, verification page"
 
 # ============================================================
 # 5.1 Iteration History
@@ -919,6 +948,55 @@ decision_log:
       - "Must handle timezone edge cases (DST transitions)"
       - "Must not create duplicate alerts for same day"
       - "Must not notify already-notified contacts"
+
+  - id: "ADR-015"
+    date: "2026-01-16"
+    decision: "Reminder notifications before check-in deadline"
+    rationale: |
+      - Users set reminderTime and reminderEnabled in CheckInSettings
+      - Send friendly reminder email to user (not to emergency contacts)
+      - Reminds user to check in before deadline to avoid alerting contacts
+      - Must track last reminder sent to prevent duplicate reminders
+    implementation:
+      schema_changes:
+        - "Add lastReminderSentAt (DateTime?) to CheckInSettings"
+      detection_logic: |
+        1. Cron job runs every minute
+        2. Find users where:
+           - reminderEnabled = true
+           - Current time in user's timezone matches reminderTime (within 1 min)
+           - User hasn't checked in today
+           - lastReminderSentAt is not today
+        3. Send reminder email to user's email
+        4. Update lastReminderSentAt to now
+      email_template:
+        subject: "[Solo Guardian] Reminder: Time to check in"
+        content: "Friendly reminder to check in before your deadline"
+
+  - id: "ADR-016"
+    date: "2026-01-16"
+    decision: "Emergency contact email verification"
+    rationale: |
+      - Verify contacts before they receive emergency alerts
+      - Prevent spam/abuse by ensuring contact owns the email
+      - Build trust with contacts before critical notifications
+      - isVerified field already exists in EmergencyContact (default false)
+    implementation:
+      schema_changes:
+        - "Add verificationToken (String?) to EmergencyContact"
+        - "Add verificationTokenExpiresAt (DateTime?) to EmergencyContact"
+      flow: |
+        1. User adds emergency contact
+        2. System generates verification token (UUID)
+        3. Send verification email with link: /verify-contact?token=xxx
+        4. Contact clicks link
+        5. Backend validates token and marks isVerified = true
+        6. Token is cleared after use
+      considerations:
+        - "Token expires after 24 hours"
+        - "User can resend verification email"
+        - "Unverified contacts can still be added but won't receive alerts"
+        - "Public endpoint (no auth required for verification)"
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

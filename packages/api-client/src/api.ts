@@ -16,6 +16,7 @@ import type {
   UserPreferences,
   UpdatePreferencesRequest,
   ToggleFeatureRequest,
+  VerifyContactResult,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -71,6 +72,18 @@ export function createApi(client: AxiosInstance) {
 
       reorder: (data: ReorderContactsRequest) =>
         client.put<EmergencyContact[]>("/api/v1/emergency-contacts/reorder", data),
+
+      sendVerification: (id: string) =>
+        client.post<EmergencyContact>(`/api/v1/emergency-contacts/${id}/send-verification`),
+
+      resendVerification: (id: string) =>
+        client.post<EmergencyContact>(`/api/v1/emergency-contacts/${id}/resend-verification`),
+    },
+
+    // Public endpoint (no auth required)
+    verification: {
+      verifyContact: (token: string) =>
+        client.get<VerifyContactResult>("/api/v1/verify-contact", { params: { token } }),
     },
 
     preferences: {

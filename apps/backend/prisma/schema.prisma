@@ -75,7 +75,7 @@ model CheckIn {
 
 // ============================================================
 // CheckInSettings Model - User preferences for check-in
-// @task TASK-005
+// @task TASK-005, TASK-029
 // ============================================================
 model CheckInSettings {
   id              String   @id @default(uuid())
@@ -87,6 +87,14 @@ model CheckInSettings {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  // TODO(B): Add lastReminderSentAt field - TASK-029
+  // Requirements:
+  // - DateTime? (nullable)
+  // - Tracks when last reminder was sent
+  // - Used to prevent sending multiple reminders per day
+  // - Map to: last_reminder_sent_at
+  lastReminderSentAt DateTime? @map("last_reminder_sent_at")
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("check_in_settings")
@@ -94,7 +102,7 @@ model CheckInSettings {
 
 // ============================================================
 // EmergencyContact Model - Emergency contacts for alert notifications
-// @task TASK-014
+// @task TASK-014, TASK-029
 // NOTE: Unique constraints on (userId, email) and (userId, priority) are
 //       implemented as partial indexes in migration to exclude soft-deleted
 //       records. See migration: fix_emergency_contact_unique_constraints
@@ -112,6 +120,15 @@ model EmergencyContact {
   updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
+  // TODO(B): Add verification token fields - TASK-029
+  // Requirements:
+  // - verificationToken: String? - UUID token for email verification
+  // - verificationTokenExpiresAt: DateTime? - Token expiration (24 hours from creation)
+  // - Map to: verification_token, verification_token_expires_at
+  // - Index on verificationToken for quick lookup
+  verificationToken          String?   @map("verification_token")
+  verificationTokenExpiresAt DateTime? @map("verification_token_expires_at")
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   // DONE(B): Add notifications relation - TASK-023
   notifications Notification[]
@@ -120,6 +137,7 @@ model EmergencyContact {
   // Only active (non-deleted) contacts have uniqueness enforced
   @@index([userId, isActive])
   @@index([userId, deletedAt]) // For efficient queries on active contacts
+  @@index([verificationToken]) // For quick token lookup during verification
   @@map("emergency_contacts")
 }
 

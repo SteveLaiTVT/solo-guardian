@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.repository.ts
  * @description Repository for emergency contacts database operations
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-031, TASK-033
+ * @design_state_version 2.0.0
  */
 import { Injectable } from '@nestjs/common';
 import { EmergencyContact, Prisma } from '@prisma/client';
@@ -152,5 +152,81 @@ export class EmergencyContactsRepository {
       where: { id: { in: ids } },
       orderBy: { priority: 'asc' },
     });
+  }
+
+  // ============================================================
+  // Contact Verification - TASK-031, TASK-033
+  // ============================================================
+
+  /**
+   * Find contact by verification token
+   * DONE(B): Implement findByVerificationToken - TASK-033
+   */
+  async findByVerificationToken(
+    token: string,
+  ): Promise<(EmergencyContact & { user: { id: string; name: string } }) | null> {
+    return this.prisma.emergencyContact.findFirst({
+      where: { verificationToken: token },
+      include: {
+        user: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+  }
+
+  /**
+   * Set verification token for a contact
+   * DONE(B): Implement setVerificationToken - TASK-031
+   */
+  async setVerificationToken(
+    id: string,
+    token?: string,
+  ): Promise<EmergencyContact> {
+    const verificationToken = token ?? crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours from now
+
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        verificationToken,
+        verificationTokenExpiresAt: expiresAt,
+      },
+    });
+  }
+
+  /**
+   * Mark contact as verified
+   * DONE(B): Implement markVerified - TASK-033
+   */
+  async markVerified(id: string): Promise<EmergencyContact> {
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        isVerified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    });
+  }
+
+  /**
+   * Clear expired verification tokens
+   * DONE(B): Implement clearExpiredTokens - TASK-033
+   */
+  async clearExpiredTokens(): Promise<number> {
+    const result = await this.prisma.emergencyContact.updateMany({
+      where: {
+        verificationTokenExpiresAt: { lt: new Date() },
+        verificationToken: { not: null },
+      },
+      data: {
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    });
+
+    return result.count;
   }
 }

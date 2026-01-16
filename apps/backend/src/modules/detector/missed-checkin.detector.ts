@@ -1,8 +1,8 @@
 /**
  * @file missed-checkin.detector.ts
  * @description Missed Check-in Detector - Cron job to detect overdue users
- * @task TASK-028
- * @design_state_version 1.8.0
+ * @task TASK-028, TASK-029
+ * @design_state_version 2.0.0
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -12,6 +12,8 @@ import { AlertService } from '../alerts';
 // DONE(B): Import PrismaService for batch queries - TASK-028
 import { PrismaService } from '../../prisma/prisma.service';
 import { CheckInService } from '../check-in';
+// DONE(B): Import EmailService for sending reminders - TASK-029
+import { EmailService } from '../email';
 
 // DONE(B): Implemented MissedCheckInDetector - TASK-028
 @Injectable()
@@ -25,6 +27,8 @@ export class MissedCheckInDetector implements OnModuleInit {
     private readonly prisma: PrismaService,
     // DONE(B): Inject CheckInService - TASK-028
     private readonly checkInService: CheckInService,
+    // DONE(B): Inject EmailService for sending reminders - TASK-029
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -33,6 +37,7 @@ export class MissedCheckInDetector implements OnModuleInit {
   onModuleInit(): void {
     this.logger.log('Missed check-in detector initialized');
     this.logger.log('Detection job runs: EVERY_MINUTE');
+    this.logger.log('Reminder job runs: EVERY_MINUTE');
     this.logger.log('Expiration job runs: Daily at midnight UTC');
   }
 
@@ -171,5 +176,140 @@ export class MissedCheckInDetector implements OnModuleInit {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Alert expiration job failed: ${errorMessage}`);
     }
+  }
+
+  // ============================================================
+  // Reminder Notification System - TASK-029
+  // ============================================================
+
+  /**
+   * Reminder job - runs every minute to send reminders
+   * DONE(B): Implement sendReminders - TASK-029
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async sendReminders(): Promise<void> {
+    let usersProcessed = 0;
+    let remindersSent = 0;
+
+    try {
+      // Get all users with reminders enabled
+      const usersWithSettings = await this.prisma.checkInSettings.findMany({
+        where: { reminderEnabled: true },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      for (const settings of usersWithSettings) {
+        try {
+          usersProcessed++;
+          const { userId, reminderTime, deadlineTime, timezone, lastReminderSentAt } = settings;
+          const { name: userName, email: userEmail } = settings.user;
+
+          // Check if within reminder window
+          if (!this.isWithinReminderWindow(reminderTime, deadlineTime, timezone)) {
+            continue;
+          }
+
+          const today = this.getTodayInTimezone(timezone);
+
+          // Check if already checked in today
+          const checkIn = await this.prisma.checkIn.findUnique({
+            where: { userId_checkInDate: { userId, checkInDate: today } },
+          });
+          if (checkIn) continue;
+
+          // Check if reminder already sent today
+          if (this.wasReminderSentToday(lastReminderSentAt, timezone)) {
+            continue;
+          }
+
+          // Send reminder email
+          const success = await this.emailService.sendReminderEmail(
+            userEmail,
+            userName,
+            deadlineTime,
+            timezone,
+          );
+
+          if (success) {
+            // Update lastReminderSentAt
+            await this.prisma.checkInSettings.update({
+              where: { userId },
+              data: { lastReminderSentAt: new Date() },
+            });
+            remindersSent++;
+            this.logger.log(`Sent reminder to ${userName} (${userEmail})`);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(`Error sending reminder to user ${settings.userId}: ${errorMessage}`);
+        }
+      }
+
+      if (remindersSent > 0) {
+        this.logger.log(`Reminder job: ${usersProcessed} users processed, ${remindersSent} reminders sent`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Reminder job failed: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Check if current time is within reminder window (after reminder, before deadline)
+   * DONE(B): Implement isWithinReminderWindow - TASK-029
+   */
+  private isWithinReminderWindow(
+    reminderTime: string,
+    deadlineTime: string,
+    timezone: string,
+  ): boolean {
+    const [reminderHour, reminderMinute] = reminderTime.split(':').map(Number);
+    const [deadlineHour, deadlineMinute] = deadlineTime.split(':').map(Number);
+
+    // Invalid window: reminder >= deadline
+    const reminderMinutes = reminderHour * 60 + reminderMinute;
+    const deadlineMinutes = deadlineHour * 60 + deadlineMinute;
+    if (reminderMinutes >= deadlineMinutes) {
+      return false;
+    }
+
+    // Get current time in user's timezone
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const currentHour = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
+    const currentMinute = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
+    const currentMinutes = currentHour * 60 + currentMinute;
+
+    // Check: reminderTime <= currentTime < deadlineTime
+    return currentMinutes >= reminderMinutes && currentMinutes < deadlineMinutes;
+  }
+
+  /**
+   * Check if reminder was already sent today
+   * DONE(B): Implement wasReminderSentToday - TASK-029
+   */
+  private wasReminderSentToday(
+    lastReminderSentAt: Date | null,
+    timezone: string,
+  ): boolean {
+    if (!lastReminderSentAt) {
+      return false;
+    }
+
+    // Convert lastReminderSentAt to user's timezone date
+    const lastSentDate = lastReminderSentAt.toLocaleDateString('en-CA', { timeZone: timezone });
+    const todayDate = this.getTodayInTimezone(timezone);
+
+    return lastSentDate === todayDate;
   }
 }
