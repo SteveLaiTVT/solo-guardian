@@ -1,0 +1,185 @@
+handoff_id: "HO-037"
+task_id: "TASK-037"
+title: "Frontend: SMS settings UI"
+design_state_version: "3.4.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# 1. Task Overview
+# ============================================================
+overview:
+  description: |
+    Add phone number verification UI and SMS notification preference selection
+    to the emergency contacts management page. This allows users to:
+    1. See email and phone verification status on contact cards
+    2. See preferred notification channel (Email/SMS) badge
+    3. Verify phone numbers via SMS OTP
+    4. Select notification preference (Email or SMS) when adding/editing contacts
+
+  depends_on:
+    - task_id: "TASK-036"
+      description: "Backend phone verification API endpoints"
+
+  related_adrs:
+    - "ADR-017: Phone number verification via SMS OTP"
+    - "ADR-018: Contact notification channel preference"
+
+# ============================================================
+# 2. Files to Create/Modify
+# ============================================================
+files:
+  create:
+    - path: "apps/user-web/src/components/contacts/PhoneVerificationDialog.tsx"
+      description: "OTP verification dialog with send -> verify -> success flow"
+
+    - path: "apps/user-web/src/components/ui/radio-group.tsx"
+      description: "RadioGroup component for notification preference selection"
+
+  modify:
+    - path: "apps/user-web/src/components/contacts/ContactCard.tsx"
+      changes:
+        - "Add email verification status indicator (verified/unverified)"
+        - "Add phone verification status indicator with Verify button"
+        - "Add preferred channel badge (Email/SMS)"
+        - "Add onVerifyPhone callback prop"
+
+    - path: "apps/user-web/src/components/contacts/ContactForm.tsx"
+      changes:
+        - "Add RadioGroup for notification preference (email/sms)"
+        - "Disable SMS option when no phone number"
+        - "Add phone format hint text"
+        - "Include preferredChannel in create/update request"
+
+    - path: "apps/user-web/src/pages/contacts/ContactsPage.tsx"
+      changes:
+        - "Add PhoneVerificationDialog integration"
+        - "Add verifyingPhoneContact state"
+        - "Pass onVerifyPhone to ContactCard"
+
+    - path: "packages/api-client/src/types.ts"
+      changes:
+        - "Add NotificationChannel type"
+        - "Add phoneVerified, preferredChannel to EmergencyContact"
+        - "Add VerifyPhoneRequest type"
+        - "Add SendPhoneVerificationResult type"
+        - "Add VerifyPhoneResult type"
+
+    - path: "packages/api-client/src/api.ts"
+      changes:
+        - "Add sendPhoneVerification function"
+        - "Add verifyPhone function"
+        - "Add resendPhoneVerification function"
+
+    - path: "packages/api-client/src/hooks.ts"
+      changes:
+        - "Add useSendPhoneVerification hook"
+        - "Add useVerifyPhone hook"
+        - "Add useResendPhoneVerification hook"
+
+    - path: "apps/user-web/src/i18n/locales/en/contacts.json"
+      changes: "Add phone verification and SMS preference translations"
+
+    - path: "apps/user-web/src/i18n/locales/zh/contacts.json"
+      changes: "Add phone verification and SMS preference translations"
+
+    - path: "apps/user-web/src/i18n/locales/ja/contacts.json"
+      changes: "Add phone verification and SMS preference translations"
+
+# ============================================================
+# 3. Implementation Requirements
+# ============================================================
+requirements:
+  phone_verification_dialog:
+    - "Two-step flow: send code -> enter OTP"
+    - "Third step shows success animation"
+    - "30-second cooldown for resend button"
+    - "6-digit OTP input with numeric-only validation"
+    - "Auto-close after successful verification"
+    - "Error handling for send/verify/resend failures"
+
+  contact_card:
+    - "Show checkmark icon for verified email/phone"
+    - "Show alert icon for unverified email/phone"
+    - "Verify button on unverified phone number"
+    - "Preferred channel badge (Email icon + text or SMS icon + text)"
+    - "Warning message when SMS selected but phone not verified"
+
+  contact_form:
+    - "RadioGroup with Email and SMS options"
+    - "SMS option disabled when phone field is empty"
+    - "Hint text under phone field for country code format"
+    - "Note that phone verification required for SMS"
+    - "Auto-switch to Email if phone cleared while SMS selected"
+
+  i18n:
+    - "All new text must use translation keys"
+    - "Support English, Chinese, Japanese"
+    - "Include interpolation for phone number and cooldown seconds"
+
+# ============================================================
+# 4. API Endpoints Used
+# ============================================================
+api_endpoints:
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/send-phone-verification"
+    description: "Send OTP to contact's phone"
+    response: "{ message, expiresAt }"
+
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/verify-phone"
+    body: "{ otp: string }"
+    description: "Verify OTP and mark phone as verified"
+    response: "{ success, message }"
+
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/resend-phone-verification"
+    description: "Resend OTP (respects rate limiting)"
+    response: "{ message, expiresAt }"
+
+# ============================================================
+# 5. Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - id: "AC-1"
+    description: "Contact card shows email verification status"
+    verification: "Verified email shows green checkmark, unverified shows amber alert"
+
+  - id: "AC-2"
+    description: "Contact card shows phone verification status with Verify button"
+    verification: "Unverified phone shows clickable Verify link"
+
+  - id: "AC-3"
+    description: "Contact card shows preferred channel badge"
+    verification: "Badge shows 'Email' or 'SMS' with appropriate icon"
+
+  - id: "AC-4"
+    description: "Phone verification dialog sends OTP"
+    verification: "Click Send Code calls API and transitions to OTP entry step"
+
+  - id: "AC-5"
+    description: "Phone verification dialog verifies OTP"
+    verification: "Enter correct OTP, click Verify, shows success animation"
+
+  - id: "AC-6"
+    description: "Resend cooldown works correctly"
+    verification: "After sending, button shows countdown for 30 seconds"
+
+  - id: "AC-7"
+    description: "Contact form has notification preference RadioGroup"
+    verification: "Email and SMS options visible, SMS disabled without phone"
+
+  - id: "AC-8"
+    description: "All text uses i18n translations"
+    verification: "Switch language, all text changes appropriately"
+
+# ============================================================
+# 6. Constraints
+# ============================================================
+constraints:
+  - "No `any` types"
+  - "Functions < 50 lines"
+  - "Files < 300 lines"
+  - "All user-facing text via i18n"
+  - "Use shadcn/ui components where available"
+  - "Follow existing code patterns"

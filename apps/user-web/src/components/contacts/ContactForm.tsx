@@ -1,8 +1,8 @@
 /**
  * @file ContactForm.tsx
- * @description Dialog form for adding/editing emergency contacts
- * @task TASK-016
- * @design_state_version 1.4.2
+ * @description Dialog form for adding/editing emergency contacts with notification preference
+ * @task TASK-037
+ * @design_state_version 3.4.0
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ import { hooks } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import type { EmergencyContact } from '@solo-guardian/api-client'
+import type { EmergencyContact, NotificationChannel } from '@solo-guardian/api-client'
 
 interface ContactFormProps {
   open: boolean
@@ -27,7 +28,7 @@ interface ContactFormProps {
   onClose: () => void
 }
 
-// DONE(B): Implemented ContactForm - TASK-016
+// DONE(B): Updated ContactForm with notification preference - TASK-037
 export function ContactForm({ open, contact, onClose }: ContactFormProps): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
@@ -38,23 +39,34 @@ export function ContactForm({ open, contact, onClose }: ContactFormProps): JSX.E
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [preferredChannel, setPreferredChannel] = useState<NotificationChannel>('email')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const isEditing = contact !== null
   const isPending = createMutation.isPending || updateMutation.isPending
+  const canSelectSms = phone.trim().length > 0
 
   // Reset form when dialog opens/closes or contact changes
   useEffect(() => {
     if (open) {
-      // Batch state updates for form reset - this is intentional for dialog initialization
       queueMicrotask(() => {
         setName(contact?.name ?? '')
         setEmail(contact?.email ?? '')
         setPhone(contact?.phone ?? '')
+        setPreferredChannel(contact?.preferredChannel ?? 'email')
         setErrors({})
       })
     }
   }, [open, contact])
+
+  // Handle phone field change - reset to email if SMS was selected but phone cleared
+  const handlePhoneChange = (value: string): void => {
+    setPhone(value)
+    // If phone is being cleared and SMS was selected, switch to email
+    if (!value.trim() && preferredChannel === 'sms') {
+      setPreferredChannel('email')
+    }
+  }
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -76,24 +88,20 @@ export function ContactForm({ open, contact, onClose }: ContactFormProps): JSX.E
   const handleSubmit = (): void => {
     if (!validate()) return
 
+    const data = {
+      name,
+      email,
+      phone: phone || undefined,
+      preferredChannel,
+    }
+
     if (isEditing && contact) {
       updateMutation.mutate(
-        { id: contact.id, data: { name, email, phone: phone || undefined } },
-        {
-          onSuccess: () => {
-            onClose()
-          },
-        }
+        { id: contact.id, data },
+        { onSuccess: () => onClose() }
       )
     } else {
-      createMutation.mutate(
-        { name, email, phone: phone || undefined },
-        {
-          onSuccess: () => {
-            onClose()
-          },
-        }
-      )
+      createMutation.mutate(data, { onSuccess: () => onClose() })
     }
   }
 
@@ -143,9 +151,46 @@ export function ContactForm({ open, contact, onClose }: ContactFormProps): JSX.E
               id="phone"
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => handlePhoneChange(e.target.value)}
               placeholder={t('form.phonePlaceholder')}
             />
+            <p className="text-xs text-muted-foreground">
+              {t('form.phoneHint')}
+            </p>
+          </div>
+
+          {/* Notification Preference */}
+          <div className="space-y-3">
+            <Label>{t('form.notificationPreference')}</Label>
+            <RadioGroup
+              value={preferredChannel}
+              onValueChange={(value) => setPreferredChannel(value as NotificationChannel)}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="email" id="channel-email" />
+                <Label htmlFor="channel-email" className="font-normal cursor-pointer">
+                  {t('form.channelEmail')}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sms" id="channel-sms" disabled={!canSelectSms} />
+                <Label
+                  htmlFor="channel-sms"
+                  className={`font-normal cursor-pointer ${!canSelectSms ? 'text-muted-foreground' : ''}`}
+                >
+                  {t('form.channelSms')}
+                  {!canSelectSms && (
+                    <span className="ml-1 text-xs">({t('form.smsRequiresPhone')})</span>
+                  )}
+                </Label>
+              </div>
+            </RadioGroup>
+            {preferredChannel === 'sms' && (
+              <p className="text-xs text-muted-foreground">
+                {t('form.smsVerificationNote')}
+              </p>
+            )}
           </div>
         </div>
 

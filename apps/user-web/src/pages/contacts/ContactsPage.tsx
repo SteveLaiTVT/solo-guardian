@@ -1,8 +1,8 @@
 /**
  * @file ContactsPage.tsx
- * @description Emergency contacts management page
- * @task TASK-016
- * @design_state_version 1.4.2
+ * @description Emergency contacts management page with phone verification
+ * @task TASK-037
+ * @design_state_version 3.4.0
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,19 +13,21 @@ import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/c
 import { ContactCard } from '@/components/contacts/ContactCard'
 import { ContactForm } from '@/components/contacts/ContactForm'
 import { DeleteContactDialog } from '@/components/contacts/DeleteContactDialog'
+import { PhoneVerificationDialog } from '@/components/contacts/PhoneVerificationDialog'
 import type { EmergencyContact } from '@solo-guardian/api-client'
 
 const MAX_CONTACTS = 5
 
-// DONE(B): Implemented ContactsPage - TASK-016
+// DONE(B): Updated ContactsPage with phone verification - TASK-037
 export function ContactsPage(): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
-  const { data: contacts, isLoading, error } = hooks.useContacts()
+  const { data: contacts, isLoading, error, refetch } = hooks.useContacts()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingContact, setEditingContact] = useState<EmergencyContact | null>(null)
   const [deletingContact, setDeletingContact] = useState<EmergencyContact | null>(null)
+  const [verifyingPhoneContact, setVerifyingPhoneContact] = useState<EmergencyContact | null>(null)
 
   const contactCount = contacts?.length ?? 0
   const canAddMore = contactCount < MAX_CONTACTS
@@ -44,6 +46,10 @@ export function ContactsPage(): JSX.Element {
     setDeletingContact(contact)
   }
 
+  const handleVerifyPhoneClick = (contact: EmergencyContact): void => {
+    setVerifyingPhoneContact(contact)
+  }
+
   const handleFormClose = (): void => {
     setIsFormOpen(false)
     setEditingContact(null)
@@ -51,6 +57,14 @@ export function ContactsPage(): JSX.Element {
 
   const handleDeleteClose = (): void => {
     setDeletingContact(null)
+  }
+
+  const handleVerifyPhoneClose = (): void => {
+    setVerifyingPhoneContact(null)
+  }
+
+  const handleVerifyPhoneSuccess = (): void => {
+    void refetch()
   }
 
   if (isLoading) {
@@ -106,6 +120,7 @@ export function ContactsPage(): JSX.Element {
               contact={contact}
               onEdit={() => handleEditClick(contact)}
               onDelete={() => handleDeleteClick(contact)}
+              onVerifyPhone={() => handleVerifyPhoneClick(contact)}
             />
           ))}
         </div>
@@ -132,6 +147,14 @@ export function ContactsPage(): JSX.Element {
       <DeleteContactDialog
         contact={deletingContact}
         onClose={handleDeleteClose}
+      />
+
+      {/* Phone Verification Dialog */}
+      <PhoneVerificationDialog
+        open={verifyingPhoneContact !== null}
+        contact={verifyingPhoneContact}
+        onClose={handleVerifyPhoneClose}
+        onSuccess={handleVerifyPhoneSuccess}
       />
     </div>
   )

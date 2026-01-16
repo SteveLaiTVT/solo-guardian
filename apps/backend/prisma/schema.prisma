@@ -97,7 +97,7 @@ model CheckInSettings {
 
 // ============================================================
 // EmergencyContact Model - Emergency contacts for alert notifications
-// @task TASK-014, TASK-029
+// @task TASK-014, TASK-029, TASK-036
 // NOTE: Unique constraints on (userId, email) and (userId, priority) are
 //       implemented as partial indexes in migration to exclude soft-deleted
 //       records. See migration: fix_emergency_contact_unique_constraints
@@ -118,6 +118,12 @@ model EmergencyContact {
   // DONE(B): Added verification token fields - TASK-029
   verificationToken          String?   @map("verification_token")
   verificationTokenExpiresAt DateTime? @map("verification_token_expires_at")
+
+  // DONE(B): Added phone verification fields - TASK-036
+  phoneVerified     Boolean   @default(false) @map("phone_verified")
+  phoneOtp          String?   @map("phone_otp")
+  phoneOtpExpiresAt DateTime? @map("phone_otp_expires_at")
+  preferredChannel  NotificationChannel @default(email) @map("preferred_channel")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   // DONE(B): Add notifications relation - TASK-023

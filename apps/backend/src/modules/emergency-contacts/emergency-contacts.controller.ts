@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.controller.ts
  * @description Controller for emergency contacts endpoints
- * @task TASK-015, TASK-031, TASK-033
- * @design_state_version 2.0.0
+ * @task TASK-015, TASK-031, TASK-033, TASK-036
+ * @design_state_version 3.4.0
  */
 import {
   Controller,
@@ -20,11 +20,13 @@ import {
 } from '@nestjs/common';
 import { EmergencyContactsService } from './emergency-contacts.service';
 import { ContactVerificationService } from './contact-verification.service';
+import { PhoneVerificationService } from './phone-verification.service';
 import {
   CreateContactDto,
   UpdateContactDto,
   ContactResponseDto,
   ReorderContactsDto,
+  VerifyPhoneDto,
 } from './dto';
 import { CurrentUser } from '@/modules/auth/decorators';
 import { JwtAuthGuard } from '@/modules/auth/guards';
@@ -35,6 +37,7 @@ export class EmergencyContactsController {
   constructor(
     private readonly contactsService: EmergencyContactsService,
     private readonly verificationService: ContactVerificationService,
+    private readonly phoneVerificationService: PhoneVerificationService,
   ) {}
 
   @Get()
@@ -101,6 +104,53 @@ export class EmergencyContactsController {
     @CurrentUser() userId: string,
   ): Promise<ContactResponseDto> {
     return this.verificationService.resendVerification(id, userId);
+  }
+
+  // ============================================================
+  // Phone Verification Endpoints - TASK-036
+  // ============================================================
+
+  /**
+   * Send phone verification OTP
+   * DONE(B): Implemented sendPhoneVerification endpoint - TASK-036
+   * @task TASK-036
+   */
+  @Post(':id/send-phone-verification')
+  @HttpCode(HttpStatus.OK)
+  async sendPhoneVerification(
+    @Param('id') id: string,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto> {
+    return this.phoneVerificationService.sendPhoneVerification(id, userId);
+  }
+
+  /**
+   * Verify phone number with OTP
+   * DONE(B): Implemented verifyPhone endpoint - TASK-036
+   * @task TASK-036
+   */
+  @Post(':id/verify-phone')
+  @HttpCode(HttpStatus.OK)
+  async verifyPhone(
+    @Param('id') id: string,
+    @Body() dto: VerifyPhoneDto,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto> {
+    return this.phoneVerificationService.verifyPhone(id, userId, dto.otpCode);
+  }
+
+  /**
+   * Resend phone verification OTP
+   * DONE(B): Implemented resendPhoneVerification endpoint - TASK-036
+   * @task TASK-036
+   */
+  @Post(':id/resend-phone-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendPhoneVerification(
+    @Param('id') id: string,
+    @CurrentUser() userId: string,
+  ): Promise<ContactResponseDto> {
+    return this.phoneVerificationService.resendPhoneVerification(id, userId);
   }
 }
 

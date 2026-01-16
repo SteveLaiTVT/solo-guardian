@@ -1,0 +1,251 @@
+# ============================================================
+# Review Report: Backend Phone Verification via SMS OTP
+# @task TASK-036
+# @reviewer C Session
+# @design_state_version 3.4.0
+# ============================================================
+
+report_id: "RR-036"
+task_id: "TASK-036"
+implementation_report_id: "IR-036"
+reviewed_at: "2026-01-16"
+reviewed_by: "C Session"
+
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 5
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+  brief: |
+    Excellent implementation of phone verification via SMS OTP.
+    All TODO(B) markers completed. All constraints satisfied.
+    Security measures (timing attack prevention, phone masking) properly implemented.
+    Code is clean, well-documented, and follows existing patterns.
+
+# ============================================================
+# TODO Completion Check
+# ============================================================
+todo_check:
+  - file: "apps/backend/src/modules/emergency-contacts/phone-verification.service.ts"
+    status: "complete"
+    todos_found: 5
+    todos_filled: 5
+    notes:
+      - "sendPhoneVerification: Validates contact, generates OTP, sends SMS"
+      - "verifyPhone: Constant-time OTP comparison with timingSafeEqual"
+      - "resendPhoneVerification: Generates new OTP, replaces old one"
+      - "generateOtpCode: Uses crypto.randomInt, zero-pads to 6 digits"
+      - "mapToResponse: Maps contact to DTO including phoneVerified and preferredChannel"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes:
+      - "setPhoneVerificationOtp: Stores OTP with 10-minute expiry"
+      - "markPhoneVerified: Sets phoneVerified=true, clears OTP fields"
+      - "clearExpiredPhoneOtps: Clears OTPs past expiration"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes:
+      - "sendPhoneVerification endpoint: POST /:id/send-phone-verification"
+      - "verifyPhone endpoint: POST /:id/verify-phone"
+      - "resendPhoneVerification endpoint: POST /:id/resend-phone-verification"
+
+  - file: "apps/backend/src/modules/emergency-contacts/dto/verify-phone.dto.ts"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "VerifyPhoneDto with class-validator decorations for 6-digit OTP"
+
+  - file: "apps/backend/src/modules/emergency-contacts/dto/contact-response.dto.ts"
+    status: "complete"
+    todos_found: 2
+    todos_filled: 2
+    notes:
+      - "Added phoneVerified: boolean"
+      - "Added preferredChannel: 'email' | 'sms'"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_check:
+  - constraint: "No `any` types"
+    status: "pass"
+    verification: "Grep search found no `any` types in implementation files"
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    verification: |
+      - phone-verification.service.ts: 206 lines
+      - emergency-contacts.repository.ts: 294 lines
+      - emergency-contacts.controller.ts: 170 lines
+      - verify-phone.dto.ts: 19 lines
+      - contact-response.dto.ts: 23 lines
+
+  - constraint: "Single function < 50 lines"
+    status: "pass"
+    verification: |
+      Longest function is sendPhoneVerification at 34 lines.
+      All other functions are well under 50 lines.
+
+  - constraint: "Controller only delegates to Service"
+    status: "pass"
+    verification: "Controller methods delegate to phoneVerificationService, no direct DB access"
+
+  - constraint: "Repository handles database operations"
+    status: "pass"
+    verification: "All Prisma calls are in repository layer"
+
+  - constraint: "Use crypto.timingSafeEqual for OTP comparison"
+    status: "pass"
+    verification: "compareOtpConstantTime method uses timingSafeEqual (line 170)"
+
+  - constraint: "Use crypto.randomInt for OTP generation"
+    status: "pass"
+    verification: "generateOtpCode uses randomInt(0, 1000000) (line 156)"
+
+  - constraint: "OTP expiry: 10 minutes"
+    status: "pass"
+    verification: "OTP_EXPIRY_MINUTES = 10 constant used in repository"
+
+  - constraint: "Phone numbers masked in logs"
+    status: "pass"
+    verification: "maskPhoneNumber shows only last 4 digits (lines 178-183)"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - id: "AC-01"
+    criterion: "OTP sent via SMS"
+    status: "pass"
+    verification: "smsService.sendVerificationSms called in sendPhoneVerification (line 62)"
+
+  - id: "AC-02"
+    criterion: "OTP stored with 10-minute expiry"
+    status: "pass"
+    verification: "setPhoneVerificationOtp calculates expiry: Date.now() + 10 minutes"
+
+  - id: "AC-03"
+    criterion: "Correct OTP verifies phone"
+    status: "pass"
+    verification: "verifyPhone calls markPhoneVerified after successful comparison (line 102)"
+
+  - id: "AC-04"
+    criterion: "Incorrect OTP rejected"
+    status: "pass"
+    verification: "BadRequestException thrown when compareOtpConstantTime returns false (lines 98-100)"
+
+  - id: "AC-05"
+    criterion: "Expired OTP rejected"
+    status: "pass"
+    verification: "Expiry check at line 92 throws BadRequestException"
+
+  - id: "AC-06"
+    criterion: "No phone number rejected"
+    status: "pass"
+    verification: "Check at line 47 throws BadRequestException if phone is null"
+
+  - id: "AC-07"
+    criterion: "Already verified rejected"
+    status: "pass"
+    verification: "Check at line 51 throws BadRequestException if phoneVerified is true"
+
+  - id: "AC-08"
+    criterion: "Contact ownership validated"
+    status: "pass"
+    verification: "Check at lines 43-45 verifies contact.userId === userId"
+
+  - id: "AC-09"
+    criterion: "Phone numbers not logged"
+    status: "pass"
+    verification: "maskPhoneNumber shows only '****' + last 4 digits in all logs"
+
+# ============================================================
+# Security Analysis
+# ============================================================
+security_analysis:
+  - area: "Timing Attack Prevention"
+    status: "properly implemented"
+    details: |
+      crypto.timingSafeEqual used for OTP comparison in compareOtpConstantTime.
+      Length check happens first but this only reveals if lengths differ,
+      not the actual value. This is acceptable security practice.
+
+  - area: "OTP Generation"
+    status: "properly implemented"
+    details: |
+      crypto.randomInt used for cryptographic randomness.
+      6-digit range (0-999999) provides adequate entropy for short-lived OTPs.
+
+  - area: "Privacy Protection"
+    status: "properly implemented"
+    details: |
+      Phone numbers are masked in all log statements, showing only last 4 digits.
+      Full phone numbers never appear in logs.
+
+  - area: "Authorization"
+    status: "properly implemented"
+    details: |
+      All endpoints protected by JwtAuthGuard.
+      Contact ownership verified (contact.userId === userId).
+      Soft-deleted contacts rejected (contact.deletedAt check).
+
+# ============================================================
+# Code Quality
+# ============================================================
+code_quality:
+  error_handling:
+    - "NotFoundException for missing/unauthorized contacts"
+    - "BadRequestException for validation failures (no phone, already verified, etc.)"
+    - "SMS send failures logged but don't throw (graceful degradation)"
+
+  naming:
+    - "Clear method names: sendPhoneVerification, verifyPhone, generateOtpCode"
+    - "Descriptive constants: OTP_EXPIRY_MINUTES, OTP_LENGTH"
+    - "Consistent patterns following existing email verification service"
+
+  documentation:
+    - "JSDoc comments on all public methods"
+    - "@task annotations linking to TASK-036"
+    - "DONE(B) markers documenting completed TODOs"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Excellent security implementation with timing-safe OTP comparison"
+  - "Clean layered architecture following existing patterns"
+  - "Comprehensive input validation with class-validator"
+  - "Phone number privacy protection in logs"
+  - "Clear error messages for different failure scenarios"
+  - "Well-structured repository methods for OTP lifecycle"
+  - "Graceful handling of SMS send failures (logs error, doesn't crash)"
+
+# ============================================================
+# Issues
+# ============================================================
+issues: []
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  required_before_merge: []
+  next_steps:
+    - "Run Prisma migration: npx prisma migrate dev"
+    - "Run npx prisma generate to update client"
+    - "Test with actual SMS provider (Twilio)"
+  recommendations:
+    - "Consider adding rate limiting in future iteration (mentioned in IR-036)"
+    - "Consider E2E tests for phone verification flow"

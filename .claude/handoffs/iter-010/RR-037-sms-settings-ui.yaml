@@ -1,0 +1,265 @@
+# ============================================================
+# Review Report: Frontend SMS Settings UI
+# @task TASK-037
+# @reviewer C Session
+# @design_state_version 3.4.0
+# ============================================================
+
+report_id: "RR-037"
+task_id: "TASK-037"
+implementation_report_id: "IR-037"
+reviewed_at: "2026-01-16"
+reviewed_by: "C Session"
+
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 9
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+  brief: |
+    Excellent implementation of SMS settings UI with phone verification dialog.
+    All TODO(B) markers completed. All constraints satisfied.
+    Clean component architecture with proper state management.
+    Complete i18n support for English, Chinese, and Japanese.
+    Accessible RadioGroup component with ARIA attributes.
+
+# ============================================================
+# TODO Completion Check
+# ============================================================
+todo_check:
+  - file: "apps/user-web/src/components/contacts/PhoneVerificationDialog.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "Three-step verification flow: send -> verify -> success"
+      - "30-second cooldown timer for resend"
+      - "6-digit OTP input with numeric validation"
+      - "Auto-close after successful verification"
+
+  - file: "apps/user-web/src/components/contacts/ContactCard.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "Email verification status with checkmark/alert icons"
+      - "Phone verification status with Verify button"
+      - "Preferred channel badge (Email/SMS)"
+      - "Warning message for SMS with unverified phone"
+
+  - file: "apps/user-web/src/components/contacts/ContactForm.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "RadioGroup for notification preference"
+      - "SMS option disabled when no phone number"
+      - "Auto-switches to email if phone cleared while SMS selected"
+      - "Phone format hint text"
+
+  - file: "apps/user-web/src/components/ui/radio-group.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "Custom RadioGroup component following shadcn/ui patterns"
+      - "Context-based state management"
+      - "Keyboard navigation (Space, Enter)"
+      - "ARIA attributes for accessibility"
+
+  - file: "apps/user-web/src/pages/contacts/ContactsPage.tsx"
+    status: "complete"
+    todos_found: 1
+    todos_filled: 1
+    notes:
+      - "PhoneVerificationDialog integration"
+      - "verifyingPhoneContact state"
+      - "onVerifyPhone callback passed to ContactCard"
+      - "Refetches contacts after successful verification"
+
+  - file: "packages/api-client/src/types.ts"
+    status: "complete"
+    todos_found: 5
+    todos_filled: 5
+    notes:
+      - "NotificationChannel type ('email' | 'sms')"
+      - "phoneVerified and preferredChannel on EmergencyContact"
+      - "preferredChannel on CreateContactRequest and UpdateContactRequest"
+      - "VerifyPhoneRequest type"
+      - "SendPhoneVerificationResult and VerifyPhoneResult types"
+
+  - file: "packages/api-client/src/api.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes:
+      - "sendPhoneVerification function"
+      - "verifyPhone function"
+      - "resendPhoneVerification function"
+
+  - file: "packages/api-client/src/hooks.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes:
+      - "useSendPhoneVerification hook"
+      - "useVerifyPhone hook (invalidates contacts query on success)"
+      - "useResendPhoneVerification hook"
+
+  - file: "i18n locales"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    notes:
+      - "English: en/contacts.json with phoneVerification section"
+      - "Chinese: zh/contacts.json with Chinese translations"
+      - "Japanese: ja/contacts.json with Japanese translations"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_check:
+  - constraint: "No `any` types"
+    status: "pass"
+    verification: "Grep search found no `any` types in implementation files"
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    verification: |
+      - PhoneVerificationDialog.tsx: 240 lines
+      - ContactCard.tsx: 128 lines
+      - ContactForm.tsx: 211 lines
+      - radio-group.tsx: 102 lines
+      - ContactsPage.tsx: 161 lines
+      All files under 300 lines.
+
+  - constraint: "Single function < 50 lines"
+    status: "pass"
+    verification: |
+      Largest functions are renderVerifyStep and renderSendStep at ~25 lines each.
+      All other functions well under 50 lines.
+
+  - constraint: "All user-facing text via i18n"
+    status: "pass"
+    verification: "All strings use useTranslation hooks, no hardcoded text"
+
+  - constraint: "Use shadcn/ui components"
+    status: "pass"
+    verification: "Uses Dialog, Button, Input, Label from shadcn/ui"
+
+  - constraint: "All API calls through api-client package"
+    status: "pass"
+    verification: "Frontend uses hooks from @solo-guardian/api-client"
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - id: "AC-1"
+    criterion: "Contact card shows email verification status"
+    status: "pass"
+    verification: "ContactCard.tsx lines 80-90: green checkmark for verified, amber alert for unverified"
+
+  - id: "AC-2"
+    criterion: "Contact card shows phone verification status with Verify button"
+    status: "pass"
+    verification: "ContactCard.tsx lines 100-115: Verify button shown for unverified phones"
+
+  - id: "AC-3"
+    criterion: "Contact card shows preferred channel badge"
+    status: "pass"
+    verification: "ContactCard.tsx lines 47-59: Badge shows Email/SMS with icon"
+
+  - id: "AC-4"
+    criterion: "Phone verification dialog sends OTP"
+    status: "pass"
+    verification: "PhoneVerificationDialog.tsx handleSendCode() calls sendMutation.mutate()"
+
+  - id: "AC-5"
+    criterion: "Phone verification dialog verifies OTP"
+    status: "pass"
+    verification: "PhoneVerificationDialog.tsx handleVerifyCode() calls verifyMutation.mutate()"
+
+  - id: "AC-6"
+    criterion: "Resend cooldown works correctly"
+    status: "pass"
+    verification: "PhoneVerificationDialog.tsx uses 30-second cooldown with setInterval timer"
+
+  - id: "AC-7"
+    criterion: "Contact form has notification preference RadioGroup"
+    status: "pass"
+    verification: "ContactForm.tsx lines 165-188: RadioGroup with Email/SMS options"
+
+  - id: "AC-8"
+    criterion: "All text uses i18n translations"
+    status: "pass"
+    verification: "All three locale files have complete phoneVerification sections"
+
+# ============================================================
+# Code Quality
+# ============================================================
+code_quality:
+  component_architecture:
+    - "Clean separation: Dialog for verification, Card for display, Form for input"
+    - "Proper use of React hooks (useState, useEffect, useCallback)"
+    - "Consistent patterns across components"
+
+  state_management:
+    - "Local state for form data and dialog steps"
+    - "TanStack Query for server state (contacts)"
+    - "Query invalidation on successful verification"
+
+  accessibility:
+    - "RadioGroup uses role='radiogroup' and role='radio'"
+    - "aria-checked attribute for radio state"
+    - "Keyboard navigation support (Space, Enter)"
+    - "Disabled states properly communicated"
+
+  error_handling:
+    - "Error states displayed with red text"
+    - "Fallback messages for API failures"
+    - "Loading states with spinner indicators"
+
+  i18n_quality:
+    - "All three languages have identical structure"
+    - "Interpolation used for dynamic values ({{phone}}, {{seconds}})"
+    - "Cultural considerations in translations"
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Excellent three-step verification flow with clear visual feedback"
+  - "Custom RadioGroup component follows shadcn/ui patterns with full accessibility"
+  - "Complete i18n support with natural translations in all three languages"
+  - "Smart UX: auto-switches to email when phone is cleared while SMS selected"
+  - "Clean timer cleanup with useEffect return function"
+  - "Consistent use of TypeScript with proper type imports"
+  - "Well-organized file structure following project conventions"
+  - "Warning message when SMS selected but phone not verified"
+  - "Cooldown timer prevents OTP spam"
+  - "Auto-close after successful verification provides good UX"
+
+# ============================================================
+# Issues
+# ============================================================
+issues: []
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  required_before_merge: []
+  next_steps:
+    - "Integration testing with backend"
+    - "Test language switching for new translations"
+    - "Verify RadioGroup accessibility with screen reader"
+  recommendations:
+    - "Consider adding rate limiting message from backend to UI"
+    - "Consider E2E tests for phone verification flow"
+    - "Consider adding phone number format validation on input"

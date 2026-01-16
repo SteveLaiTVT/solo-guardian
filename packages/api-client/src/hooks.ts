@@ -17,6 +17,8 @@ import type {
   ReorderContactsRequest,
   UserPreferences,
   UpdatePreferencesRequest,
+  SendPhoneVerificationResult,
+  VerifyPhoneResult,
 } from "./types"
 
 export function createHooks(client: AxiosInstance) {
@@ -133,6 +135,38 @@ export function createHooks(client: AxiosInstance) {
         onSuccess: () => {
           void queryClient.invalidateQueries({ queryKey: ["contacts"] })
         },
+      })
+    },
+
+    // Phone verification hooks
+    useSendPhoneVerification: () => {
+      return useMutation({
+        mutationFn: (contactId: string) =>
+          api.contacts
+            .sendPhoneVerification(contactId)
+            .then((r: AxiosResponse<SendPhoneVerificationResult>) => r.data),
+      })
+    },
+
+    useVerifyPhone: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: ({ contactId, otp }: { contactId: string; otp: string }) =>
+          api.contacts
+            .verifyPhone(contactId, { otp })
+            .then((r: AxiosResponse<VerifyPhoneResult>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts"] })
+        },
+      })
+    },
+
+    useResendPhoneVerification: () => {
+      return useMutation({
+        mutationFn: (contactId: string) =>
+          api.contacts
+            .resendPhoneVerification(contactId)
+            .then((r: AxiosResponse<SendPhoneVerificationResult>) => r.data),
       })
     },
 

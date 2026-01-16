@@ -1,8 +1,8 @@
 /**
  * @file contact-response.dto.ts
  * @description DTO for emergency contact response
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-036
+ * @design_state_version 3.4.0
  */
 
 export class ContactResponseDto {
@@ -16,4 +16,8 @@ export class ContactResponseDto {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  // DONE(B): Added phoneVerified field - TASK-036
+  phoneVerified: boolean;
+  // DONE(B): Added preferredChannel field - TASK-036
+  preferredChannel: 'email' | 'sms';
 }

@@ -11,13 +11,25 @@
   "emptyState": "No emergency contacts yet",
   "emptyStateHint": "Add someone who should be notified if you miss a check-in",
   "inactive": "Inactive",
+  "verified": "Verified",
+  "unverified": "Unverified",
+  "verifyPhone": "Verify",
+  "channelEmail": "Email",
+  "channelSms": "SMS",
+  "smsRequiresVerifiedPhone": "SMS notifications require a verified phone number. Please verify the phone to enable SMS alerts.",
   "form": {
     "name": "Name",
     "namePlaceholder": "Contact's name",
     "email": "Email",
     "emailPlaceholder": "contact@example.com",
     "phone": "Phone (optional)",
-    "phonePlaceholder": "+1 234 567 8900"
+    "phonePlaceholder": "+1 234 567 8900",
+    "phoneHint": "Include country code for SMS notifications (e.g., +1 for US)",
+    "notificationPreference": "Notification Preference",
+    "channelEmail": "Email - Receive alerts via email",
+    "channelSms": "SMS - Receive alerts via text message",
+    "smsRequiresPhone": "requires phone number",
+    "smsVerificationNote": "Phone number must be verified before SMS alerts can be sent"
   },
   "deleteConfirm": "Are you sure you want to remove {{name}} from your emergency contacts?",
   "errors": {
@@ -34,5 +46,24 @@
     "updated": "Contact updated successfully",
     "deleted": "Contact removed successfully",
     "reordered": "Contact order updated"
+  },
+  "phoneVerification": {
+    "title": "Verify Phone Number",
+    "sendDescription": "We will send a verification code to {{phone}}",
+    "sendCode": "Send Code",
+    "enterCode": "Enter Verification Code",
+    "verifyDescription": "Enter the 6-digit code sent to {{phone}}",
+    "otpLabel": "Verification Code",
+    "verify": "Verify",
+    "resendCode": "Resend code",
+    "resendCooldown": "Resend in {{seconds}}s",
+    "successTitle": "Phone Verified",
+    "successDescription": "The phone number has been verified successfully",
+    "errors": {
+      "sendFailed": "Failed to send verification code. Please try again.",
+      "verifyFailed": "Invalid or expired code. Please try again.",
+      "resendFailed": "Failed to resend code. Please try again.",
+      "invalidOtp": "Please enter a 6-digit verification code"
+    }
   }
 }

@@ -1,0 +1,307 @@
+# ============================================================
+# Handoff Document: Phone Number Verification via SMS OTP
+# @task TASK-036
+# @design_state_version 3.4.0
+# ============================================================
+
+handoff_id: "HO-036"
+task_id: "TASK-036"
+title: "Backend: Phone number verification via SMS OTP"
+design_state_version: "3.4.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement phone number verification for emergency contacts using SMS OTP.
+  Similar to email verification but uses 6-digit OTP codes sent via SMS.
+  Contacts with verified phone numbers can receive SMS alerts.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - task: "TASK-034"
+      description: "SmsService with sendVerificationSms method"
+      status: "completed"
+    - task: "TASK-015"
+      description: "Emergency contacts module"
+      status: "completed"
+
+  database_changes:
+    - "Run: npx prisma migrate dev --name add_phone_verification_fields"
+    - "New fields on EmergencyContact:"
+    - "  - phoneVerified: Boolean (default false)"
+    - "  - phoneOtp: String? (6-digit code)"
+    - "  - phoneOtpExpiresAt: DateTime? (10 min expiry)"
+    - "  - preferredChannel: NotificationChannel (default 'email')"
+
+# ============================================================
+# Skeleton Files
+# ============================================================
+skeleton_files:
+  - path: "apps/backend/src/modules/emergency-contacts/phone-verification.service.ts"
+    status: "created"
+    todos:
+      - "TODO(B): Implement sendPhoneVerification"
+      - "TODO(B): Implement verifyPhone"
+      - "TODO(B): Implement resendPhoneVerification"
+      - "TODO(B): Implement generateOtpCode"
+      - "TODO(B): Implement mapToResponse"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    status: "updated"
+    todos:
+      - "TODO(B): Implement setPhoneVerificationOtp"
+      - "TODO(B): Implement markPhoneVerified"
+      - "TODO(B): Implement clearExpiredPhoneOtps"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+    status: "updated"
+    todos:
+      - "TODO(B): Import SmsModule from '../sms'"
+      - "TODO(B): Add SmsModule to imports array"
+
+  - path: "apps/backend/src/modules/emergency-contacts/dto/verify-phone.dto.ts"
+    status: "created"
+    todos:
+      - "VerifyPhoneDto already implemented with class-validator"
+
+  - path: "apps/backend/src/modules/emergency-contacts/dto/contact-response.dto.ts"
+    status: "updated"
+    todos:
+      - "TODO(B): Add phoneVerified field"
+      - "TODO(B): Add preferredChannel field"
+
+  - path: "apps/backend/prisma/schema.prisma"
+    status: "updated"
+    todos:
+      - "TODO(B): Run prisma migrate dev"
+
+# ============================================================
+# Implementation Details
+# ============================================================
+implementation:
+
+  otp_generation:
+    method: "generateOtpCode"
+    logic: |
+      1. Use crypto.randomInt(0, 999999) for secure random number
+      2. Pad to 6 digits with leading zeros
+      3. Return as string (e.g., "012345")
+    code_hint: |
+      import { randomInt } from 'crypto';
+      const code = randomInt(0, 1000000).toString().padStart(6, '0');
+
+  send_verification:
+    method: "sendPhoneVerification"
+    inputs:
+      - "contactId: string"
+      - "userId: string"
+    logic: |
+      1. Find contact, verify belongs to user
+      2. Throw NotFoundException if not found/deleted
+      3. Throw BadRequestException if no phone number
+      4. Throw BadRequestException if already verified
+      5. Generate 6-digit OTP
+      6. Store via repository.setPhoneVerificationOtp()
+      7. Send via smsService.sendVerificationSms(phone, otp)
+      8. Log (mask phone number)
+      9. Return contact DTO
+
+  verify_phone:
+    method: "verifyPhone"
+    inputs:
+      - "contactId: string"
+      - "userId: string"
+      - "otpCode: string"
+    logic: |
+      1. Find contact, verify belongs to user
+      2. Throw NotFoundException if not found/deleted
+      3. Throw BadRequestException if no pending OTP (phoneOtp is null)
+      4. Throw BadRequestException if OTP expired
+      5. Throw BadRequestException if OTP doesn't match (use timingSafeEqual)
+      6. Mark verified via repository.markPhoneVerified()
+      7. Log success
+      8. Return contact DTO
+    security_note: |
+      Use crypto.timingSafeEqual() for OTP comparison to prevent timing attacks:
+
+      import { timingSafeEqual } from 'crypto';
+      const match = timingSafeEqual(
+        Buffer.from(otpCode),
+        Buffer.from(contact.phoneOtp)
+      );
+
+  repository_methods:
+    setPhoneVerificationOtp:
+      logic: |
+        1. Calculate expiry: new Date(Date.now() + 10 * 60 * 1000)
+        2. Update contact with phoneOtp and phoneOtpExpiresAt
+        3. Return updated contact
+
+    markPhoneVerified:
+      logic: |
+        1. Set phoneVerified = true
+        2. Clear phoneOtp = null
+        3. Clear phoneOtpExpiresAt = null
+        4. Return updated contact
+
+# ============================================================
+# API Endpoints
+# ============================================================
+endpoints:
+  send_phone_verification:
+    method: "POST"
+    path: "/api/v1/emergency-contacts/:id/send-phone-verification"
+    auth: "Required (JWT)"
+    request_body: "None"
+    response: "ContactResponseDto"
+    success_code: 200
+
+  verify_phone:
+    method: "POST"
+    path: "/api/v1/emergency-contacts/:id/verify-phone"
+    auth: "Required (JWT)"
+    request_body:
+      otpCode: "string (6 digits)"
+    response: "ContactResponseDto"
+    success_code: 200
+
+  resend_phone_verification:
+    method: "POST"
+    path: "/api/v1/emergency-contacts/:id/resend-phone-verification"
+    auth: "Required (JWT)"
+    request_body: "None"
+    response: "ContactResponseDto"
+    success_code: 200
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - id: "AC-01"
+    description: "OTP sent via SMS"
+    verification: "smsService.sendVerificationSms called with correct params"
+
+  - id: "AC-02"
+    description: "OTP stored with 10-minute expiry"
+    verification: "phoneOtp and phoneOtpExpiresAt set in database"
+
+  - id: "AC-03"
+    description: "Correct OTP verifies phone"
+    verification: "phoneVerified = true after correct OTP submission"
+
+  - id: "AC-04"
+    description: "Incorrect OTP rejected"
+    verification: "BadRequestException thrown for wrong OTP"
+
+  - id: "AC-05"
+    description: "Expired OTP rejected"
+    verification: "BadRequestException thrown after 10 minutes"
+
+  - id: "AC-06"
+    description: "No phone number rejected"
+    verification: "BadRequestException if contact.phone is null"
+
+  - id: "AC-07"
+    description: "Already verified rejected"
+    verification: "BadRequestException if phoneVerified is true"
+
+  - id: "AC-08"
+    description: "Contact ownership validated"
+    verification: "NotFoundException if contact.userId !== userId"
+
+  - id: "AC-09"
+    description: "Phone numbers not logged"
+    verification: "Only last 4 digits appear in logs"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single function < 50 lines"
+  - "No `any` types"
+  - "Use crypto.timingSafeEqual for OTP comparison"
+  - "Use crypto.randomInt for OTP generation"
+  - "OTP expiry: 10 minutes"
+  - "OTP format: 6 numeric digits"
+  - "Log phone numbers masked (last 4 digits only)"
+  - "Follow existing patterns from contact-verification.service.ts"
+
+# ============================================================
+# Testing
+# ============================================================
+testing:
+  manual_test_steps:
+    - "Run prisma migrate dev"
+    - "Create emergency contact with phone number (+1234567890)"
+    - "Call POST /emergency-contacts/:id/send-phone-verification"
+    - "Check SMS received (or logs in dev mode)"
+    - "Call POST /emergency-contacts/:id/verify-phone with OTP"
+    - "Verify phoneVerified = true in response"
+
+  test_scenarios:
+    - scenario: "Happy path"
+      input: "Valid contact with phone, correct OTP"
+      expected: "Phone verified successfully"
+
+    - scenario: "No phone number"
+      input: "Contact with phone = null"
+      expected: "BadRequestException: Phone number not set"
+
+    - scenario: "Already verified"
+      input: "Contact with phoneVerified = true"
+      expected: "BadRequestException: Phone already verified"
+
+    - scenario: "Wrong OTP"
+      input: "Incorrect 6-digit code"
+      expected: "BadRequestException: Invalid OTP code"
+
+    - scenario: "Expired OTP"
+      input: "OTP submitted after 10 minutes"
+      expected: "BadRequestException: OTP expired"
+
+    - scenario: "Wrong contact owner"
+      input: "Contact belongs to different user"
+      expected: "NotFoundException"
+
+# ============================================================
+# Out of Scope
+# ============================================================
+out_of_scope:
+  - "Rate limiting for OTP requests (future enhancement)"
+  - "SMS delivery confirmation"
+  - "Phone number format validation UI"
+  - "Frontend SMS settings UI (TASK-037)"
+
+# ============================================================
+# Reference Files
+# ============================================================
+reference_files:
+  - path: "apps/backend/src/modules/emergency-contacts/contact-verification.service.ts"
+    note: "Email verification pattern to follow"
+
+  - path: "apps/backend/src/modules/sms/sms.service.ts"
+    note: "sendVerificationSms method available"
+
+  - path: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    note: "Existing token methods to mirror"
+
+# ============================================================
+# Commit Message Template
+# ============================================================
+commit_message: |
+  feat(contacts): add phone number verification via SMS OTP
+
+  - Add PhoneVerificationService with OTP generation
+  - Add sendPhoneVerification, verifyPhone, resendPhoneVerification
+  - Add repository methods for OTP storage
+  - Add phoneVerified, phoneOtp, phoneOtpExpiresAt fields
+  - Add preferredChannel field for SMS/email preference
+  - Use crypto.timingSafeEqual for secure OTP comparison
+
+  Task: TASK-036

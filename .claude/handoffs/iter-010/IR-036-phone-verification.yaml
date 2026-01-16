@@ -1,0 +1,280 @@
+# ============================================================
+# Implementation Report: Phone Number Verification via SMS OTP
+# @task TASK-036
+# @design_state_version 3.4.0
+# ============================================================
+
+report_id: "IR-036"
+task_id: "TASK-036"
+design_state_version: "3.4.0"
+created_at: "2026-01-16"
+created_by: "B Session"
+
+summary: |
+  Implemented phone number verification for emergency contacts via SMS OTP.
+  All TODO(B) markers filled in skeleton files. Features include:
+  - OTP generation using crypto.randomInt (6 digits, zero-padded)
+  - OTP storage with 10-minute expiration
+  - Constant-time OTP comparison (timing attack prevention)
+  - Phone number masking in logs (privacy protection)
+  - Three API endpoints: send, verify, resend
+
+# ============================================================
+# TODOs Completed
+# ============================================================
+todos_completed:
+  - file: "apps/backend/src/modules/emergency-contacts/phone-verification.service.ts"
+    todos:
+      - todo: "TODO(B): Implement sendPhoneVerification"
+        implementation: "Validates contact, generates OTP, stores via repository, sends SMS via SmsService"
+        lines: "38-71"
+      - todo: "TODO(B): Implement verifyPhone"
+        implementation: "Validates contact, checks OTP expiry, constant-time comparison, marks verified"
+        lines: "78-107"
+      - todo: "TODO(B): Implement resendPhoneVerification"
+        implementation: "Similar to sendPhoneVerification, generates new OTP replacing old one"
+        lines: "114-147"
+      - todo: "TODO(B): Implement generateOtpCode"
+        implementation: "Uses crypto.randomInt(0, 1000000), zero-pads to 6 digits"
+        lines: "154-158"
+      - todo: "TODO(B): Implement mapToResponse"
+        implementation: "Maps EmergencyContact to ContactResponseDto including new fields"
+        lines: "190-205"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+    todos:
+      - todo: "TODO(B): Implement setPhoneVerificationOtp"
+        implementation: "Updates contact with phoneOtp and 10-minute expiry"
+        lines: "244-258"
+      - todo: "TODO(B): Implement markPhoneVerified"
+        implementation: "Sets phoneVerified=true, clears OTP fields"
+        lines: "265-277"
+      - todo: "TODO(B): Implement clearExpiredPhoneOtps"
+        implementation: "Clears expired OTPs using updateMany"
+        lines: "284-295"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+    todos:
+      - todo: "TODO(B): Import SmsModule"
+        implementation: "Added import and SmsModule to imports array"
+        lines: "17, 25"
+
+  - file: "apps/backend/src/modules/emergency-contacts/dto/contact-response.dto.ts"
+    todos:
+      - todo: "TODO(B): Add phoneVerified field"
+        implementation: "Added phoneVerified: boolean"
+        lines: "21"
+      - todo: "TODO(B): Add preferredChannel field"
+        implementation: "Added preferredChannel: 'email' | 'sms'"
+        lines: "23"
+
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+    todos:
+      - todo: "TODO(B): Implement sendPhoneVerification endpoint"
+        implementation: "Delegates to phoneVerificationService.sendPhoneVerification"
+        lines: "127-134"
+      - todo: "TODO(B): Implement verifyPhone endpoint"
+        implementation: "Accepts VerifyPhoneDto, delegates to service"
+        lines: "142-159"
+      - todo: "TODO(B): Implement resendPhoneVerification endpoint"
+        implementation: "Delegates to phoneVerificationService.resendPhoneVerification"
+        lines: "167-182"
+
+  - file: "apps/backend/prisma/schema.prisma"
+    todos:
+      - todo: "TODO(B): Add phone verification fields"
+        implementation: "Fields already defined by A Session, removed TODO comment"
+        lines: "128-132"
+
+# ============================================================
+# Additional Files Modified
+# ============================================================
+additional_modifications:
+  - file: "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+    change: "Updated mapToResponse to include phoneVerified and preferredChannel"
+    lines: "153-158"
+
+  - file: "apps/backend/src/modules/emergency-contacts/contact-verification.service.ts"
+    change: "Updated mapToResponse to include phoneVerified and preferredChannel"
+    lines: "145-150"
+
+  - file: "apps/backend/prisma/migrations/20260116130000_add_phone_verification_fields/migration.sql"
+    change: "Created migration for new phone verification fields"
+    description: |
+      ALTER TABLE to add:
+      - phone_verified (Boolean, default false)
+      - phone_otp (String?, nullable)
+      - phone_otp_expires_at (DateTime?, nullable)
+      - preferred_channel (String, default 'email')
+
+# ============================================================
+# Acceptance Criteria Checklist
+# ============================================================
+acceptance_checklist:
+  - id: "AC-01"
+    criterion: "OTP sent via SMS"
+    status: "pass"
+    evidence: "smsService.sendVerificationSms called in sendPhoneVerification (line 62)"
+
+  - id: "AC-02"
+    criterion: "OTP stored with 10-minute expiry"
+    status: "pass"
+    evidence: "setPhoneVerificationOtp sets expiry to Date.now() + 10 minutes"
+
+  - id: "AC-03"
+    criterion: "Correct OTP verifies phone"
+    status: "pass"
+    evidence: "verifyPhone calls markPhoneVerified on match (line 102)"
+
+  - id: "AC-04"
+    criterion: "Incorrect OTP rejected"
+    status: "pass"
+    evidence: "compareOtpConstantTime returns false, BadRequestException thrown (lines 97-100)"
+
+  - id: "AC-05"
+    criterion: "Expired OTP rejected"
+    status: "pass"
+    evidence: "Expiry check at line 92 throws BadRequestException"
+
+  - id: "AC-06"
+    criterion: "No phone number rejected"
+    status: "pass"
+    evidence: "Check at line 47 throws BadRequestException"
+
+  - id: "AC-07"
+    criterion: "Already verified rejected"
+    status: "pass"
+    evidence: "Check at line 51 throws BadRequestException"
+
+  - id: "AC-08"
+    criterion: "Contact ownership validated"
+    status: "pass"
+    evidence: "Check at line 43 verifies userId match"
+
+  - id: "AC-09"
+    criterion: "Phone numbers masked in logs"
+    status: "pass"
+    evidence: "maskPhoneNumber() shows only last 4 digits (lines 178-183)"
+
+# ============================================================
+# Constraints Compliance
+# ============================================================
+constraints_compliance:
+  - constraint: "Single file < 300 lines"
+    status: "compliant"
+    evidence: "phone-verification.service.ts: 206 lines, repository: 294 lines"
+
+  - constraint: "Single function < 50 lines"
+    status: "compliant"
+    evidence: "Longest function (sendPhoneVerification) is 34 lines"
+
+  - constraint: "No `any` types"
+    status: "compliant"
+    evidence: "All types explicitly declared"
+
+  - constraint: "Use crypto.timingSafeEqual"
+    status: "compliant"
+    evidence: "Used in compareOtpConstantTime (line 170)"
+
+  - constraint: "Use crypto.randomInt"
+    status: "compliant"
+    evidence: "Used in generateOtpCode (line 156)"
+
+  - constraint: "OTP expiry: 10 minutes"
+    status: "compliant"
+    evidence: "OTP_EXPIRY_MINUTES = 10 used in repository"
+
+  - constraint: "OTP format: 6 numeric digits"
+    status: "compliant"
+    evidence: "padStart(6, '0') in generateOtpCode"
+
+  - constraint: "Phone numbers masked in logs"
+    status: "compliant"
+    evidence: "maskPhoneNumber shows only last 4 digits"
+
+# ============================================================
+# Security Measures
+# ============================================================
+security_measures:
+  - measure: "Timing Attack Prevention"
+    implementation: "crypto.timingSafeEqual for OTP comparison"
+    file: "phone-verification.service.ts"
+    lines: "165-171"
+
+  - measure: "Cryptographic OTP Generation"
+    implementation: "crypto.randomInt for secure random numbers"
+    file: "phone-verification.service.ts"
+    lines: "154-158"
+
+  - measure: "Phone Number Masking"
+    implementation: "Only last 4 digits logged"
+    file: "phone-verification.service.ts"
+    lines: "178-183"
+
+  - measure: "Ownership Verification"
+    implementation: "Contact must belong to authenticated user"
+    file: "phone-verification.service.ts"
+    lines: "42-45, 83-86, 118-121"
+
+# ============================================================
+# Known Issues
+# ============================================================
+known_issues:
+  - severity: "info"
+    description: "Prisma client regeneration required after migration"
+    details: |
+      The migration creates new database fields. After running the migration,
+      `npx prisma generate` must be executed to regenerate the Prisma client
+      with the new field types. TypeScript errors will appear until this is done.
+    resolution: |
+      Run in environment with network access:
+      1. npx prisma migrate dev --name add_phone_verification_fields
+      2. npx prisma generate
+
+  - severity: "low"
+    description: "Rate limiting not implemented (optional for MVP)"
+    details: |
+      The handoff mentioned optional rate limiting (max 3 OTPs per 10 minutes).
+      This is not implemented in MVP as specified as optional.
+    suggestion: "Consider adding rate limiting in future iteration"
+
+# ============================================================
+# Testing Notes
+# ============================================================
+testing_notes: |
+  Manual testing steps after migration:
+  1. Create emergency contact with phone number (+1234567890)
+  2. POST /api/v1/emergency-contacts/:id/send-phone-verification
+  3. Check SMS logs (or Twilio console) for OTP
+  4. POST /api/v1/emergency-contacts/:id/verify-phone with {"otpCode": "123456"}
+  5. Verify response has phoneVerified: true
+
+  Error scenarios to test:
+  - No phone number: Returns "Phone number not set for this contact"
+  - Already verified: Returns "Phone number is already verified"
+  - Wrong OTP: Returns "Invalid OTP code"
+  - Expired OTP (wait 10+ minutes): Returns "OTP code has expired"
+  - No pending OTP: Returns "No pending phone verification"
+  - Wrong contact owner: Returns 404 "Contact not found"
+
+# ============================================================
+# API Endpoints Summary
+# ============================================================
+api_endpoints:
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/send-phone-verification"
+    auth: "JWT required"
+    body: "None"
+    response: "ContactResponseDto with phoneVerified=false"
+
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/verify-phone"
+    auth: "JWT required"
+    body: '{"otpCode": "123456"}'
+    response: "ContactResponseDto with phoneVerified=true"
+
+  - method: "POST"
+    path: "/api/v1/emergency-contacts/:id/resend-phone-verification"
+    auth: "JWT required"
+    body: "None"
+    response: "ContactResponseDto with new OTP generated"

@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "3.2.0"
+  version: "3.5.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
   branch: "main"
@@ -413,29 +413,33 @@ modules:
         completed_task: "TASK-031"
 
   sms_notifications:
-    status: "designing"
-    owner: "A Session"
+    status: "in_progress"
+    owner: "B Session"
     description: "SMS notifications for alerts (alternative to email)"
     started_iteration: "iter-010"
     skeleton_created: true
-    skeleton_version: "3.1.0"
+    skeleton_version: "3.4.0"
     features:
       - name: "SMS Provider Integration"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Integrate with Twilio or similar SMS provider"
+        completed_task: "TASK-034"
       - name: "SMS Alert Notifications"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Send SMS to emergency contacts on missed check-in"
-      - name: "SMS Channel Selection"
-        priority: "P1"
-        status: "designing"
-        description: "Allow contacts to choose email vs SMS"
+        completed_task: "TASK-035"
       - name: "Phone Number Verification"
         priority: "P1"
-        status: "designing"
+        status: "ready"
         description: "Verify phone numbers before sending SMS"
+        task: "TASK-036"
+      - name: "SMS Channel Selection"
+        priority: "P1"
+        status: "ready"
+        description: "Allow contacts to choose email vs SMS"
+        task: "TASK-037"
 
   oauth:
     status: "designing"
@@ -572,27 +576,54 @@ current_iterations:
 
       - id: "TASK-035"
         title: "Backend: SMS notification processor"
-        status: "pending"
+        status: "completed"
         priority: "P0"
         handoff: "HO-035-sms-processor.yaml"
         depends_on: ["TASK-034"]
         description: "Add SMS channel to notification queue processor"
+        skeleton_files:
+          - "apps/backend/src/modules/notifications/notification.processor.ts"
+          - "apps/backend/src/modules/notifications/notification.module.ts"
+          - "apps/backend/src/modules/notifications/notification.service.ts"
+        skeleton_version: "3.2.1"
+        review_verdict: "pass"
+        completed_at: "2026-01-16"
 
       - id: "TASK-036"
         title: "Backend: Phone number verification"
-        status: "pending"
+        status: "completed"
         priority: "P1"
         handoff: "HO-036-phone-verification.yaml"
         depends_on: ["TASK-034"]
         description: "Verify phone numbers via SMS OTP"
+        skeleton_files:
+          - "apps/backend/src/modules/emergency-contacts/phone-verification.service.ts"
+          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
+          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
+          - "apps/backend/src/modules/emergency-contacts/dto/verify-phone.dto.ts"
+          - "apps/backend/src/modules/emergency-contacts/dto/contact-response.dto.ts"
+          - "apps/backend/prisma/schema.prisma"
+        skeleton_version: "3.4.0"
+        completed_at: "2026-01-16"
 
       - id: "TASK-037"
         title: "Frontend: SMS settings UI"
-        status: "pending"
+        status: "completed"
         priority: "P1"
         handoff: "HO-037-sms-settings-ui.yaml"
-        depends_on: ["TASK-035"]
+        depends_on: ["TASK-036"]
+        completed_at: "2026-01-16"
         description: "Add phone number and SMS preference to contact form"
+        skeleton_files:
+          - "apps/user-web/src/components/contacts/ContactCard.tsx"
+          - "apps/user-web/src/components/contacts/ContactForm.tsx"
+          - "apps/user-web/src/components/contacts/PhoneVerificationDialog.tsx"
+          - "apps/user-web/src/i18n/locales/en/contacts.json"
+          - "packages/api-client/src/types.ts"
+          - "packages/api-client/src/api.ts"
+          - "packages/api-client/src/hooks.ts"
+        skeleton_version: "3.4.0"
 
   - id: "iter-011"
     goal: "OAuth Login (Google/Apple)"
@@ -1187,6 +1218,59 @@ decision_log:
         - "User can resend verification email"
         - "Unverified contacts can still be added but won't receive alerts"
         - "Public endpoint (no auth required for verification)"
+
+  - id: "ADR-017"
+    date: "2026-01-16"
+    decision: "Phone number verification via SMS OTP"
+    rationale: |
+      - Verify phone numbers before sending SMS alerts
+      - Use 6-digit OTP (One-Time Password) sent via SMS
+      - OTP is simpler and more mobile-friendly than email links
+      - Ensures contact has access to the phone number
+      - Required before contact can receive SMS notifications
+    implementation:
+      schema_changes:
+        - "Add phoneVerified (Boolean, default false) to EmergencyContact"
+        - "Add phoneOtp (String?) to EmergencyContact"
+        - "Add phoneOtpExpiresAt (DateTime?) to EmergencyContact"
+        - "Add preferredChannel (NotificationChannel) to EmergencyContact"
+      flow: |
+        1. User requests phone verification for contact
+        2. System generates 6-digit OTP using crypto.randomInt
+        3. Store OTP and expiry (10 minutes) in database
+        4. Send OTP via SmsService.sendVerificationSms()
+        5. User enters OTP received on contact's phone
+        6. Backend validates OTP using crypto.timingSafeEqual (timing attack prevention)
+        7. Mark phoneVerified = true, clear OTP fields
+      api_endpoints:
+        - "POST /api/v1/emergency-contacts/:id/send-phone-verification"
+        - "POST /api/v1/emergency-contacts/:id/verify-phone"
+        - "POST /api/v1/emergency-contacts/:id/resend-phone-verification"
+      security:
+        - "OTP expires after 10 minutes"
+        - "Use crypto.timingSafeEqual for constant-time comparison"
+        - "Use crypto.randomInt for cryptographic OTP generation"
+        - "Phone numbers masked in logs (show only last 4 digits)"
+        - "Rate limiting recommended (max 3 OTPs per 10 minutes)"
+
+  - id: "ADR-018"
+    date: "2026-01-16"
+    decision: "Contact notification channel preference"
+    rationale: |
+      - Contacts can choose to receive notifications via email or SMS
+      - preferredChannel field on EmergencyContact (default 'email')
+      - SMS channel requires verified phone number
+      - Allows flexibility while maintaining verification requirements
+    implementation:
+      field: "preferredChannel: NotificationChannel"
+      default: "email"
+      validation:
+        - "SMS requires: contact.phone exists AND contact.phoneVerified = true"
+        - "If SMS selected but not valid, fall back to email"
+      ui:
+        - "RadioGroup in contact form (Email / SMS)"
+        - "SMS option disabled if no phone number"
+        - "Warning if SMS selected but phone not verified"
 
 # ============================================================
 # 8. Review History (Recorded by A Session)

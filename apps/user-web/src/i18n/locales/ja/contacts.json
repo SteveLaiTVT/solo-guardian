@@ -11,13 +11,25 @@
   "emptyState": "緊急連絡先がありません",
   "emptyStateHint": "チェックインを逃した際に通知する方を追加してください",
   "inactive": "無効",
+  "verified": "確認済み",
+  "unverified": "未確認",
+  "verifyPhone": "確認",
+  "channelEmail": "メール",
+  "channelSms": "SMS",
+  "smsRequiresVerifiedPhone": "SMS通知には電話番号の確認が必要です。SMSアラートを有効にするには電話番号を確認してください。",
   "form": {
     "name": "名前",
     "namePlaceholder": "連絡先の名前",
     "email": "メール",
     "emailPlaceholder": "contact@example.com",
     "phone": "電話（任意）",
-    "phonePlaceholder": "+81 90 1234 5678"
+    "phonePlaceholder": "+81 90 1234 5678",
+    "phoneHint": "SMS通知には国番号を含めてください（例：日本は +81）",
+    "notificationPreference": "通知方法",
+    "channelEmail": "メール - メールで通知を受け取る",
+    "channelSms": "SMS - テキストメッセージで通知を受け取る",
+    "smsRequiresPhone": "電話番号が必要です",
+    "smsVerificationNote": "SMSアラートを送信する前に電話番号の確認が必要です"
   },
   "deleteConfirm": "{{name}}を緊急連絡先から削除しますか？",
   "errors": {
@@ -34,5 +46,24 @@
     "updated": "連絡先を更新しました",
     "deleted": "連絡先を削除しました",
     "reordered": "連絡先の順序を更新しました"
+  },
+  "phoneVerification": {
+    "title": "電話番号の確認",
+    "sendDescription": "{{phone}} に確認コードを送信します",
+    "sendCode": "コードを送信",
+    "enterCode": "確認コードを入力",
+    "verifyDescription": "{{phone}} に送信された6桁のコードを入力してください",
+    "otpLabel": "確認コード",
+    "verify": "確認",
+    "resendCode": "再送信",
+    "resendCooldown": "{{seconds}}秒後に再送信",
+    "successTitle": "確認完了",
+    "successDescription": "電話番号が確認されました",
+    "errors": {
+      "sendFailed": "確認コードの送信に失敗しました。もう一度お試しください。",
+      "verifyFailed": "コードが無効または期限切れです。もう一度お試しください。",
+      "resendFailed": "再送信に失敗しました。もう一度お試しください。",
+      "invalidOtp": "6桁の確認コードを入力してください"
+    }
   }
 }

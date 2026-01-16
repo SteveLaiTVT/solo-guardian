@@ -139,6 +139,7 @@ export class EmergencyContactsService {
     return updated.map((c) => this.mapToResponse(c));
   }
 
+  // DONE(B): Updated mapToResponse to include phoneVerified and preferredChannel - TASK-036
   private mapToResponse(contact: EmergencyContact): ContactResponseDto {
     return {
       id: contact.id,
@@ -151,6 +152,8 @@ export class EmergencyContactsService {
       isActive: contact.isActive,
       createdAt: contact.createdAt,
       updatedAt: contact.updatedAt,
+      phoneVerified: contact.phoneVerified,
+      preferredChannel: contact.preferredChannel as 'email' | 'sms',
     };
   }
 }

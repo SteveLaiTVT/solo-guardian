@@ -17,6 +17,9 @@ import type {
   UpdatePreferencesRequest,
   ToggleFeatureRequest,
   VerifyContactResult,
+  VerifyPhoneRequest,
+  SendPhoneVerificationResult,
+  VerifyPhoneResult,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -78,6 +81,16 @@ export function createApi(client: AxiosInstance) {
 
       resendVerification: (id: string) =>
         client.post<EmergencyContact>(`/api/v1/emergency-contacts/${id}/resend-verification`),
+
+      // Phone verification endpoints
+      sendPhoneVerification: (id: string) =>
+        client.post<SendPhoneVerificationResult>(`/api/v1/emergency-contacts/${id}/send-phone-verification`),
+
+      verifyPhone: (id: string, data: VerifyPhoneRequest) =>
+        client.post<VerifyPhoneResult>(`/api/v1/emergency-contacts/${id}/verify-phone`, data),
+
+      resendPhoneVerification: (id: string) =>
+        client.post<SendPhoneVerificationResult>(`/api/v1/emergency-contacts/${id}/resend-phone-verification`),
     },
 
     // Public endpoint (no auth required)

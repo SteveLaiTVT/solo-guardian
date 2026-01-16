@@ -11,13 +11,25 @@
   "emptyState": "暂无紧急联系人",
   "emptyStateHint": "添加一个在您错过签到时应该被通知的人",
   "inactive": "已停用",
+  "verified": "已验证",
+  "unverified": "未验证",
+  "verifyPhone": "验证",
+  "channelEmail": "邮件",
+  "channelSms": "短信",
+  "smsRequiresVerifiedPhone": "短信通知需要验证手机号码。请验证手机号以启用短信提醒。",
   "form": {
     "name": "姓名",
     "namePlaceholder": "联系人姓名",
     "email": "邮箱",
     "emailPlaceholder": "contact@example.com",
     "phone": "电话（可选）",
-    "phonePlaceholder": "+86 123 4567 8900"
+    "phonePlaceholder": "+86 123 4567 8900",
+    "phoneHint": "请包含国家代码以便接收短信通知（如中国 +86）",
+    "notificationPreference": "通知方式",
+    "channelEmail": "邮件 - 通过邮件接收提醒",
+    "channelSms": "短信 - 通过短信接收提醒",
+    "smsRequiresPhone": "需要手机号码",
+    "smsVerificationNote": "需要先验证手机号码才能发送短信提醒"
   },
   "deleteConfirm": "确定要将 {{name}} 从紧急联系人中移除吗？",
   "errors": {
@@ -34,5 +46,24 @@
     "updated": "联系人更新成功",
     "deleted": "联系人已移除",
     "reordered": "联系人顺序已更新"
+  },
+  "phoneVerification": {
+    "title": "验证手机号码",
+    "sendDescription": "我们将向 {{phone}} 发送验证码",
+    "sendCode": "发送验证码",
+    "enterCode": "输入验证码",
+    "verifyDescription": "请输入发送到 {{phone}} 的6位验证码",
+    "otpLabel": "验证码",
+    "verify": "验证",
+    "resendCode": "重新发送",
+    "resendCooldown": "{{seconds}}秒后可重发",
+    "successTitle": "验证成功",
+    "successDescription": "手机号码已验证成功",
+    "errors": {
+      "sendFailed": "发送验证码失败，请重试。",
+      "verifyFailed": "验证码无效或已过期，请重试。",
+      "resendFailed": "重新发送失败，请重试。",
+      "invalidOtp": "请输入6位验证码"
+    }
   }
 }

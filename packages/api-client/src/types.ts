@@ -77,6 +77,9 @@ export interface UpdateSettingsRequest {
   reminderEnabled?: boolean
 }
 
+// Notification channel type
+export type NotificationChannel = 'email' | 'sms'
+
 // Emergency Contact types
 export interface EmergencyContact {
   id: string
@@ -86,6 +89,8 @@ export interface EmergencyContact {
   phone: string | null
   priority: number
   isVerified: boolean
+  phoneVerified: boolean
+  preferredChannel: NotificationChannel
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -96,6 +101,7 @@ export interface CreateContactRequest {
   email: string
   phone?: string
   priority?: number
+  preferredChannel?: NotificationChannel
 }
 
 export interface UpdateContactRequest {
@@ -104,6 +110,7 @@ export interface UpdateContactRequest {
   phone?: string
   priority?: number
   isActive?: boolean
+  preferredChannel?: NotificationChannel
 }
 
 export interface ReorderContactsRequest {
@@ -146,4 +153,19 @@ export interface VerifyContactResult {
   success: boolean
   contactName: string
   userName: string
+}
+
+// Phone Verification types
+export interface VerifyPhoneRequest {
+  otp: string
+}
+
+export interface SendPhoneVerificationResult {
+  message: string
+  expiresAt: string
+}
+
+export interface VerifyPhoneResult {
+  success: boolean
+  message: string
 }

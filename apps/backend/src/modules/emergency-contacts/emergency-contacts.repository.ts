@@ -229,4 +229,66 @@ export class EmergencyContactsRepository {
 
     return result.count;
   }
+
+  // ============================================================
+  // Phone Verification - TASK-036
+  // ============================================================
+
+  /**
+   * Set phone verification OTP for a contact
+   * DONE(B): Implemented setPhoneVerificationOtp - TASK-036
+   * @task TASK-036
+   */
+  async setPhoneVerificationOtp(
+    id: string,
+    otpCode: string,
+  ): Promise<EmergencyContact> {
+    const OTP_EXPIRY_MINUTES = 10;
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + OTP_EXPIRY_MINUTES);
+
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        phoneOtp: otpCode,
+        phoneOtpExpiresAt: expiresAt,
+      },
+    });
+  }
+
+  /**
+   * Mark phone as verified and clear OTP
+   * DONE(B): Implemented markPhoneVerified - TASK-036
+   * @task TASK-036
+   */
+  async markPhoneVerified(id: string): Promise<EmergencyContact> {
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        phoneVerified: true,
+        phoneOtp: null,
+        phoneOtpExpiresAt: null,
+      },
+    });
+  }
+
+  /**
+   * Clear expired phone OTPs
+   * DONE(B): Implemented clearExpiredPhoneOtps - TASK-036
+   * @task TASK-036
+   */
+  async clearExpiredPhoneOtps(): Promise<number> {
+    const result = await this.prisma.emergencyContact.updateMany({
+      where: {
+        phoneOtpExpiresAt: { lt: new Date() },
+        phoneOtp: { not: null },
+      },
+      data: {
+        phoneOtp: null,
+        phoneOtpExpiresAt: null,
+      },
+    });
+
+    return result.count;
+  }
 }
