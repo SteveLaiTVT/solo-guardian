@@ -137,11 +137,12 @@ export function createHooks(client: AxiosInstance) {
     },
 
     // Preferences hooks
-    usePreferences: () =>
+    usePreferences: (options?: { enabled?: boolean }) =>
       useQuery({
         queryKey: ["preferences"],
         queryFn: () =>
           api.preferences.get().then((r: AxiosResponse<UserPreferences>) => r.data),
+        enabled: options?.enabled ?? true,
       }),
 
     useUpdatePreferences: () => {

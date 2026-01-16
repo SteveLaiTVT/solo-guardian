@@ -13,6 +13,7 @@ import {
 } from 'react';
 import type { UserPreferences, UpdatePreferencesRequest } from '@solo-guardian/api-client';
 import { hooks } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 interface ThemeContextValue {
   preferences: UserPreferences | undefined;
@@ -31,7 +32,12 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
-  const { data: preferences, isLoading } = hooks.usePreferences();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  // Only fetch preferences when authenticated to avoid 401 errors on login page
+  const { data: preferences, isLoading } = hooks.usePreferences({
+    enabled: isAuthenticated,
+  });
   const updateMutation = hooks.useUpdatePreferences();
 
   const updatePreference = <K extends keyof UpdatePreferencesRequest>(
@@ -41,7 +47,8 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
     updateMutation.mutate({ [key]: value });
   };
 
-  const isOnboardingRequired = !isLoading && !!preferences && !preferences.onboardingCompleted;
+  // Only check onboarding when authenticated and preferences loaded
+  const isOnboardingRequired = isAuthenticated && !isLoading && !!preferences && !preferences.onboardingCompleted;
 
   useEffect(() => {
     if (!preferences) return;
