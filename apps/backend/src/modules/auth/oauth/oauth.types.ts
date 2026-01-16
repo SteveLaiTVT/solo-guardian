@@ -71,8 +71,8 @@ export interface OAuthProviderConfig {
 export interface OAuthAuthResult {
   /** User profile from OAuth provider */
   profile: OAuthUserProfile;
-  /** OAuth tokens */
-  tokens: OAuthTokens;
+  /** OAuth tokens from the provider */
+  oauthTokens: OAuthTokens;
   /** Whether this is a new user */
   isNewUser: boolean;
 }

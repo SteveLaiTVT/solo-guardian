@@ -104,9 +104,8 @@ test.describe('Check-in Flow', () => {
       await saveButton.click();
 
       // Should show success message or not show error
-      await expect(authenticatedPage.locator('.text-red-500')).toBeHidden({ timeout: 5000 }).catch(() => {
-        // It's okay if there's no error shown
-      });
+      // Verify that no error indicator is visible after save
+      await expect(authenticatedPage.locator('.text-red-500')).toBeHidden({ timeout: 5000 });
     });
   });
 

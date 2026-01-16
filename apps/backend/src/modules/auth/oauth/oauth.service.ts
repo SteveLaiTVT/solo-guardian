@@ -105,7 +105,7 @@ export class OAuthService {
 
     return {
       profile,
-      tokens: oauthTokens,
+      oauthTokens,
       isNewUser,
       user: {
         id: user.id,

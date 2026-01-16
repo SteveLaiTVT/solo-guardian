@@ -33,7 +33,9 @@ test.describe('Authentication', () => {
 
       await loginPage.login('nonexistent@example.com', 'wrongpassword');
 
-      await loginPage.expectError(/invalid|incorrect|failed/i);
+      // Error message pattern matches common auth error responses
+      // Covers: "Invalid credentials", "Incorrect email or password", "Login failed"
+      await loginPage.expectError(/invalid credentials|incorrect email or password|login failed/i);
     });
 
     test('should redirect to dashboard on successful login', async ({ page }) => {

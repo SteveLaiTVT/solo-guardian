@@ -88,8 +88,13 @@ export function OAuthButtons({
     setLoadingProvider(providerId)
 
     // Redirect to backend OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-    const oauthUrl = `${backendUrl}/auth/oauth/${providerId}`
+    // Handle VITE_API_URL which may or may not include /api suffix
+    const rawBackendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+    const trimmedBackendUrl = rawBackendUrl.replace(/\/+$/, '')
+    const apiBase = trimmedBackendUrl.endsWith('/api')
+      ? trimmedBackendUrl
+      : `${trimmedBackendUrl}/api`
+    const oauthUrl = `${apiBase}/auth/oauth/${providerId}`
 
     // Store return URL in session storage for callback
     sessionStorage.setItem('oauth_return_url', window.location.href)
