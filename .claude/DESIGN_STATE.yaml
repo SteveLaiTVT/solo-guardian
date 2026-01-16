@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.5.0"
-  updated_at: "2026-01-16"
+  version: "3.6.0"
+  updated_at: "2026-01-17"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "SMS, OAuth, and E2E Testing"
+  milestone: "SMS, OAuth, E2E Testing Complete - Ready for Next Phase"
 
 # ============================================================
 # 1. Technical Architecture
@@ -100,8 +100,9 @@ modules:
         description: "Protect endpoints with JWT authentication"
       - name: "OAuth (Google/Apple)"
         priority: "P1"
-        status: "designing"
+        status: "done"
         started_iteration: "iter-011"
+        completed_iteration: "iter-011"
       - name: "Role-Based Access Control (RBAC)"
         priority: "P0"
         status: "pending"
@@ -413,10 +414,11 @@ modules:
         completed_task: "TASK-031"
 
   sms_notifications:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "SMS notifications for alerts (alternative to email)"
     started_iteration: "iter-010"
+    completed_iteration: "iter-010"
     skeleton_created: true
     skeleton_version: "3.4.0"
     features:
@@ -432,62 +434,78 @@ modules:
         completed_task: "TASK-035"
       - name: "Phone Number Verification"
         priority: "P1"
-        status: "ready"
+        status: "done"
         description: "Verify phone numbers before sending SMS"
-        task: "TASK-036"
+        completed_task: "TASK-036"
       - name: "SMS Channel Selection"
         priority: "P1"
-        status: "ready"
+        status: "done"
         description: "Allow contacts to choose email vs SMS"
-        task: "TASK-037"
+        completed_task: "TASK-037"
 
   oauth:
-    status: "designing"
-    owner: "A Session"
+    status: "done"
+    owner: "B Session"
     description: "OAuth authentication with Google and Apple"
     started_iteration: "iter-011"
-    skeleton_created: false
+    completed_iteration: "iter-011"
+    skeleton_created: true
+    skeleton_version: "3.5.0"
     features:
       - name: "Google OAuth"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Sign in with Google"
+        completed_task: "TASK-038"
       - name: "Apple OAuth"
         priority: "P1"
-        status: "designing"
+        status: "done"
         description: "Sign in with Apple (required for iOS)"
+        completed_task: "TASK-039"
       - name: "Account Linking"
         priority: "P1"
-        status: "designing"
+        status: "done"
         description: "Link OAuth to existing email account"
+        completed_task: "TASK-040"
+      - name: "OAuth Login UI"
+        priority: "P0"
+        status: "done"
+        description: "Google/Apple sign-in buttons on login page"
+        completed_task: "TASK-041"
 
   e2e_testing:
-    status: "designing"
-    owner: "A Session"
+    status: "done"
+    owner: "B Session"
     description: "End-to-end testing infrastructure"
     started_iteration: "iter-012"
-    skeleton_created: false
+    completed_iteration: "iter-012"
+    skeleton_created: true
+    skeleton_version: "3.5.0"
     features:
       - name: "Playwright Setup"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Configure Playwright for E2E tests"
+        completed_task: "TASK-042"
       - name: "Auth Flow Tests"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Test login, register, logout flows"
+        completed_task: "TASK-043"
       - name: "Check-in Flow Tests"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Test check-in functionality"
+        completed_task: "TASK-044"
       - name: "Contact Management Tests"
         priority: "P1"
-        status: "designing"
-        description: "Test emergency contacts CRUD"
+        status: "pending"
+        description: "Test emergency contacts CRUD (deferred)"
       - name: "CI Integration"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Run E2E tests in GitHub Actions"
+        completed_task: "TASK-045"
 
 # ============================================================
 # 3. API Design Constraints
@@ -554,191 +572,100 @@ code_constraints:
 # ============================================================
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
-current_iterations:
-  - id: "iter-010"
-    goal: "SMS Notifications"
-    started_at: "2026-01-16"
-    status: "designing"
-    tasks:
-      - id: "TASK-034"
-        title: "Backend: SMS provider integration (Twilio)"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-034-sms-provider.yaml"
-        depends_on: []
-        description: "Integrate Twilio SDK, configure credentials, create SmsService"
-        skeleton_files:
-          - "apps/backend/src/modules/sms/sms.service.ts"
-          - "apps/backend/src/modules/sms/sms.module.ts"
-          - "apps/backend/src/modules/sms/index.ts"
-        review_verdict: "pass"
-        completed_at: "2026-01-16"
-
-      - id: "TASK-035"
-        title: "Backend: SMS notification processor"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-035-sms-processor.yaml"
-        depends_on: ["TASK-034"]
-        description: "Add SMS channel to notification queue processor"
-        skeleton_files:
-          - "apps/backend/src/modules/notifications/notification.processor.ts"
-          - "apps/backend/src/modules/notifications/notification.module.ts"
-          - "apps/backend/src/modules/notifications/notification.service.ts"
-        skeleton_version: "3.2.1"
-        review_verdict: "pass"
-        completed_at: "2026-01-16"
-
-      - id: "TASK-036"
-        title: "Backend: Phone number verification"
-        status: "completed"
-        priority: "P1"
-        handoff: "HO-036-phone-verification.yaml"
-        depends_on: ["TASK-034"]
-        description: "Verify phone numbers via SMS OTP"
-        skeleton_files:
-          - "apps/backend/src/modules/emergency-contacts/phone-verification.service.ts"
-          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.repository.ts"
-          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
-          - "apps/backend/src/modules/emergency-contacts/emergency-contacts.module.ts"
-          - "apps/backend/src/modules/emergency-contacts/dto/verify-phone.dto.ts"
-          - "apps/backend/src/modules/emergency-contacts/dto/contact-response.dto.ts"
-          - "apps/backend/prisma/schema.prisma"
-        skeleton_version: "3.4.0"
-        completed_at: "2026-01-16"
-
-      - id: "TASK-037"
-        title: "Frontend: SMS settings UI"
-        status: "completed"
-        priority: "P1"
-        handoff: "HO-037-sms-settings-ui.yaml"
-        depends_on: ["TASK-036"]
-        completed_at: "2026-01-16"
-        description: "Add phone number and SMS preference to contact form"
-        skeleton_files:
-          - "apps/user-web/src/components/contacts/ContactCard.tsx"
-          - "apps/user-web/src/components/contacts/ContactForm.tsx"
-          - "apps/user-web/src/components/contacts/PhoneVerificationDialog.tsx"
-          - "apps/user-web/src/i18n/locales/en/contacts.json"
-          - "packages/api-client/src/types.ts"
-          - "packages/api-client/src/api.ts"
-          - "packages/api-client/src/hooks.ts"
-        skeleton_version: "3.4.0"
-
-  - id: "iter-011"
-    goal: "OAuth Login (Google/Apple)"
-    started_at: "2026-01-16"
-    status: "implementing"
-    tasks:
-      - id: "TASK-038"
-        title: "Backend: Google OAuth integration"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-038-google-oauth.yaml"
-        depends_on: []
-        description: "Google OAuth strategy with BaseOAuthProvider pattern"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "apps/backend/src/modules/auth/oauth/oauth.types.ts"
-          - "apps/backend/src/modules/auth/oauth/base-oauth.provider.ts"
-          - "apps/backend/src/modules/auth/oauth/google-oauth.provider.ts"
-          - "apps/backend/src/modules/auth/oauth/oauth.service.ts"
-          - "apps/backend/src/modules/auth/oauth/oauth.controller.ts"
-          - "apps/backend/src/modules/auth/oauth/oauth.module.ts"
-
-      - id: "TASK-039"
-        title: "Backend: Apple OAuth integration"
-        status: "completed"
-        priority: "P1"
-        handoff: "HO-039-apple-oauth.yaml"
-        depends_on: []
-        description: "Apple Sign In with BaseOAuthProvider pattern"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "apps/backend/src/modules/auth/oauth/apple-oauth.provider.ts"
-
-      - id: "TASK-040"
-        title: "Backend: Account linking"
-        status: "completed"
-        priority: "P1"
-        handoff: "HO-040-account-linking.yaml"
-        depends_on: ["TASK-038"]
-        description: "Link OAuth accounts to existing email accounts"
-        completed_at: "2026-01-16"
-
-      - id: "TASK-041"
-        title: "Frontend: OAuth login buttons"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-041-oauth-buttons.yaml"
-        depends_on: ["TASK-038"]
-        description: "Add Google/Apple sign-in buttons to login page"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "apps/user-web/src/components/auth/OAuthButtons.tsx"
-          - "apps/user-web/src/components/auth/OAuthCallback.tsx"
-          - "packages/api-client/src/api.ts"
-          - "packages/api-client/src/hooks.ts"
-
-  - id: "iter-012"
-    goal: "E2E Testing Infrastructure"
-    started_at: "2026-01-16"
-    status: "implementing"
-    tasks:
-      - id: "TASK-042"
-        title: "Testing: Playwright setup and configuration"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-042-playwright-setup.yaml"
-        depends_on: []
-        description: "Install Playwright, configure browsers, create test utils"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "e2e/playwright.config.ts"
-          - "e2e/global-setup.ts"
-          - "e2e/global-teardown.ts"
-          - "e2e/fixtures/test-fixtures.ts"
-          - "e2e/package.json"
-          - "e2e/tsconfig.json"
-
-      - id: "TASK-043"
-        title: "Testing: Auth flow E2E tests"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-043-auth-e2e.yaml"
-        depends_on: ["TASK-042"]
-        description: "Test login, register, logout, password reset"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "e2e/tests/auth.setup.ts"
-          - "e2e/tests/auth.spec.ts"
-
-      - id: "TASK-044"
-        title: "Testing: Check-in flow E2E tests"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-044-checkin-e2e.yaml"
-        depends_on: ["TASK-042"]
-        description: "Test check-in, settings, history, contacts pages"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - "e2e/tests/check-in.spec.ts"
-
-      - id: "TASK-045"
-        title: "Testing: GitHub Actions CI integration"
-        status: "completed"
-        priority: "P0"
-        handoff: "HO-045-ci-integration.yaml"
-        depends_on: ["TASK-043", "TASK-044"]
-        description: "Run E2E tests on PR and main branch"
-        completed_at: "2026-01-16"
-        skeleton_files:
-          - ".github/workflows/e2e.yml"
+current_iterations: []
+  # No active iterations - ready for next phase planning
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-012"
+    goal: "E2E Testing Infrastructure"
+    started_at: "2026-01-16"
+    completed_at: "2026-01-17"
+    status: "completed"
+    summary: |
+      E2E testing infrastructure complete:
+      - Playwright configured with Chromium browser
+      - Test fixtures for authenticated and unauthenticated flows
+      - Auth flow tests (login, register, logout)
+      - Check-in flow tests (dashboard, settings, history)
+      - GitHub Actions CI integration for PR and main branch
+      - Tests run on every PR and push to main
+    tasks_completed:
+      - id: "TASK-042"
+        title: "Testing: Playwright setup and configuration"
+        review_verdict: "pass"
+      - id: "TASK-043"
+        title: "Testing: Auth flow E2E tests"
+        review_verdict: "pass"
+      - id: "TASK-044"
+        title: "Testing: Check-in flow E2E tests"
+        review_verdict: "pass"
+      - id: "TASK-045"
+        title: "Testing: GitHub Actions CI integration"
+        review_verdict: "pass"
+    deferred_items:
+      - "Contact management E2E tests (to be added in future iteration)"
+    milestone: "E2E Testing Infrastructure Complete"
+
+  - id: "iter-011"
+    goal: "OAuth Login (Google/Apple)"
+    started_at: "2026-01-16"
+    completed_at: "2026-01-17"
+    status: "completed"
+    summary: |
+      OAuth authentication complete:
+      - BaseOAuthProvider pattern for extensibility
+      - Google OAuth integration with ID token validation
+      - Apple Sign In integration with JWT verification
+      - Account linking for existing email accounts
+      - OAuth login buttons on frontend (Google/Apple)
+      - OAuth callback handling with token exchange
+    tasks_completed:
+      - id: "TASK-038"
+        title: "Backend: Google OAuth integration"
+        review_verdict: "pass"
+      - id: "TASK-039"
+        title: "Backend: Apple OAuth integration"
+        review_verdict: "pass"
+      - id: "TASK-040"
+        title: "Backend: Account linking"
+        review_verdict: "pass"
+      - id: "TASK-041"
+        title: "Frontend: OAuth login buttons"
+        review_verdict: "pass"
+    milestone: "OAuth Authentication Complete"
+
+  - id: "iter-010"
+    goal: "SMS Notifications"
+    started_at: "2026-01-16"
+    completed_at: "2026-01-17"
+    status: "completed"
+    summary: |
+      SMS notifications complete:
+      - Twilio SMS provider integration
+      - SMS notification processor for alerts
+      - Phone number verification via 6-digit OTP
+      - Timing-safe OTP validation for security
+      - SMS channel selection for emergency contacts
+      - Phone verification UI with dialog
+      - Contact preferred channel (email/SMS) support
+    tasks_completed:
+      - id: "TASK-034"
+        title: "Backend: SMS provider integration (Twilio)"
+        review_verdict: "pass"
+      - id: "TASK-035"
+        title: "Backend: SMS notification processor"
+        review_verdict: "pass"
+      - id: "TASK-036"
+        title: "Backend: Phone number verification"
+        review_verdict: "pass"
+      - id: "TASK-037"
+        title: "Frontend: SMS settings UI"
+        review_verdict: "pass"
+    milestone: "SMS Notifications Complete"
+
   - id: "iter-009"
     goal: "Reminder notifications and contact verification"
     started_at: "2026-01-16"
