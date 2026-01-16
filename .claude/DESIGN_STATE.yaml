@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "2.1.0"
+  version: "2.2.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
-  branch: "feature/iter-009-reminders-verification"
+  branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Reminder Notifications & Contact Verification"
+  milestone: "Core Safety Features Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -477,60 +477,49 @@ code_constraints:
 # 5. Current Iteration
 # ============================================================
 current_iteration:
-  id: "iter-009"
-  goal: "Reminder notifications and contact verification"
-  started_at: "2026-01-16"
-  status: "implemented"
-  tasks:
-    - id: "TASK-029"
-      title: "Backend: Reminder notification system"
-      status: "done"
-      priority: "P0"
-      handoff: "HO-029-reminder-notifications.yaml"
-      depends_on: []
-      description: "Reminder cron job, email template, tracking in CheckInSettings"
-      implementation_report: "IR-iter-009-reminders-verification.yaml"
-
-    - id: "TASK-030"
-      title: "Frontend: Reminder settings UI"
-      status: "done"
-      priority: "P1"
-      handoff: "HO-030-reminder-settings-ui.yaml"
-      depends_on: []
-      description: "Settings page toggle and time picker for reminders"
-      note: "Deferred - backend-only for iter-009"
-
-    - id: "TASK-031"
-      title: "Backend: Send verification emails"
-      status: "done"
-      priority: "P0"
-      handoff: "HO-031-verification-email-send.yaml"
-      depends_on: []
-      description: "Service to send/resend verification emails, token generation"
-      implementation_report: "IR-iter-009-reminders-verification.yaml"
-
-    - id: "TASK-032"
-      title: "Backend: Verification email templates"
-      status: "done"
-      priority: "P0"
-      handoff: "HO-032-verification-email-content.yaml"
-      depends_on: []
-      description: "HTML and text email templates for contact verification"
-      implementation_report: "IR-iter-009-reminders-verification.yaml"
-
-    - id: "TASK-033"
-      title: "Backend + Frontend: Verification endpoint and page"
-      status: "done"
-      priority: "P0"
-      handoff: "HO-033-verification-endpoint.yaml"
-      depends_on: ["TASK-031", "TASK-032"]
-      description: "Public verification endpoint and VerifyContactPage"
-      implementation_report: "IR-iter-009-reminders-verification.yaml"
+  id: null
+  goal: "No active iteration - ready for next feature"
+  started_at: null
+  status: "idle"
+  tasks: []
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-009"
+    goal: "Reminder notifications and contact verification"
+    started_at: "2026-01-16"
+    completed_at: "2026-01-16"
+    status: "completed"
+    summary: |
+      Reminder notifications and contact verification complete:
+      - Reminder cron job runs every minute
+      - Sends reminder email before check-in deadline
+      - Tracks lastReminderSentAt to prevent duplicates
+      - Contact verification email on request
+      - UUID token with 24-hour expiration
+      - Public verification endpoint
+      - Frontend verification page
+    tasks_completed:
+      - id: "TASK-029"
+        title: "Backend: Reminder notification system"
+        review_verdict: "pass"
+      - id: "TASK-030"
+        title: "Frontend: Reminder settings UI"
+        review_verdict: "deferred"
+        note: "Backend-only for iter-009"
+      - id: "TASK-031"
+        title: "Backend: Send verification emails"
+        review_verdict: "pass"
+      - id: "TASK-032"
+        title: "Backend: Verification email templates"
+        review_verdict: "pass"
+      - id: "TASK-033"
+        title: "Backend + Frontend: Verification endpoint and page"
+        review_verdict: "pass"
+    milestone: "Reminder Notifications & Contact Verification"
+
   - id: "iter-008"
     goal: "Notification system and missed check-in detection - core safety feature"
     started_at: "2026-01-16"
