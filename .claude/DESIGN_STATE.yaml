@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "1.8.0"
+  version: "1.9.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
-  branch: "feature/iter-008-notifications"
+  branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Notification System In Progress"
+  milestone: "Core Safety Feature Complete - Notification System"
 
 # ============================================================
 # 1. Technical Architecture
@@ -278,67 +278,83 @@ modules:
         completed_task: "TASK-019"
 
   alerts:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "Alert system for missed check-ins"
     started_iteration: "iter-008"
+    completed_iteration: "iter-008"
     skeleton_created: true
     skeleton_version: "0.1.0"
     features:
       - name: "Alert Creation"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Create alert when user misses check-in deadline"
+        completed_task: "TASK-027"
       - name: "Alert Resolution"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Resolve alert when user checks in (late check-in)"
+        completed_task: "TASK-027"
       - name: "Alert History"
-        priority: "P1"
-        status: "pending"
+        priority: "P0"
+        status: "done"
         description: "View past alerts for user"
+        completed_task: "TASK-027"
 
   notifications:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "Notification delivery to emergency contacts"
     started_iteration: "iter-008"
+    completed_iteration: "iter-008"
     skeleton_created: true
     skeleton_version: "0.1.0"
     features:
       - name: "Email Notifications"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Send email alerts to emergency contacts"
+        completed_task: "TASK-025"
       - name: "Notification Queue"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Bull queue for reliable notification delivery"
+        completed_task: "TASK-024"
       - name: "Notification History"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Track sent notifications and their status"
+        completed_task: "TASK-026"
       - name: "SMS Notifications"
         priority: "P2"
         status: "pending"
         description: "Send SMS alerts (future)"
 
   missed_checkin_detector:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "Scheduled job to detect users who missed check-in"
     started_iteration: "iter-008"
+    completed_iteration: "iter-008"
     skeleton_created: true
     skeleton_version: "0.1.0"
     features:
       - name: "Cron Job"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Run every minute to check for overdue users"
+        completed_task: "TASK-028"
       - name: "Timezone-Aware Detection"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Respect user timezone when checking deadline"
+        completed_task: "TASK-028"
+      - name: "Alert Expiration"
+        priority: "P0"
+        status: "done"
+        description: "Daily job to expire old alerts"
+        completed_task: "TASK-028"
 
 # ============================================================
 # 3. API Design Constraints
@@ -409,60 +425,103 @@ current_iteration:
   id: "iter-008"
   goal: "Notification system and missed check-in detection - core safety feature"
   started_at: "2026-01-16"
-  status: "in_progress"
+  completed_at: "2026-01-16"
+  status: "completed"
   tasks:
     - id: "TASK-023"
       title: "Database: Alert and Notification models"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-023-alert-notification-db.yaml"
       depends_on: []
       description: "Prisma schema for Alert and Notification with status tracking"
+      review_verdict: "pass"
 
     - id: "TASK-024"
       title: "Backend: Bull queue infrastructure"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-024-queue-infrastructure.yaml"
       depends_on: []
       description: "Bull queue module with Redis connection for job processing"
+      review_verdict: "pass"
 
     - id: "TASK-025"
       title: "Backend: Email service"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-025-email-service.yaml"
       depends_on: []
       description: "Email service with nodemailer and alert templates"
+      review_verdict: "pass"
 
     - id: "TASK-026"
       title: "Backend: Notification module"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-026-notification-module.yaml"
       depends_on: ["TASK-023", "TASK-024", "TASK-025"]
       description: "NotificationService, Repository, and queue processor"
+      review_verdict: "pass"
 
     - id: "TASK-027"
       title: "Backend: Alert module"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-027-alert-module.yaml"
       depends_on: ["TASK-023", "TASK-026"]
       description: "AlertService, Repository, Controller for alert management"
+      review_verdict: "pass"
 
     - id: "TASK-028"
       title: "Backend: Missed check-in detector"
-      status: "pending"
+      status: "completed"
       priority: "P0"
       handoff: "HO-028-missed-checkin-detector.yaml"
       depends_on: ["TASK-027"]
       description: "Cron job to detect overdue users and trigger alerts"
+      review_verdict: "pass"
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-008"
+    goal: "Notification system and missed check-in detection - core safety feature"
+    started_at: "2026-01-16"
+    completed_at: "2026-01-16"
+    status: "completed"
+    summary: |
+      Core safety feature complete - notification system:
+      - Alert and Notification database models with enums
+      - Bull queue infrastructure with Redis
+      - Email service with nodemailer (HTML + text templates)
+      - Notification module with queue processor
+      - Alert module with CRUD API endpoints
+      - Missed check-in detector (runs every minute)
+      - Timezone-aware deadline detection
+      - Alert expiration job (daily cleanup)
+    tasks_completed:
+      - id: "TASK-023"
+        title: "Database: Alert and Notification models"
+        review_verdict: "pass"
+      - id: "TASK-024"
+        title: "Backend: Bull queue infrastructure"
+        review_verdict: "pass"
+      - id: "TASK-025"
+        title: "Backend: Email service"
+        review_verdict: "pass"
+      - id: "TASK-026"
+        title: "Backend: Notification module"
+        review_verdict: "pass"
+      - id: "TASK-027"
+        title: "Backend: Alert module"
+        review_verdict: "pass"
+      - id: "TASK-028"
+        title: "Backend: Missed check-in detector"
+        review_verdict: "pass"
+    milestone: "Core Safety Feature Complete"
+
   - id: "iter-007"
     goal: "User preferences system and error handling infrastructure"
     started_at: "2026-01-15"
