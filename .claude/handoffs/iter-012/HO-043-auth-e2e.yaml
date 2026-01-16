@@ -1,0 +1,126 @@
+# ============================================================
+# Handoff Document: Auth Flow E2E Tests
+# @task TASK-043
+# @design_state_version 3.0.0
+# ============================================================
+
+handoff_id: "HO-043"
+task_id: "TASK-043"
+title: "Testing: Auth flow E2E tests"
+design_state_version: "3.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Write E2E tests for authentication flows: login, register, logout.
+  Ensure core auth functionality works correctly.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - "TASK-042: Playwright setup"
+
+# ============================================================
+# Files to Create
+# ============================================================
+files_to_create:
+  - path: "apps/user-web/e2e/auth.spec.ts"
+    description: "Auth flow E2E tests"
+
+# ============================================================
+# Test Scenarios
+# ============================================================
+test_scenarios:
+  login:
+    - name: "should login with valid credentials"
+      steps:
+        - "Navigate to /login"
+        - "Fill email and password"
+        - "Click Sign In"
+        - "Verify redirect to dashboard"
+        - "Verify user name displayed"
+
+    - name: "should show error with invalid credentials"
+      steps:
+        - "Navigate to /login"
+        - "Fill wrong email/password"
+        - "Click Sign In"
+        - "Verify error message displayed"
+        - "Verify still on login page"
+
+    - name: "should redirect to login when not authenticated"
+      steps:
+        - "Navigate directly to /dashboard"
+        - "Verify redirect to /login"
+
+  register:
+    - name: "should register new user"
+      steps:
+        - "Navigate to /register"
+        - "Fill name, email, password"
+        - "Click Register"
+        - "Verify redirect to onboarding or dashboard"
+
+    - name: "should show error for existing email"
+      steps:
+        - "Navigate to /register"
+        - "Fill existing email"
+        - "Click Register"
+        - "Verify error message"
+
+    - name: "should validate password requirements"
+      steps:
+        - "Navigate to /register"
+        - "Fill weak password"
+        - "Verify validation error"
+
+  logout:
+    - name: "should logout user"
+      steps:
+        - "Login as test user"
+        - "Click logout button/menu"
+        - "Verify redirect to login"
+        - "Verify cannot access dashboard"
+
+# ============================================================
+# Test File Structure
+# ============================================================
+test_structure: |
+  import { test, expect } from '@playwright/test';
+  import { LoginPage } from './page-objects/login.page';
+  import { testUser } from './fixtures/test-data';
+
+  test.describe('Authentication', () => {
+    test.describe('Login', () => {
+      test('should login with valid credentials', async ({ page }) => {
+        const loginPage = new LoginPage(page);
+        await loginPage.goto();
+        await loginPage.login(testUser.email, testUser.password);
+        await expect(page).toHaveURL('/');
+      });
+    });
+  });
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "All login tests pass"
+  - "All register tests pass"
+  - "All logout tests pass"
+  - "Tests are independent (no shared state)"
+  - "Tests clean up after themselves"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use Page Object Model"
+  - "No hardcoded waits"
+  - "Use accessible selectors"
+  - "Tests should be deterministic"

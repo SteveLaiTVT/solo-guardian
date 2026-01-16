@@ -1,0 +1,182 @@
+# ============================================================
+# Handoff Document: Google OAuth Integration
+# @task TASK-038
+# @design_state_version 3.0.0
+# ============================================================
+
+handoff_id: "HO-038"
+task_id: "TASK-038"
+title: "Backend: Google OAuth integration"
+design_state_version: "3.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Implement Google OAuth authentication to allow users to sign in
+  with their Google account. This provides a convenient alternative
+  to email/password authentication.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  npm_packages:
+    - "@nestjs/passport"
+    - "passport"
+    - "passport-google-oauth20"
+  npm_install: "cd apps/backend && pnpm add @nestjs/passport passport passport-google-oauth20 && pnpm add -D @types/passport-google-oauth20"
+
+  google_cloud_setup:
+    - "Create project in Google Cloud Console"
+    - "Enable Google+ API"
+    - "Create OAuth 2.0 credentials"
+    - "Add authorized redirect URI: {APP_URL}/api/v1/auth/google/callback"
+
+  environment_variables:
+    - name: "GOOGLE_CLIENT_ID"
+      description: "Google OAuth Client ID"
+      required: true
+    - name: "GOOGLE_CLIENT_SECRET"
+      description: "Google OAuth Client Secret"
+      required: true
+    - name: "GOOGLE_CALLBACK_URL"
+      description: "OAuth callback URL"
+      default: "http://localhost:3001/api/v1/auth/google/callback"
+
+# ============================================================
+# Database Changes
+# ============================================================
+database_changes:
+  prisma_schema:
+    - model: "User"
+      new_fields:
+        - "googleId String? @unique @map('google_id')"
+        - "avatarUrl String? @map('avatar_url')"
+
+# ============================================================
+# Files to Create/Modify
+# ============================================================
+files_to_create:
+  - path: "apps/backend/src/modules/auth/strategies/google.strategy.ts"
+    description: "Passport Google OAuth strategy"
+
+  - path: "apps/backend/src/modules/auth/dto/oauth-user.dto.ts"
+    description: "DTO for OAuth user data"
+
+files_to_modify:
+  - path: "apps/backend/src/modules/auth/auth.controller.ts"
+    changes:
+      - "Add GET /auth/google endpoint (initiates OAuth)"
+      - "Add GET /auth/google/callback endpoint (handles callback)"
+
+  - path: "apps/backend/src/modules/auth/auth.service.ts"
+    changes:
+      - "Add validateGoogleUser method"
+      - "Add findOrCreateGoogleUser method"
+
+  - path: "apps/backend/src/modules/auth/auth.module.ts"
+    changes:
+      - "Import PassportModule"
+      - "Register GoogleStrategy"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  google_strategy:
+    location: "strategies/google.strategy.ts"
+    logic: |
+      1. Extend PassportStrategy with Google OAuth 2.0
+      2. Configure with clientID, clientSecret, callbackURL
+      3. Request profile and email scopes
+      4. In validate callback:
+         - Extract email, name, googleId, picture
+         - Call authService.validateGoogleUser()
+         - Return user or throw
+
+  validate_google_user:
+    location: "auth.service.ts"
+    logic: |
+      1. Find user by googleId
+      2. If found, return existing user
+      3. If not found, check if email exists:
+         a. If email exists without googleId → link accounts
+         b. If email doesn't exist → create new user
+      4. Generate JWT tokens
+      5. Return AuthResult
+
+  endpoints:
+    google_initiate:
+      method: "GET"
+      path: "/api/v1/auth/google"
+      auth: "None"
+      description: "Redirects to Google OAuth consent page"
+      guard: "AuthGuard('google')"
+
+    google_callback:
+      method: "GET"
+      path: "/api/v1/auth/google/callback"
+      auth: "None"
+      description: "Handles Google OAuth callback"
+      logic: |
+        1. Passport validates the callback
+        2. User attached to request
+        3. Generate JWT tokens
+        4. Redirect to frontend with tokens (or set cookies)
+
+  frontend_redirect:
+    description: "After OAuth, redirect to frontend with tokens"
+    options:
+      - "Redirect with tokens in URL query params"
+      - "Redirect with tokens in cookies (more secure)"
+      - "Redirect to intermediate page that posts to opener"
+    recommended: "URL query params for simplicity, HTTPS required"
+    redirect_url: "{FRONTEND_URL}/auth/callback?accessToken=xxx&refreshToken=xxx"
+
+# ============================================================
+# OAuth Flow
+# ============================================================
+oauth_flow: |
+  1. User clicks "Sign in with Google" on frontend
+  2. Frontend redirects to: /api/v1/auth/google
+  3. Backend redirects to Google consent page
+  4. User authorizes app
+  5. Google redirects to: /api/v1/auth/google/callback?code=xxx
+  6. Backend exchanges code for tokens
+  7. Backend fetches user profile from Google
+  8. Backend finds/creates user, generates JWT
+  9. Backend redirects to: {FRONTEND_URL}/auth/callback?accessToken=xxx
+  10. Frontend extracts tokens, stores in auth store
+  11. Frontend redirects to dashboard
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "Google OAuth flow works end-to-end"
+  - "New users created with Google profile"
+  - "Existing email users linked to Google"
+  - "JWT tokens generated on successful auth"
+  - "Frontend receives tokens and can authenticate"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Single function < 50 lines"
+  - "No `any` types"
+  - "Use Passport.js (NestJS standard)"
+  - "HTTPS required in production"
+  - "Don't store Google access tokens"
+
+# ============================================================
+# Security
+# ============================================================
+security:
+  - "Validate state parameter (CSRF protection)"
+  - "Use HTTPS for callback URL in production"
+  - "Don't expose Google tokens to frontend"
+  - "Verify email from Google is verified"

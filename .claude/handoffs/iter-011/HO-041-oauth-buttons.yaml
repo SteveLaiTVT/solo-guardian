@@ -1,0 +1,97 @@
+# ============================================================
+# Handoff Document: OAuth Login Buttons
+# @task TASK-041
+# @design_state_version 3.0.0
+# ============================================================
+
+handoff_id: "HO-041"
+task_id: "TASK-041"
+title: "Frontend: OAuth login buttons"
+design_state_version: "3.0.0"
+created_at: "2026-01-16"
+created_by: "A Session"
+
+# ============================================================
+# Objective
+# ============================================================
+objective: |
+  Add "Sign in with Google" and "Sign in with Apple" buttons to the
+  login and register pages. Handle OAuth callback and store tokens.
+
+# ============================================================
+# Prerequisites
+# ============================================================
+prerequisites:
+  dependencies:
+    - "TASK-038: Google OAuth backend"
+    - "TASK-039: Apple OAuth backend (optional)"
+
+# ============================================================
+# Files to Create/Modify
+# ============================================================
+files_to_modify:
+  - path: "apps/user-web/src/pages/auth/LoginPage.tsx"
+    changes:
+      - "Add OAuth buttons section"
+      - "Add divider 'or continue with'"
+
+  - path: "apps/user-web/src/pages/auth/RegisterPage.tsx"
+    changes:
+      - "Add OAuth buttons section"
+
+files_to_create:
+  - path: "apps/user-web/src/components/auth/OAuthButtons.tsx"
+    description: "Reusable OAuth buttons component"
+
+  - path: "apps/user-web/src/pages/auth/OAuthCallbackPage.tsx"
+    description: "Handle OAuth callback and extract tokens"
+
+# ============================================================
+# Requirements
+# ============================================================
+requirements:
+  oauth_buttons_component:
+    location: "components/auth/OAuthButtons.tsx"
+    ui:
+      - "Google button with Google logo"
+      - "Apple button with Apple logo (if enabled)"
+      - "Loading state while redirecting"
+    behavior:
+      - "Click → redirect to /api/v1/auth/google"
+      - "Show loading spinner"
+      - "Handle errors gracefully"
+
+  oauth_callback_page:
+    location: "pages/auth/OAuthCallbackPage.tsx"
+    route: "/auth/callback"
+    logic: |
+      1. Extract tokens from URL query params
+      2. Store tokens in auth store
+      3. Redirect to dashboard
+      4. Handle errors (show message, redirect to login)
+
+  login_page_layout:
+    description: |
+      Email/Password form
+      ─────── or ───────
+      [Sign in with Google]
+      [Sign in with Apple]
+
+# ============================================================
+# Acceptance Criteria
+# ============================================================
+acceptance_criteria:
+  - "OAuth buttons visible on login page"
+  - "Clicking Google redirects to OAuth flow"
+  - "Callback page extracts and stores tokens"
+  - "User redirected to dashboard after OAuth"
+  - "Error handling for failed OAuth"
+
+# ============================================================
+# Constraints
+# ============================================================
+constraints:
+  - "Use existing UI components"
+  - "Functional components + hooks"
+  - "No `any` types"
+  - "Follow existing auth page styling"
