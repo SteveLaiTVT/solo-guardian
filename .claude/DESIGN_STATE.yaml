@@ -29,19 +29,19 @@ architecture:
     database: "PostgreSQL"
     cache: "Redis"
     orm: "Prisma"
-    
+
   frontend_shared:
     language: "TypeScript"
     ui_framework: "React 18"
     state_management: "Zustand"
     styling: "Tailwind CSS"
     api_client: "TanStack Query + Axios"
-    
+
   admin_web:
     base: "frontend_shared"
     routing: "React Router"
     ui_library: "Ant Design"
-    
+
   user_web:
     base: "frontend_shared"
     routing: "React Router"
@@ -53,7 +53,7 @@ architecture:
       mobile: "< 768px"
       tablet: "768px - 1024px"
       desktop: "> 1024px"
-    
+
   mobile:
     android:
       language: "Kotlin"
@@ -105,7 +105,7 @@ modules:
       - name: "Role-Based Access Control (RBAC)"
         priority: "P0"
         status: "pending"
-    
+
   user:
     status: "pending"
     owner: null
@@ -495,12 +495,12 @@ modules:
 api_constraints:
   style: "RESTful"
   versioning: "URL prefix (/api/v1)"
-  
+
   naming:
     - "Use plural for resource names: /users, /posts"
     - "Use kebab-case: /user-profiles"
     - "Max 2 levels of nesting: /users/{id}/posts"
-    
+
   response_format:
     success: |
       {
@@ -517,7 +517,7 @@ api_constraints:
           "details": { ... }
         }
       }
-      
+
   authentication:
     method: "Bearer Token (JWT)"
     header: "Authorization: Bearer <token>"
@@ -532,20 +532,20 @@ code_constraints:
     - "All functions must have return type declaration"
     - "Single file < 300 lines"
     - "Single function < 50 lines"
-    
+
   backend:
     - "Controller only does parameter validation and calls Service"
     - "Service contains business logic, does not directly access database"
     - "Repository handles database operations"
     - "All database operations must be in transactions"
     - "Sensitive operations must be logged"
-    
+
   frontend:
     - "Use functional components + Hooks"
     - "Extract business logic to custom hooks"
     - "Separate UI components from business components"
     - "All API calls through api-client package"
-    
+
   mobile:
     - "Separate UI from business logic (Compose + ViewModel)"
     - "Use StateFlow/SharedFlow for state management"

@@ -1,0 +1,342 @@
+# ============================================================
+# Review Report: SMS Notification Processor
+# @task TASK-035
+# @design_state_version 3.2.1
+# ============================================================
+
+report_id: "RR-035"
+task_id: "TASK-035"
+implementation_report_id: "IR-035"
+reviewer: "C Session"
+reviewed_at: "2026-01-16"
+
+# ============================================================
+# Summary
+# ============================================================
+summary:
+  verdict: "pass"
+  statistics:
+    files_reviewed: 3
+    issues_found: 0
+    critical_issues: 0
+    errors: 0
+    warnings: 0
+    suggestions: 1
+  brief: |
+    Implementation is complete and meets all acceptance criteria.
+    All TODO(B) markers have been filled in correctly with DONE(B) markers.
+    Code follows existing patterns and constraints are satisfied.
+    SMS channel support is correctly integrated into the notification system.
+
+# ============================================================
+# TODO Completion Check
+# ============================================================
+todo_check:
+  - file: "apps/backend/src/modules/notifications/notification.processor.ts"
+    status: "complete"
+    todos_found: 3
+    todos_filled: 3
+    details:
+      - marker: "TODO(B): Import SmsService from '../sms'"
+        status: "complete"
+        done_marker: "DONE(B): Import SmsService from '../sms' - TASK-035"
+        line: 15
+      - marker: "TODO(B): Inject SmsService"
+        status: "complete"
+        done_marker: "DONE(B): Inject SmsService - TASK-035"
+        line: 24
+      - marker: "TODO(B): Implement handleSendSms"
+        status: "complete"
+        done_marker: "DONE(B): Implement handleSendSms - TASK-035"
+        line: 83
+
+  - file: "apps/backend/src/modules/notifications/notification.module.ts"
+    status: "complete"
+    todos_found: 2
+    todos_filled: 2
+    details:
+      - marker: "TODO(B): Import SmsModule from '../sms'"
+        status: "complete"
+        done_marker: "DONE(B): Import SmsModule from '../sms' - TASK-035"
+        line: 13
+      - marker: "TODO(B): Add SmsModule to imports"
+        status: "complete"
+        done_marker: "DONE(B): Add SmsModule to imports - TASK-035"
+        line: 21
+
+  - file: "apps/backend/src/modules/notifications/notification.service.ts"
+    status: "complete"
+    todos_found: 4
+    todos_filled: 4
+    details:
+      - marker: "TODO(B): Update Queue type to union"
+        status: "complete"
+        done_marker: "DONE(B): Update Queue type to union - TASK-035"
+        line: 31
+      - marker: "TODO(B): Determine channel based on preferredChannel"
+        status: "complete"
+        done_marker: "DONE(B): Determine channel based on preferredChannel and available contact info - TASK-035"
+        line: 67
+      - marker: "TODO(B): Queue appropriate job based on channel"
+        status: "complete"
+        done_marker: "DONE(B): Queue appropriate job based on channel - TASK-035"
+        line: 80
+      - marker: "TODO(B): Add SMS channel support"
+        status: "complete"
+        done_marker: "DONE(B): Add SMS channel support - TASK-035"
+        line: 46
+
+# ============================================================
+# Constraints Check
+# ============================================================
+constraints_check:
+  - constraint: "No `any` type allowed"
+    status: "pass"
+    verification: "Grep search found no `any` types in notification files"
+
+  - constraint: "Single function < 50 lines"
+    status: "pass"
+    verification: |
+      Function line counts:
+      - handleSendSms(): 37 lines (86-122) - PASS
+      - handleSendEmail(): 34 lines (36-70) - PASS
+      - determineChannel(): 11 lines (91-101) - PASS
+      - queueNotificationJob(): 37 lines (107-143) - PASS
+      - queueAlertNotifications(): 36 lines (49-85) - PASS
+
+  - constraint: "Single file < 300 lines"
+    status: "pass"
+    verification: |
+      File line counts:
+      - notification.processor.ts: 136 lines - PASS
+      - notification.module.ts: 38 lines - PASS
+      - notification.service.ts: 194 lines - PASS
+
+  - constraint: "Sensitive operations must be logged"
+    status: "pass"
+    verification: |
+      All SMS operations logged with Logger:
+      - Line 93: SMS processing start (masked phone)
+      - Line 106: SMS sent success
+      - Line 113: SMS failed error
+
+  - constraint: "Don't log full phone numbers (privacy)"
+    status: "pass"
+    verification: |
+      Phone masking implemented at line 92:
+      `const maskedPhone = contactPhone.length > 4 ? `****${contactPhone.slice(-4)}` : '****';`
+      Only last 4 digits visible in logs.
+
+  - constraint: "Mirror existing code patterns"
+    status: "pass"
+    verification: |
+      handleSendSms follows exact pattern of handleSendEmail:
+      1. Extract job data
+      2. Log start (with masked phone for SMS)
+      3. Call service method
+      4. Handle success/failure
+      5. Update notification status
+      6. Re-throw for Bull retry
+
+# ============================================================
+# Acceptance Criteria Check
+# ============================================================
+acceptance_check:
+  - id: "AC-01"
+    criterion: "SMS jobs processed from notification queue"
+    status: "pass"
+    verification: |
+      handleSendSms method at line 86 with @Process(NOTIFICATION_JOB_TYPES.SEND_SMS)
+      decorator properly registers the handler for SMS jobs.
+
+  - id: "AC-02"
+    criterion: "SmsService injected and used for SMS sending"
+    status: "pass"
+    verification: |
+      SmsService injected in constructor at line 28.
+      Called at line 96: `this.smsService.sendAlertSms(...)` with all required parameters.
+
+  - id: "AC-03"
+    criterion: "Contact's preferred channel respected"
+    status: "pass"
+    verification: |
+      determineChannel() method at lines 91-101 correctly checks:
+      - If preferredChannel === 'sms' AND phone exists -> returns 'sms'
+      - Otherwise -> returns 'email' (fallback)
+
+  - id: "AC-04"
+    criterion: "Notification status updated correctly"
+    status: "pass"
+    verification: |
+      - Success: handleNotificationSent called at line 105
+      - Failure: handleNotificationFailed called at line 117
+      Same pattern as email handler.
+
+  - id: "AC-05"
+    criterion: "Phone numbers not fully logged (privacy)"
+    status: "pass"
+    verification: |
+      Phone masking at lines 92:
+      `const maskedPhone = contactPhone.length > 4 ? `****${contactPhone.slice(-4)}` : '****';`
+      All log messages use maskedPhone variable.
+
+  - id: "AC-06"
+    criterion: "Existing email functionality unchanged"
+    status: "pass"
+    verification: |
+      handleSendEmail method at lines 35-70 remains unchanged.
+      Email path still used when channel is 'email'.
+      Verified by comparing with queue.constants.ts job data interfaces.
+
+  - id: "AC-07"
+    criterion: "Fallback to email if no phone number"
+    status: "pass"
+    verification: |
+      determineChannel() at line 96-100:
+      If preferredChannel is 'sms' but phone is null/undefined,
+      returns 'email' as fallback.
+
+# ============================================================
+# Code Quality Check
+# ============================================================
+code_quality:
+  error_handling:
+    status: "good"
+    notes: |
+      - Proper try/catch in handleSendSms
+      - Error message extraction with instanceof check
+      - Retry logic using Bull's attemptsMade
+      - Final failure marked only on last attempt
+
+  security:
+    status: "good"
+    notes: |
+      - Phone numbers masked in all log messages
+      - No PII exposure in error logs
+      - Consistent with email handler patterns
+
+  performance:
+    status: "good"
+    notes: |
+      - Async/await properly used
+      - No blocking operations
+      - Efficient channel determination (single if statement)
+
+  maintainability:
+    status: "good"
+    notes: |
+      - Clear method naming (determineChannel, queueNotificationJob)
+      - Helper methods extracted for clarity
+      - Consistent with existing codebase patterns
+      - Good use of TypeScript types (SendSmsJobData, NotificationChannel)
+
+  consistency:
+    status: "good"
+    notes: |
+      - handleSendSms mirrors handleSendEmail exactly
+      - Same error handling pattern
+      - Same logging pattern (with phone masking)
+      - Same retry mechanism
+      - Module imports follow existing pattern
+
+# ============================================================
+# Consistency with Email Handler
+# ============================================================
+email_handler_comparison:
+  pattern_match: true
+  details:
+    - aspect: "Method signature"
+      email: "handleSendEmail(job: Job<SendEmailJobData>)"
+      sms: "handleSendSms(job: Job<SendSmsJobData>)"
+      match: true
+
+    - aspect: "Decorator"
+      email: "@Process(NOTIFICATION_JOB_TYPES.SEND_EMAIL)"
+      sms: "@Process(NOTIFICATION_JOB_TYPES.SEND_SMS)"
+      match: true
+
+    - aspect: "Data extraction"
+      email: "Destructure job.data"
+      sms: "Destructure job.data"
+      match: true
+
+    - aspect: "Logging"
+      email: "Logs email address"
+      sms: "Logs masked phone (last 4 digits)"
+      match: true
+      note: "SMS correctly masks phone for privacy"
+
+    - aspect: "Service call"
+      email: "emailService.sendAlertEmail(...)"
+      sms: "smsService.sendAlertSms(...)"
+      match: true
+
+    - aspect: "Success handling"
+      email: "handleNotificationSent + log"
+      sms: "handleNotificationSent + log"
+      match: true
+
+    - aspect: "Failure handling"
+      email: "handleNotificationFailed on last attempt"
+      sms: "handleNotificationFailed on last attempt"
+      match: true
+
+    - aspect: "Retry mechanism"
+      email: "Re-throw error for Bull retry"
+      sms: "Re-throw error for Bull retry"
+      match: true
+
+# ============================================================
+# Issues
+# ============================================================
+issues: []
+
+# ============================================================
+# Suggestions (Non-blocking)
+# ============================================================
+suggestions:
+  - id: "SUG-001"
+    severity: "suggestion"
+    type: "consistency"
+    title: "onFailed handler type could be more specific"
+    location:
+      file: "notification.processor.ts"
+      line: 130
+    description: |
+      The onFailed handler accepts `Job<SendEmailJobData | SendSmsJobData>`.
+      This is correct, but the onCompleted handler only accepts `Job<SendEmailJobData>`.
+      For full consistency, onCompleted could also accept the union type.
+    recommendation: |
+      Update onCompleted signature at line 77 to:
+      `onCompleted(job: Job<SendEmailJobData | SendSmsJobData>): void`
+    effort: "minimal"
+    blocking: false
+
+# ============================================================
+# Positives
+# ============================================================
+positives:
+  - "Excellent pattern consistency with existing email handler"
+  - "Privacy-conscious phone masking implementation"
+  - "Clear separation of concerns (determineChannel, queueNotificationJob)"
+  - "Proper fallback behavior when SMS not possible"
+  - "Clean TypeScript types with no `any` usage"
+  - "Well-documented with @task annotations"
+  - "All DONE(B) markers correctly placed"
+
+# ============================================================
+# Conclusion
+# ============================================================
+conclusion:
+  can_merge: true
+  blocking_issues: []
+  required_before_merge: []
+  next_steps:
+    - "Proceed to TASK-036 (Phone number verification)"
+    - "Consider TASK-037 (Frontend SMS settings UI)"
+  notes: |
+    Implementation is clean and follows all established patterns.
+    SMS notification channel is correctly integrated with proper
+    privacy protection (phone masking) and fallback behavior.
+    The code is ready for production use once Twilio credentials
+    are configured.
