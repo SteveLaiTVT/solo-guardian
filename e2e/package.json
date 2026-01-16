@@ -4,16 +4,18 @@
   "private": true,
   "description": "End-to-end tests for Solo Guardian",
   "scripts": {
-    "test": "playwright test",
+    "test": "playwright test --project=chromium",
+    "test:all-browsers": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed --project=chromium",
+    "test:debug": "playwright test --debug --project=chromium",
     "test:report": "playwright show-report",
-    "test:auth": "playwright test auth.spec.ts",
-    "test:checkin": "playwright test check-in.spec.ts",
+    "test:auth": "playwright test auth.spec.ts --project=chromium",
+    "test:checkin": "playwright test check-in.spec.ts --project=chromium",
     "codegen": "playwright codegen http://localhost:5173"
   },
-    "@playwright/test": "^1.40.0",    "@playwright/test": "^1.48.0",
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@types/node": "^20.10.0",
     "typescript": "^5.0.0"
   }

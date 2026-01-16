@@ -21,7 +21,7 @@ export const TEST_USER_2 = {
 };
 
 // Storage state file path for authenticated sessions
-export const STORAGE_STATE_PATH = 'e2e/.auth/user.json';
+export const STORAGE_STATE_PATH = '.auth/user.json';
 
 /**
  * Extended test fixtures with authentication helpers
@@ -102,7 +102,7 @@ export class LoginPage {
     await this.page.click('button[type="submit"]');
   }
 
-  async expectError(message: string): Promise<void> {
+  async expectError(message: string | RegExp): Promise<void> {
     await expect(this.page.locator('.text-red-500')).toContainText(message);
   }
 
@@ -129,7 +129,7 @@ export class RegisterPage {
     await this.page.click('button[type="submit"]');
   }
 
-  async expectError(message: string): Promise<void> {
+  async expectError(message: string | RegExp): Promise<void> {
     await expect(this.page.locator('.text-red-500')).toContainText(message);
   }
 }

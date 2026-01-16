@@ -157,7 +157,7 @@ export class AppleOAuthProvider extends BaseOAuthProvider {
       throw new Error('Invalid Apple ID token');
     }
 
-    const typedClaims = claims as AppleIdTokenClaims;
+    const typedClaims = claims as unknown as AppleIdTokenClaims;
 
     return {
       providerId: typedClaims.sub,

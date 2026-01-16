@@ -53,13 +53,14 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/,
     },
 
-    // Desktop browsers
+    // Desktop browsers - chromium is the default
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
 
+    // Additional browsers - run with: pnpm test:all-browsers
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
@@ -102,8 +103,8 @@ export default defineConfig({
   ],
 
   /* Global setup/teardown */
-  globalSetup: require.resolve('./global-setup'),
-  globalTeardown: require.resolve('./global-teardown'),
+  globalSetup: './global-setup.ts',
+  globalTeardown: './global-teardown.ts',
 
   /* Output folder for test artifacts */
   outputDir: 'test-results/',
