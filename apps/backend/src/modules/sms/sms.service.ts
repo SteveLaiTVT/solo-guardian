@@ -59,18 +59,22 @@ export class SmsService implements OnModuleInit {
    * DONE(B): Implement sendAlertSms - TASK-034
    *
    * @param to - Phone number in E.164 format (+1234567890)
-   * @param contactName - Name of the emergency contact
+   * @param contactName - Name of the emergency contact (used in greeting)
    * @param userName - Name of the user who missed check-in
-   * @param _alertDate - Date of the missed check-in (formatted) - unused in message
+   * @param alertDate - Date of the missed check-in (formatted)
+   * @param triggeredAt - Time when the alert was triggered (for consistency with email)
    */
   async sendAlertSms(
     to: string,
     contactName: string,
     userName: string,
-    _alertDate: string,
+    alertDate: string,
+    triggeredAt: string,
   ): Promise<boolean> {
     const maskedPhone = this.maskPhoneNumber(to);
-    this.logger.log(`Attempting to send alert SMS to: ${maskedPhone}`);
+    this.logger.log(
+      `Attempting to send alert SMS to: ${maskedPhone} for ${userName} on ${alertDate}`,
+    );
 
     if (!this.twilioClient) {
       this.logger.error('Twilio client not initialized');
@@ -84,7 +88,10 @@ export class SmsService implements OnModuleInit {
 
     try {
       // Message kept under 160 characters for single segment
-      const message = `[Solo Guardian] Alert: ${userName} has not checked in today. Please check on them.`;
+      // Using contactName for personalization as suggested by Copilot review
+      const message = `Hi ${contactName}, ${userName} missed check-in on ${alertDate}. Please check on them. -Solo Guardian`;
+
+      this.logger.debug(`Alert triggered at: ${triggeredAt}`);
 
       await this.twilioClient.messages.create({
         body: message,
