@@ -9,7 +9,7 @@
 # ============================================================
 
 meta:
-  version: "2.0.0"
+  version: "2.1.0"
   updated_at: "2026-01-16"
   updated_by: "A Session"
   branch: "feature/iter-009-reminders-verification"
@@ -357,48 +357,59 @@ modules:
         completed_task: "TASK-028"
 
   reminder_notifications:
-    status: "designing"
-    owner: "A Session"
+    status: "done"
+    owner: "B Session"
     description: "Send reminder emails to users before their check-in deadline"
     started_iteration: "iter-009"
-    skeleton_created: false
+    completed_iteration: "iter-009"
+    skeleton_created: true
+    skeleton_version: "2.0.0"
     features:
       - name: "Reminder Cron Job"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Scheduled job to send reminders at user's reminderTime"
+        completed_task: "TASK-029"
       - name: "Reminder Email"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Email template for check-in reminders"
+        completed_task: "TASK-029"
       - name: "Reminder Tracking"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Track last reminder sent to prevent duplicates"
+        completed_task: "TASK-029"
 
   contact_verification:
-    status: "designing"
-    owner: "A Session"
+    status: "done"
+    owner: "B Session"
     description: "Email verification for emergency contacts"
     started_iteration: "iter-009"
-    skeleton_created: false
+    completed_iteration: "iter-009"
+    skeleton_created: true
+    skeleton_version: "2.0.0"
     features:
       - name: "Verification Email"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Send verification email when contact is added"
+        completed_task: "TASK-032"
       - name: "Verification Token"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Token-based verification with expiration"
+        completed_task: "TASK-031"
       - name: "Verification Endpoint"
         priority: "P0"
-        status: "designing"
+        status: "done"
         description: "Public endpoint to verify contact"
+        completed_task: "TASK-033"
       - name: "Resend Verification"
         priority: "P1"
-        status: "designing"
+        status: "done"
         description: "Allow resending verification email"
+        completed_task: "TASK-031"
 
 # ============================================================
 # 3. API Design Constraints
@@ -469,47 +480,52 @@ current_iteration:
   id: "iter-009"
   goal: "Reminder notifications and contact verification"
   started_at: "2026-01-16"
-  status: "in_progress"
+  status: "implemented"
   tasks:
     - id: "TASK-029"
-      title: "Database: Add reminder tracking and verification fields"
-      status: "pending"
+      title: "Backend: Reminder notification system"
+      status: "done"
       priority: "P0"
-      handoff: "HO-029-reminder-verification-db.yaml"
+      handoff: "HO-029-reminder-notifications.yaml"
       depends_on: []
-      description: "Add lastReminderSentAt to CheckInSettings, verificationToken to EmergencyContact"
+      description: "Reminder cron job, email template, tracking in CheckInSettings"
+      implementation_report: "IR-iter-009-reminders-verification.yaml"
 
     - id: "TASK-030"
-      title: "Backend: Reminder email template"
-      status: "pending"
-      priority: "P0"
-      handoff: "HO-030-reminder-email.yaml"
+      title: "Frontend: Reminder settings UI"
+      status: "done"
+      priority: "P1"
+      handoff: "HO-030-reminder-settings-ui.yaml"
       depends_on: []
-      description: "Add reminder email template to EmailService"
+      description: "Settings page toggle and time picker for reminders"
+      note: "Deferred - backend-only for iter-009"
 
     - id: "TASK-031"
-      title: "Backend: Reminder notification detector"
-      status: "pending"
+      title: "Backend: Send verification emails"
+      status: "done"
       priority: "P0"
-      handoff: "HO-031-reminder-detector.yaml"
-      depends_on: ["TASK-029", "TASK-030"]
-      description: "Cron job to send reminders at user's reminderTime"
+      handoff: "HO-031-verification-email-send.yaml"
+      depends_on: []
+      description: "Service to send/resend verification emails, token generation"
+      implementation_report: "IR-iter-009-reminders-verification.yaml"
 
     - id: "TASK-032"
-      title: "Backend: Contact verification service"
-      status: "pending"
+      title: "Backend: Verification email templates"
+      status: "done"
       priority: "P0"
-      handoff: "HO-032-contact-verification.yaml"
-      depends_on: ["TASK-029"]
-      description: "Verification email, token generation, and verification endpoint"
+      handoff: "HO-032-verification-email-content.yaml"
+      depends_on: []
+      description: "HTML and text email templates for contact verification"
+      implementation_report: "IR-iter-009-reminders-verification.yaml"
 
     - id: "TASK-033"
-      title: "Frontend: Contact verification UI"
-      status: "pending"
+      title: "Backend + Frontend: Verification endpoint and page"
+      status: "done"
       priority: "P0"
-      handoff: "HO-033-verification-ui.yaml"
-      depends_on: ["TASK-032"]
-      description: "Show verification status, resend button, verification page"
+      handoff: "HO-033-verification-endpoint.yaml"
+      depends_on: ["TASK-031", "TASK-032"]
+      description: "Public verification endpoint and VerifyContactPage"
+      implementation_report: "IR-iter-009-reminders-verification.yaml"
 
 # ============================================================
 # 5.1 Iteration History
