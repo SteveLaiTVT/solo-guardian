@@ -1,8 +1,8 @@
 /**
  * @file alert.service.ts
  * @description Alert Service - Business logic for alerts
- * @task TASK-027
- * @design_state_version 1.8.0
+ * @task TASK-027, TASK-035
+ * @design_state_version 3.0.0
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -70,12 +70,13 @@ export class AlertService implements OnModuleInit {
       return alert;
     }
 
-    // Queue notifications
+    // Queue notifications - DONE(B): Added preferredChannel - TASK-035
     const contacts = activeContacts.map((c: ContactResponseDto) => ({
       id: c.id,
       name: c.name,
       email: c.email,
       phone: c.phone,
+      preferredChannel: c.preferredChannel,
     }));
 
     await this.notificationService.queueAlertNotifications(

@@ -1,8 +1,8 @@
 /**
  * @file notification.processor.ts
  * @description Notification Processor - Bull queue worker for notifications
- * @task TASK-026
- * @design_state_version 1.8.0
+ * @task TASK-026, TASK-035
+ * @design_state_version 3.0.0
  */
 
 import { Logger } from '@nestjs/common';
@@ -10,9 +10,21 @@ import { Logger } from '@nestjs/common';
 import { Processor, Process, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
 // DONE(B): Import Job from 'bull' - TASK-026
 import { Job } from 'bull';
-import { QUEUE_NAMES, NOTIFICATION_JOB_TYPES, SendEmailJobData } from '../queue';
+import {
+  QUEUE_NAMES,
+  NOTIFICATION_JOB_TYPES,
+  SendEmailJobData,
+  SendSmsJobData,
+} from '../queue';
 import { EmailService } from '../email';
+// DONE(B): Import SmsService for SMS notifications - TASK-035
+import { SmsService } from '../sms';
 import { NotificationService } from './notification.service';
+
+/**
+ * Union type for job data
+ */
+type NotificationJobData = SendEmailJobData | SendSmsJobData;
 
 // DONE(B): Add @Processor decorator - TASK-026
 @Processor(QUEUE_NAMES.NOTIFICATION)
@@ -21,6 +33,8 @@ export class NotificationProcessor {
 
   constructor(
     private readonly emailService: EmailService,
+    // DONE(B): Inject SmsService for SMS notifications - TASK-035
+    private readonly smsService: SmsService,
     private readonly notificationService: NotificationService,
   ) {}
 
@@ -66,11 +80,56 @@ export class NotificationProcessor {
   }
 
   /**
+   * Process send-sms job
+   * DONE(B): Implement handleSendSms - TASK-035
+   */
+  @Process(NOTIFICATION_JOB_TYPES.SEND_SMS)
+  async handleSendSms(job: Job<SendSmsJobData>): Promise<void> {
+    const { notificationId, alertId, contactPhone, contactName, userName, alertDate } = job.data;
+
+    this.logger.log(`Processing SMS notification ${notificationId}`);
+
+    if (!this.smsService.isReady()) {
+      this.logger.warn(`SMS service not configured, skipping notification ${notificationId}`);
+      await this.notificationService.handleNotificationFailed(
+        notificationId,
+        'SMS service not configured',
+      );
+      return;
+    }
+
+    try {
+      const success = await this.smsService.sendAlertSms(
+        contactPhone,
+        contactName,
+        userName,
+        alertDate,
+      );
+
+      if (success) {
+        await this.notificationService.handleNotificationSent(notificationId, alertId);
+        this.logger.log(`SMS notification ${notificationId} sent successfully`);
+      } else {
+        throw new Error('SMS service failed to send SMS');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`SMS notification ${notificationId} failed: ${errorMessage}`);
+
+      if (job.attemptsMade >= (job.opts.attempts ?? 3) - 1) {
+        await this.notificationService.handleNotificationFailed(notificationId, errorMessage);
+      }
+
+      throw error;
+    }
+  }
+
+  /**
    * Handle job completion
    * DONE(B): Implement onCompleted - TASK-026
    */
   @OnQueueCompleted()
-  onCompleted(job: Job<SendEmailJobData>): void {
+  onCompleted(job: Job<NotificationJobData>): void {
     this.logger.log(`Job ${job.id} completed for notification ${job.data.notificationId}`);
   }
 
@@ -79,7 +138,7 @@ export class NotificationProcessor {
    * DONE(B): Implement onFailed - TASK-026
    */
   @OnQueueFailed()
-  onFailed(job: Job<SendEmailJobData>, error: Error): void {
+  onFailed(job: Job<NotificationJobData>, error: Error): void {
     this.logger.error(
       `Job ${job.id} failed for notification ${job.data.notificationId}: ${error.message}`,
     );

@@ -1,9 +1,11 @@
 /**
  * @file contact-response.dto.ts
  * @description DTO for emergency contact response
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-035
+ * @design_state_version 3.0.0
  */
+
+import { NotificationChannel } from '@prisma/client';
 
 export class ContactResponseDto {
   id: string;
@@ -14,6 +16,8 @@ export class ContactResponseDto {
   priority: number;
   isVerified: boolean;
   isActive: boolean;
+  // DONE(B): Added preferredChannel field - TASK-035
+  preferredChannel: NotificationChannel;
   createdAt: Date;
   updatedAt: Date;
 }

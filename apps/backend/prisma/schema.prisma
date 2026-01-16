@@ -1,7 +1,7 @@
 // ============================================================
 // Prisma Schema for Solo Guardian
-// @task TASK-001-A, TASK-005, TASK-014, TASK-020, TASK-023
-// @design_state_version 1.8.0
+// @task TASK-001-A, TASK-005, TASK-014, TASK-020, TASK-023, TASK-035
+// @design_state_version 3.0.0
 // ============================================================
 
 generator client {
@@ -97,7 +97,7 @@ model CheckInSettings {
 
 // ============================================================
 // EmergencyContact Model - Emergency contacts for alert notifications
-// @task TASK-014, TASK-029
+// @task TASK-014, TASK-029, TASK-035
 // NOTE: Unique constraints on (userId, email) and (userId, priority) are
 //       implemented as partial indexes in migration to exclude soft-deleted
 //       records. See migration: fix_emergency_contact_unique_constraints
@@ -118,6 +118,9 @@ model EmergencyContact {
   // DONE(B): Added verification token fields - TASK-029
   verificationToken          String?   @map("verification_token")
   verificationTokenExpiresAt DateTime? @map("verification_token_expires_at")
+
+  // DONE(B): Added preferred notification channel - TASK-035
+  preferredChannel NotificationChannel @default(email) @map("preferred_channel")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   // DONE(B): Add notifications relation - TASK-023

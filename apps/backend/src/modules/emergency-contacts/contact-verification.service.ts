@@ -139,6 +139,7 @@ export class ContactVerificationService {
       priority: contact.priority,
       isVerified: contact.isVerified,
       isActive: contact.isActive,
+      preferredChannel: contact.preferredChannel,
       createdAt: contact.createdAt,
       updatedAt: contact.updatedAt,
     };

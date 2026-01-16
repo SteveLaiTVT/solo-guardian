@@ -1,8 +1,8 @@
 /**
  * @file notification.service.ts
  * @description Notification Service - Business logic for notifications
- * @task TASK-026
- * @design_state_version 1.8.0
+ * @task TASK-026, TASK-035
+ * @design_state_version 3.0.0
  */
 
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
@@ -11,15 +11,25 @@ import { InjectQueue } from '@nestjs/bull';
 // DONE(B): Import Queue from 'bull' - TASK-026
 import { Queue } from 'bull';
 import { NotificationRepository } from './notification.repository';
-import { QUEUE_NAMES, NOTIFICATION_JOB_TYPES, SendEmailJobData } from '../queue';
-import type { Notification } from '@prisma/client';
+import {
+  QUEUE_NAMES,
+  NOTIFICATION_JOB_TYPES,
+  SendEmailJobData,
+  SendSmsJobData,
+} from '../queue';
+import type { Notification, NotificationChannel } from '@prisma/client';
 
 // Forward reference type for AlertService to avoid circular dependency
 interface AlertServiceInterface {
   markAlertNotified(alertId: string): Promise<void>;
 }
 
-// DONE(B): Implemented NotificationService - TASK-026
+/**
+ * Union type for notification job data
+ */
+type NotificationJobData = SendEmailJobData | SendSmsJobData;
+
+// DONE(B): Implemented NotificationService - TASK-026, TASK-035
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
@@ -29,7 +39,7 @@ export class NotificationService {
     private readonly notificationRepository: NotificationRepository,
     // DONE(B): Inject notification queue - TASK-026
     @InjectQueue(QUEUE_NAMES.NOTIFICATION)
-    private readonly notificationQueue: Queue<SendEmailJobData>,
+    private readonly notificationQueue: Queue<NotificationJobData>,
   ) {}
 
   /**
@@ -41,7 +51,7 @@ export class NotificationService {
 
   /**
    * Queue notifications for all emergency contacts of a user
-   * DONE(B): Implement queueAlertNotifications - TASK-026
+   * DONE(B): Implement queueAlertNotifications - TASK-026, TASK-035
    */
   async queueAlertNotifications(
     alertId: string,
@@ -53,6 +63,7 @@ export class NotificationService {
       name: string;
       email: string;
       phone: string | null;
+      preferredChannel: NotificationChannel;
     }>,
   ): Promise<string[]> {
     this.logger.log(`Queueing notifications for alert ${alertId} to ${contacts.length} contacts`);
@@ -60,32 +71,103 @@ export class NotificationService {
     const notificationIds: string[] = [];
 
     for (const contact of contacts) {
+      // Determine channel: use preferredChannel if valid, fallback to email
+      const channel = this.determineChannel(contact);
+
       // Create notification record
       const notification = await this.notificationRepository.create({
         alertId,
         contactId: contact.id,
-        channel: 'email',
+        channel,
       });
 
       notificationIds.push(notification.id);
 
-      // Queue email job
-      const jobData: SendEmailJobData = {
-        notificationId: notification.id,
-        alertId,
-        contactId: contact.id,
-        contactName: contact.name,
-        contactEmail: contact.email,
-        userName,
-        alertDate,
-        triggeredAt: triggeredAt.toISOString(),
-      };
-
-      await this.notificationQueue.add(NOTIFICATION_JOB_TYPES.SEND_EMAIL, jobData);
-      this.logger.log(`Queued email notification ${notification.id} for contact ${contact.name}`);
+      // Queue job based on channel
+      if (channel === 'sms') {
+        await this.queueSmsNotification(notification.id, alertId, contact, userName, alertDate, triggeredAt);
+      } else {
+        await this.queueEmailNotification(notification.id, alertId, contact, userName, alertDate, triggeredAt);
+      }
     }
 
     return notificationIds;
+  }
+
+  /**
+   * Determine notification channel based on contact preferences
+   * DONE(B): Implement determineChannel - TASK-035
+   */
+  private determineChannel(contact: {
+    email: string;
+    phone: string | null;
+    preferredChannel: NotificationChannel;
+  }): NotificationChannel {
+    // If preferred channel is SMS and phone is available, use SMS
+    if (contact.preferredChannel === 'sms' && contact.phone) {
+      return 'sms';
+    }
+    // Default to email
+    return 'email';
+  }
+
+  /**
+   * Queue email notification
+   * DONE(B): Implement queueEmailNotification - TASK-035
+   */
+  private async queueEmailNotification(
+    notificationId: string,
+    alertId: string,
+    contact: { id: string; name: string; email: string },
+    userName: string,
+    alertDate: string,
+    triggeredAt: Date,
+  ): Promise<void> {
+    const jobData: SendEmailJobData = {
+      notificationId,
+      alertId,
+      contactId: contact.id,
+      contactName: contact.name,
+      contactEmail: contact.email,
+      userName,
+      alertDate,
+      triggeredAt: triggeredAt.toISOString(),
+    };
+
+    await this.notificationQueue.add(NOTIFICATION_JOB_TYPES.SEND_EMAIL, jobData);
+    this.logger.log(`Queued email notification ${notificationId} for contact ${contact.name}`);
+  }
+
+  /**
+   * Queue SMS notification
+   * DONE(B): Implement queueSmsNotification - TASK-035
+   */
+  private async queueSmsNotification(
+    notificationId: string,
+    alertId: string,
+    contact: { id: string; name: string; phone: string | null },
+    userName: string,
+    alertDate: string,
+    triggeredAt: Date,
+  ): Promise<void> {
+    if (!contact.phone) {
+      this.logger.warn(`Cannot queue SMS for contact ${contact.id} - no phone number`);
+      return;
+    }
+
+    const jobData: SendSmsJobData = {
+      notificationId,
+      alertId,
+      contactId: contact.id,
+      contactName: contact.name,
+      contactPhone: contact.phone,
+      userName,
+      alertDate,
+      triggeredAt: triggeredAt.toISOString(),
+    };
+
+    await this.notificationQueue.add(NOTIFICATION_JOB_TYPES.SEND_SMS, jobData);
+    this.logger.log(`Queued SMS notification ${notificationId} for contact ${contact.name}`);
   }
 
   /**
