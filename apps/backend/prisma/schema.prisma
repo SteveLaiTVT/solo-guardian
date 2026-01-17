@@ -41,6 +41,7 @@ enum UserStatus {
 
 // ============================================================
 // User Model
+// @task TASK-065
 // ============================================================
 model User {
   id           String     @id @default(uuid())
@@ -55,7 +56,7 @@ model User {
   refreshTokens     RefreshToken[]
   checkIns          CheckIn[]
   checkInSettings   CheckInSettings?
-  emergencyContacts EmergencyContact[]
+  emergencyContacts EmergencyContact[]    @relation("UserContacts")
   preferences       UserPreferences?
   // DONE(B): Add alerts relation - TASK-023
   alerts            Alert[]
@@ -66,6 +67,8 @@ model User {
   caretakerCheckIns CheckIn[]             @relation("CaretakerCheckIns")
   // DONE(B): Add caregiver invitations relation - TASK-057
   invitations       CaregiverInvitation[]
+  // DONE(B): Add linked contacts relation - TASK-065
+  linkedAsContact   EmergencyContact[]    @relation("LinkedContacts")
 
   @@index([role])
   @@index([status])
@@ -138,7 +141,7 @@ model CheckInSettings {
 
 // ============================================================
 // EmergencyContact Model - Emergency contacts for alert notifications
-// @task TASK-014, TASK-029, TASK-036
+// @task TASK-014, TASK-029, TASK-036, TASK-065
 // NOTE: Unique constraints on (userId, email) and (userId, priority) are
 //       implemented as partial indexes in migration to exclude soft-deleted
 //       records. See migration: fix_emergency_contact_unique_constraints
@@ -166,7 +169,14 @@ model EmergencyContact {
   phoneOtpExpiresAt DateTime?           @map("phone_otp_expires_at")
   preferredChannel  NotificationChannel @default(email) @map("preferred_channel")
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // DONE(B): Added linked user fields - TASK-065
+  linkedUserId          String?   @map("linked_user_id")
+  invitationToken       String?   @unique @map("invitation_token")
+  invitationSentAt      DateTime? @map("invitation_sent_at")
+  invitationAcceptedAt  DateTime? @map("invitation_accepted_at")
+
+  user          User           @relation("UserContacts", fields: [userId], references: [id], onDelete: Cascade)
+  linkedUser    User?          @relation("LinkedContacts", fields: [linkedUserId], references: [id], onDelete: SetNull)
   // DONE(B): Add notifications relation - TASK-023
   notifications Notification[]
 
@@ -175,6 +185,7 @@ model EmergencyContact {
   @@index([userId, isActive])
   @@index([userId, deletedAt]) // For efficient queries on active contacts
   @@index([verificationToken]) // For quick token lookup during verification
+  @@index([linkedUserId]) // For efficient queries on linked contacts
   @@map("emergency_contacts")
 }
 
