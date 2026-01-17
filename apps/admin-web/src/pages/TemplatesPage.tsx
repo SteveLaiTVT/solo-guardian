@@ -580,8 +580,62 @@ export function TemplatesPage(): React.ReactElement {
         styles={{ body: { padding: 0 } }}
       >
         <div style={{ display: 'flex', height: '75vh' }}>
-          {/* Left: Editor */}
-          <div style={{ flex: 1, padding: 24, overflowY: 'auto', borderRight: '1px solid #f0f0f0' }}>
+          {/* Left: Live Preview */}
+          <div style={{ flex: 1, padding: 24, overflowY: 'auto', background: '#fafafa', borderRight: '1px solid #f0f0f0' }}>
+            <div style={{ marginBottom: 16 }}>
+              <Tag color="green">Live Preview</Tag>
+              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                Variables shown with example values
+              </Text>
+            </div>
+
+            <Card size="small" style={{ marginBottom: 16 }}>
+              <Text strong>Subject: </Text>
+              <Text>
+                {(() => {
+                  let subject = emailSubject || 'Your email subject here...';
+                  currentVariables.forEach(v => {
+                    subject = subject.replace(
+                      new RegExp(`{{${v.key}}}`, 'g'),
+                      v.example
+                    );
+                  });
+                  return subject;
+                })()}
+              </Text>
+            </Card>
+
+            <Card
+              title="Email Body"
+              size="small"
+              styles={{ body: { background: '#fff', minHeight: 300 } }}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: (() => {
+                    let html = emailContent || '<p style="color:#999">Start typing to see preview...</p>';
+                    currentVariables.forEach(v => {
+                      html = html.replace(
+                        new RegExp(`{{${v.key}}}`, 'g'),
+                        `<span style="background:#e6f7ff;padding:1px 4px;border-radius:2px;color:#1890ff">${v.example}</span>`
+                      );
+                    });
+                    return html;
+                  })()
+                }}
+              />
+            </Card>
+
+            <Alert
+              type="info"
+              message="Blue highlighted text shows where variables will be replaced with real data."
+              style={{ marginTop: 16 }}
+              showIcon
+            />
+          </div>
+
+          {/* Right: Editor */}
+          <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
             <Form
               form={emailForm}
               layout="vertical"
@@ -667,60 +721,6 @@ export function TemplatesPage(): React.ReactElement {
               </Form.Item>
             </Form>
           </div>
-
-          {/* Right: Live Preview */}
-          <div style={{ flex: 1, padding: 24, overflowY: 'auto', background: '#fafafa' }}>
-            <div style={{ marginBottom: 16 }}>
-              <Tag color="green">Live Preview</Tag>
-              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
-                Variables shown with example values
-              </Text>
-            </div>
-
-            <Card size="small" style={{ marginBottom: 16 }}>
-              <Text strong>Subject: </Text>
-              <Text>
-                {(() => {
-                  let subject = emailSubject || 'Your email subject here...';
-                  currentVariables.forEach(v => {
-                    subject = subject.replace(
-                      new RegExp(`{{${v.key}}}`, 'g'),
-                      v.example
-                    );
-                  });
-                  return subject;
-                })()}
-              </Text>
-            </Card>
-
-            <Card
-              title="Email Body"
-              size="small"
-              styles={{ body: { background: '#fff', minHeight: 300 } }}
-            >
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: (() => {
-                    let html = emailContent || '<p style="color:#999">Start typing to see preview...</p>';
-                    currentVariables.forEach(v => {
-                      html = html.replace(
-                        new RegExp(`{{${v.key}}}`, 'g'),
-                        `<span style="background:#e6f7ff;padding:1px 4px;border-radius:2px;color:#1890ff">${v.example}</span>`
-                      );
-                    });
-                    return html;
-                  })()
-                }}
-              />
-            </Card>
-
-            <Alert
-              type="info"
-              message="Blue highlighted text shows where variables will be replaced with real data."
-              style={{ marginTop: 16 }}
-              showIcon
-            />
-          </div>
         </div>
       </Modal>
 
@@ -739,8 +739,64 @@ export function TemplatesPage(): React.ReactElement {
         styles={{ body: { padding: 0 } }}
       >
         <div style={{ display: 'flex', minHeight: 400 }}>
-          {/* Left: Editor */}
-          <div style={{ flex: 1, padding: 24, borderRight: '1px solid #f0f0f0' }}>
+          {/* Left: Live Preview */}
+          <div style={{ flex: 1, padding: 24, background: '#fafafa', borderRight: '1px solid #f0f0f0' }}>
+            <div style={{ marginBottom: 16 }}>
+              <Tag color="green">Live Preview</Tag>
+              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                How the SMS will appear
+              </Text>
+            </div>
+
+            {/* Phone mockup */}
+            <div style={{
+              maxWidth: 300,
+              margin: '0 auto',
+              background: '#fff',
+              borderRadius: 24,
+              padding: 16,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '8px solid #333',
+            }}>
+              <div style={{
+                background: '#e5e5ea',
+                borderRadius: 12,
+                padding: 12,
+                fontSize: 14,
+                lineHeight: 1.5,
+                minHeight: 100,
+              }}>
+                {(() => {
+                  let text = smsContent || 'Your SMS message will appear here...';
+                  currentVariables.forEach(v => {
+                    text = text.replace(
+                      new RegExp(`{{${v.key}}}`, 'g'),
+                      v.example
+                    );
+                  });
+                  return text;
+                })()}
+              </div>
+              <div style={{
+                textAlign: 'center',
+                marginTop: 12,
+                color: '#666',
+                fontSize: 12,
+              }}>
+                {smsContent.length}/320 characters
+              </div>
+            </div>
+
+            <Alert
+              type="info"
+              message="Keep SMS messages short and clear. Variables will be replaced with real user data."
+              style={{ marginTop: 24 }}
+              showIcon
+            />
+          </div>
+
+          {/* Right: Editor */}
+          <div style={{ flex: 1, padding: 24 }}>
             <Form
               form={smsForm}
               layout="vertical"
@@ -800,62 +856,6 @@ export function TemplatesPage(): React.ReactElement {
                 </Space>
               </Form.Item>
             </Form>
-          </div>
-
-          {/* Right: Live Preview */}
-          <div style={{ flex: 1, padding: 24, background: '#fafafa' }}>
-            <div style={{ marginBottom: 16 }}>
-              <Tag color="green">Live Preview</Tag>
-              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
-                How the SMS will appear
-              </Text>
-            </div>
-
-            {/* Phone mockup */}
-            <div style={{
-              maxWidth: 300,
-              margin: '0 auto',
-              background: '#fff',
-              borderRadius: 24,
-              padding: 16,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              border: '8px solid #333',
-            }}>
-              <div style={{
-                background: '#e5e5ea',
-                borderRadius: 12,
-                padding: 12,
-                fontSize: 14,
-                lineHeight: 1.5,
-                minHeight: 100,
-              }}>
-                {(() => {
-                  let text = smsContent || 'Your SMS message will appear here...';
-                  currentVariables.forEach(v => {
-                    text = text.replace(
-                      new RegExp(`{{${v.key}}}`, 'g'),
-                      v.example
-                    );
-                  });
-                  return text;
-                })()}
-              </div>
-              <div style={{
-                textAlign: 'center',
-                marginTop: 12,
-                color: '#666',
-                fontSize: 12,
-              }}>
-                {smsContent.length}/320 characters
-              </div>
-            </div>
-
-            <Alert
-              type="info"
-              message="Keep SMS messages short and clear. Variables will be replaced with real user data."
-              style={{ marginTop: 24 }}
-              showIcon
-            />
           </div>
         </div>
       </Modal>
