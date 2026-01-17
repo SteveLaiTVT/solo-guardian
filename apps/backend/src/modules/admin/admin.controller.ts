@@ -1,8 +1,8 @@
 /**
  * @file admin.controller.ts
  * @description Admin API controller
- * @task TASK-046
- * @design_state_version 3.7.0
+ * @task TASK-046, TASK-055
+ * @design_state_version 3.8.0
  */
 import {
   Controller,
@@ -24,6 +24,7 @@ import {
   UpdateUserStatusDto,
   AlertListQueryDto,
   AlertListResponse,
+  AtRiskUsersResponse,
 } from './dto';
 
 interface ApiResponse<T> {
@@ -73,6 +74,13 @@ export class AdminController {
     @Query() query: AlertListQueryDto,
   ): Promise<ApiResponse<AlertListResponse>> {
     const result = await this.adminService.getAlertList(query);
+    return { success: true, data: result };
+  }
+
+  // DONE(B): Add early warning endpoint - TASK-055
+  @Get('early-warning/at-risk-users')
+  async getAtRiskUsers(): Promise<ApiResponse<AtRiskUsersResponse>> {
+    const result = await this.adminService.getAtRiskUsers();
     return { success: true, data: result };
   }
 }

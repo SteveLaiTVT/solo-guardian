@@ -1,8 +1,8 @@
 /**
  * @file admin.service.ts
  * @description Admin service for business logic
- * @task TASK-046
- * @design_state_version 3.7.0
+ * @task TASK-046, TASK-055
+ * @design_state_version 3.8.0
  */
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { AdminRepository, UserStatusType, UserRoleType } from './admin.repository';
@@ -13,6 +13,7 @@ import {
   UserDetailResponse,
   AlertListQueryDto,
   AlertListResponse,
+  AtRiskUsersResponse,
 } from './dto';
 
 @Injectable()
@@ -131,6 +132,16 @@ export class AdminService {
       total: result.total,
       page,
       limit,
+    };
+  }
+
+  // DONE(B): Get at-risk users with consecutive missed check-ins - TASK-055
+  async getAtRiskUsers(minConsecutiveMisses: number = 2): Promise<AtRiskUsersResponse> {
+    const users = await this.adminRepository.getAtRiskUsers(minConsecutiveMisses);
+
+    return {
+      users,
+      total: users.length,
     };
   }
 }

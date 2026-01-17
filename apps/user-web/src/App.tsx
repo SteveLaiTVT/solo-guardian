@@ -1,8 +1,8 @@
 /**
  * @file App.tsx
  * @description Main application component with routing configuration
- * @task TASK-010, TASK-016, TASK-019, TASK-022, TASK-033
- * @design_state_version 2.0.0
+ * @task TASK-010, TASK-016, TASK-019, TASK-022, TASK-033, TASK-062, TASK-063
+ * @design_state_version 3.8.0
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -16,8 +16,9 @@ import { DashboardPage, HistoryPage } from '@/pages/dashboard'
 import { SettingsPage } from '@/pages/settings'
 import { ContactsPage } from '@/pages/contacts'
 import { OnboardingPage } from '@/pages/onboarding'
-// DONE(B): Import VerifyContactPage - TASK-033
 import { VerifyContactPage } from '@/pages/verify-contact'
+import { AcceptInvitationPage } from '@/pages/accept-invitation'
+import { CaregiverPage } from '@/pages/caregiver'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,8 +38,8 @@ function App(): JSX.Element {
           <BrowserRouter>
             <Routes>
               {/* Public routes (no auth check) */}
-              {/* DONE(B): Add VerifyContactPage route - TASK-033 */}
               <Route path="/verify-contact" element={<VerifyContactPage />} />
+              <Route path="/accept-invitation/:token" element={<AcceptInvitationPage />} />
 
               {/* Guest routes (redirect if logged in) */}
               <Route element={<GuestRoute />}>
@@ -54,6 +55,7 @@ function App(): JSX.Element {
                   <Route path="/history" element={<HistoryPage />} />
                   <Route path="/contacts" element={<ContactsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/caregiver" element={<CaregiverPage />} />
                 </Route>
               </Route>
 

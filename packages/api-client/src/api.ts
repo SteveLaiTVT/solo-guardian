@@ -20,6 +20,16 @@ import type {
   VerifyPhoneRequest,
   SendPhoneVerificationResult,
   VerifyPhoneResult,
+  ElderSummary,
+  ElderDetail,
+  CaregiverSummary,
+  CreateInvitationRequest,
+  InvitationResponse,
+  InvitationDetails,
+  CaregiverNote,
+  CreateNoteRequest,
+  CaretakerCheckInRequest,
+  CaretakerCheckInResponse,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -117,6 +127,45 @@ export function createApi(client: AxiosInstance) {
     oauth: {
       getProviders: () =>
         client.get<{ providers: ('google' | 'apple')[] }>("/api/auth/oauth/providers"),
+    },
+
+    // Caregiver endpoints
+    caregiver: {
+      // Get elders I'm caring for
+      getElders: () =>
+        client.get<ElderSummary[]>("/api/v1/caregiver/elders"),
+
+      // Get elder detail
+      getElderDetail: (elderId: string) =>
+        client.get<ElderDetail>(`/api/v1/caregiver/elders/${elderId}`),
+
+      // Get my caregivers
+      getCaregivers: () =>
+        client.get<CaregiverSummary[]>("/api/v1/caregiver/caregivers"),
+
+      // Create invitation
+      createInvitation: (data: CreateInvitationRequest) =>
+        client.post<InvitationResponse>("/api/v1/caregiver/invitations", data),
+
+      // Get invitation details (public)
+      getInvitation: (token: string) =>
+        client.get<InvitationDetails>(`/api/v1/caregiver/invitations/${token}`),
+
+      // Accept invitation
+      acceptInvitation: (token: string) =>
+        client.post<{ message: string }>(`/api/v1/caregiver/invitations/${token}/accept`),
+
+      // Check-in on behalf (caretaker only)
+      checkInOnBehalf: (elderId: string, data?: CaretakerCheckInRequest) =>
+        client.post<CaretakerCheckInResponse>(`/api/v1/caregiver/elders/${elderId}/check-in`, data ?? {}),
+
+      // Add note
+      addNote: (elderId: string, data: CreateNoteRequest) =>
+        client.post<CaregiverNote>(`/api/v1/caregiver/elders/${elderId}/notes`, data),
+
+      // Get notes
+      getNotes: (elderId: string) =>
+        client.get<CaregiverNote[]>(`/api/v1/caregiver/elders/${elderId}/notes`),
     },
   }
 }

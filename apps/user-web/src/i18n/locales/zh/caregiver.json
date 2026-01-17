@@ -1,0 +1,94 @@
+{
+  "title": "看护人仪表板",
+  "tabs": {
+    "elders": "我的长辈",
+    "caregivers": "我的看护人",
+    "invitations": "邀请"
+  },
+  "elders": {
+    "empty": "您还没有照顾任何长辈",
+    "status": {
+      "checked_in": "已签到",
+      "pending": "待签到",
+      "overdue": "已逾期"
+    },
+    "lastCheckIn": "上次签到",
+    "never": "从未",
+    "actions": {
+      "view": "查看详情",
+      "checkIn": "代为签到",
+      "addNote": "添加备注",
+      "remove": "移除"
+    }
+  },
+  "caregivers": {
+    "empty": "您还没有看护人",
+    "pending": "等待接受",
+    "accepted": "已激活",
+    "actions": {
+      "accept": "接受",
+      "reject": "拒绝",
+      "remove": "移除"
+    }
+  },
+  "invitation": {
+    "create": "创建邀请",
+    "createTitle": "邀请他人",
+    "relationshipType": "关系类型",
+    "types": {
+      "caregiver": "看护人",
+      "family": "家庭成员",
+      "caretaker": "照护者"
+    },
+    "typeDescriptions": {
+      "caregiver": "可以查看您的签到状态",
+      "family": "互相照顾的关系",
+      "caretaker": "可以代您签到"
+    },
+    "targetEmail": "邮箱（可选）",
+    "targetPhone": "电话（可选）",
+    "qrCode": "二维码",
+    "shareLink": "分享链接",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制到剪贴板",
+    "expiresAt": "过期时间",
+    "success": "邀请创建成功"
+  },
+  "accept": {
+    "title": "接受邀请",
+    "invitedBy": "{{name}} 邀请了您",
+    "relationshipType": "成为 {{type}}",
+    "expired": "此邀请已过期",
+    "alreadyAccepted": "此邀请已被接受",
+    "accept": "接受邀请",
+    "decline": "拒绝",
+    "success": "邀请已接受",
+    "loginRequired": "请登录以接受此邀请"
+  },
+  "notes": {
+    "title": "备注",
+    "add": "添加备注",
+    "placeholder": "输入您的观察或备注...",
+    "empty": "暂无备注",
+    "save": "保存备注",
+    "success": "备注保存成功"
+  },
+  "checkIn": {
+    "onBehalf": "代为签到",
+    "note": "备注（可选）",
+    "notePlaceholder": "{{name}} 今天怎么样？",
+    "success": "已为 {{name}} 记录签到",
+    "error": "记录签到失败"
+  },
+  "detail": {
+    "title": "长辈详情",
+    "settings": "签到设置",
+    "deadline": "截止时间",
+    "reminder": "提醒时间",
+    "timezone": "时区",
+    "alerts": "待处理警报",
+    "contacts": "紧急联系人",
+    "verified": "已验证",
+    "unverified": "未验证"
+  }
+}

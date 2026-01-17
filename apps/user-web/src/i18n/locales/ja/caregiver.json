@@ -1,0 +1,94 @@
+{
+  "title": "介護者ダッシュボード",
+  "tabs": {
+    "elders": "私の高齢者",
+    "caregivers": "私の介護者",
+    "invitations": "招待"
+  },
+  "elders": {
+    "empty": "まだ高齢者の世話をしていません",
+    "status": {
+      "checked_in": "チェックイン済み",
+      "pending": "保留中",
+      "overdue": "期限切れ"
+    },
+    "lastCheckIn": "最後のチェックイン",
+    "never": "なし",
+    "actions": {
+      "view": "詳細を見る",
+      "checkIn": "代わりにチェックイン",
+      "addNote": "メモを追加",
+      "remove": "削除"
+    }
+  },
+  "caregivers": {
+    "empty": "まだ介護者がいません",
+    "pending": "承認待ち",
+    "accepted": "有効",
+    "actions": {
+      "accept": "承認",
+      "reject": "拒否",
+      "remove": "削除"
+    }
+  },
+  "invitation": {
+    "create": "招待を作成",
+    "createTitle": "誰かを招待",
+    "relationshipType": "関係タイプ",
+    "types": {
+      "caregiver": "介護者",
+      "family": "家族",
+      "caretaker": "世話人"
+    },
+    "typeDescriptions": {
+      "caregiver": "チェックイン状況を確認できます",
+      "family": "相互ケア関係",
+      "caretaker": "代わりにチェックインできます"
+    },
+    "targetEmail": "メール（任意）",
+    "targetPhone": "電話（任意）",
+    "qrCode": "QRコード",
+    "shareLink": "リンクを共有",
+    "copyLink": "リンクをコピー",
+    "linkCopied": "リンクがクリップボードにコピーされました",
+    "expiresAt": "有効期限",
+    "success": "招待が作成されました"
+  },
+  "accept": {
+    "title": "招待を承認",
+    "invitedBy": "{{name}}があなたを招待しました",
+    "relationshipType": "{{type}}として",
+    "expired": "この招待は期限切れです",
+    "alreadyAccepted": "この招待は既に承認されています",
+    "accept": "招待を承認",
+    "decline": "辞退",
+    "success": "招待が承認されました",
+    "loginRequired": "この招待を承認するにはログインしてください"
+  },
+  "notes": {
+    "title": "メモ",
+    "add": "メモを追加",
+    "placeholder": "観察やメモを入力...",
+    "empty": "メモがありません",
+    "save": "メモを保存",
+    "success": "メモが保存されました"
+  },
+  "checkIn": {
+    "onBehalf": "代わりにチェックイン",
+    "note": "メモ（任意）",
+    "notePlaceholder": "{{name}}の今日の様子は？",
+    "success": "{{name}}のチェックインが記録されました",
+    "error": "チェックインの記録に失敗しました"
+  },
+  "detail": {
+    "title": "高齢者の詳細",
+    "settings": "チェックイン設定",
+    "deadline": "締め切り",
+    "reminder": "リマインダー",
+    "timezone": "タイムゾーン",
+    "alerts": "保留中のアラート",
+    "contacts": "緊急連絡先",
+    "verified": "確認済み",
+    "unverified": "未確認"
+  }
+}

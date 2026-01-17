@@ -1,8 +1,8 @@
 /**
  * @file check-in.service.ts
  * @description Service for check-in business logic
- * @task TASK-006
- * @design_state_version 0.8.0
+ * @task TASK-006, TASK-054
+ * @design_state_version 3.8.0
  */
 import { Injectable, Logger } from '@nestjs/common';
 import { CheckIn, CheckInSettings } from '@prisma/client';
@@ -16,12 +16,16 @@ import {
   CheckInHistoryDto,
   CheckInSettingsResponseDto,
 } from './dto';
+import { AnalyticsService } from '../analytics';
 
 @Injectable()
 export class CheckInService {
   private readonly logger = new Logger(CheckInService.name);
 
-  constructor(private readonly checkInRepository: CheckInRepository) {}
+  constructor(
+    private readonly checkInRepository: CheckInRepository,
+    private readonly analyticsService: AnalyticsService,
+  ) {}
 
   async checkIn(
     userId: string,
@@ -46,6 +50,9 @@ export class CheckInService {
     });
 
     this.logger.log(`User ${userId} checked in for ${today}`);
+
+    // DONE(B): Track check-in event - TASK-054
+    await this.analyticsService.trackCheckIn(userId, today);
 
     return this.mapCheckInToResponse(checkIn);
   }
@@ -103,6 +110,9 @@ export class CheckInService {
     });
 
     this.logger.log(`User ${userId} updated check-in settings`);
+
+    // DONE(B): Track settings update event - TASK-054
+    await this.analyticsService.trackSettingsUpdated(userId, 'check-in');
 
     return this.mapSettingsToResponse(updated);
   }

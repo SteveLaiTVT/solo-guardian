@@ -1,0 +1,94 @@
+{
+  "title": "Caregiver Dashboard",
+  "tabs": {
+    "elders": "My Elders",
+    "caregivers": "My Caregivers",
+    "invitations": "Invitations"
+  },
+  "elders": {
+    "empty": "You are not caring for any elders yet",
+    "status": {
+      "checked_in": "Checked in",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "lastCheckIn": "Last check-in",
+    "never": "Never",
+    "actions": {
+      "view": "View Details",
+      "checkIn": "Check In for Them",
+      "addNote": "Add Note",
+      "remove": "Remove"
+    }
+  },
+  "caregivers": {
+    "empty": "You don't have any caregivers yet",
+    "pending": "Pending acceptance",
+    "accepted": "Active",
+    "actions": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "remove": "Remove"
+    }
+  },
+  "invitation": {
+    "create": "Create Invitation",
+    "createTitle": "Invite Someone",
+    "relationshipType": "Relationship Type",
+    "types": {
+      "caregiver": "Caregiver",
+      "family": "Family Member",
+      "caretaker": "Caretaker"
+    },
+    "typeDescriptions": {
+      "caregiver": "Can view your check-in status",
+      "family": "Mutual care relationship",
+      "caretaker": "Can check in on your behalf"
+    },
+    "targetEmail": "Email (optional)",
+    "targetPhone": "Phone (optional)",
+    "qrCode": "QR Code",
+    "shareLink": "Share Link",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard",
+    "expiresAt": "Expires at",
+    "success": "Invitation created successfully"
+  },
+  "accept": {
+    "title": "Accept Invitation",
+    "invitedBy": "{{name}} invited you",
+    "relationshipType": "as {{type}}",
+    "expired": "This invitation has expired",
+    "alreadyAccepted": "This invitation has already been accepted",
+    "accept": "Accept Invitation",
+    "decline": "Decline",
+    "success": "Invitation accepted",
+    "loginRequired": "Please log in to accept this invitation"
+  },
+  "notes": {
+    "title": "Notes",
+    "add": "Add Note",
+    "placeholder": "Enter your observation or note...",
+    "empty": "No notes yet",
+    "save": "Save Note",
+    "success": "Note saved successfully"
+  },
+  "checkIn": {
+    "onBehalf": "Check In on Behalf",
+    "note": "Note (optional)",
+    "notePlaceholder": "How is {{name}} doing today?",
+    "success": "Check-in recorded for {{name}}",
+    "error": "Failed to record check-in"
+  },
+  "detail": {
+    "title": "Elder Details",
+    "settings": "Check-in Settings",
+    "deadline": "Deadline",
+    "reminder": "Reminder",
+    "timezone": "Timezone",
+    "alerts": "Pending Alerts",
+    "contacts": "Emergency Contacts",
+    "verified": "Verified",
+    "unverified": "Unverified"
+  }
+}

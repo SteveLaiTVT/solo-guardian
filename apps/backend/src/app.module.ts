@@ -24,6 +24,10 @@ import { HealthModule } from './modules/health';
 import { AdminModule } from './modules/admin';
 // DONE(B): Import CaregiverModule - TASK-046 (enabled after migration)
 import { CaregiverModule } from './modules/caregiver';
+// DONE(B): Import TemplatesModule - TASK-050
+import { TemplatesModule } from './modules/templates';
+// DONE(B): Import AnalyticsModule - TASK-053
+import { AnalyticsModule } from './modules/analytics';
 
 @Module({
   imports: [
@@ -51,6 +55,10 @@ import { CaregiverModule } from './modules/caregiver';
     AdminModule,
     // DONE(B): Add CaregiverModule - TASK-046 (enabled)
     CaregiverModule,
+    // DONE(B): Add TemplatesModule - TASK-050
+    TemplatesModule,
+    // DONE(B): Add AnalyticsModule - TASK-053
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

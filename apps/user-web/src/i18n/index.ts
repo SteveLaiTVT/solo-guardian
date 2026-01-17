@@ -1,8 +1,8 @@
 /**
  * @file i18n configuration
  * @description Internationalization setup with react-i18next
- * @task TASK-013, TASK-016, TASK-019
- * @design_state_version 1.6.1
+ * @task TASK-013, TASK-016, TASK-019, TASK-064
+ * @design_state_version 3.8.0
  */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -18,6 +18,7 @@ import enContacts from './locales/en/contacts.json';
 import enError from './locales/en/error.json';
 import enOnboarding from './locales/en/onboarding.json';
 import enPreferences from './locales/en/preferences.json';
+import enCaregiver from './locales/en/caregiver.json';
 
 // Chinese
 import zhCommon from './locales/zh/common.json';
@@ -29,6 +30,7 @@ import zhContacts from './locales/zh/contacts.json';
 import zhError from './locales/zh/error.json';
 import zhOnboarding from './locales/zh/onboarding.json';
 import zhPreferences from './locales/zh/preferences.json';
+import zhCaregiver from './locales/zh/caregiver.json';
 
 // Japanese
 import jaCommon from './locales/ja/common.json';
@@ -40,6 +42,7 @@ import jaContacts from './locales/ja/contacts.json';
 import jaError from './locales/ja/error.json';
 import jaOnboarding from './locales/ja/onboarding.json';
 import jaPreferences from './locales/ja/preferences.json';
+import jaCaregiver from './locales/ja/caregiver.json';
 
 const resources = {
   en: {
@@ -52,6 +55,7 @@ const resources = {
     error: enError,
     onboarding: enOnboarding,
     preferences: enPreferences,
+    caregiver: enCaregiver,
   },
   zh: {
     common: zhCommon,
@@ -63,6 +67,7 @@ const resources = {
     error: zhError,
     onboarding: zhOnboarding,
     preferences: zhPreferences,
+    caregiver: zhCaregiver,
   },
   ja: {
     common: jaCommon,
@@ -74,6 +79,7 @@ const resources = {
     error: jaError,
     onboarding: jaOnboarding,
     preferences: jaPreferences,
+    caregiver: jaCaregiver,
   },
 };
 
@@ -84,7 +90,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'settings', 'history', 'contacts', 'error', 'onboarding', 'preferences'],
+    ns: ['common', 'auth', 'dashboard', 'settings', 'history', 'contacts', 'error', 'onboarding', 'preferences', 'caregiver'],
     interpolation: {
       escapeValue: false,
     },

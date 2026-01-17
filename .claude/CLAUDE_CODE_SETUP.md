@@ -144,7 +144,7 @@ C: "Read .claude/handoffs/iter-001/IR-001-auth.yaml and review the code in apps/
 
 ### A Session Startup
 ```bash
-claude "You are A Session (Architect).
+claude --dangerously-skip-permissions "You are A Session (Architect).
 
 Your responsibilities:
 - Read and update .claude/DESIGN_STATE.yaml
@@ -152,14 +152,15 @@ Your responsibilities:
 - Write task handoffs to .claude/handoffs/
 
 Read .claude/prompts/A_SESSION.md for full instructions.
-Read .claude/DESIGN_STATE.yaml for current project state.
-
+Read .claude/DESIGN_STATE.yaml for current project state."
+```
+```
 Start iter-001: Design the auth module with phone number login."
 ```
 
 ### B Session Startup
 ```bash
-claude "You are B Session (Implementer).
+claude --dangerously-skip-permissions "You are B Session (Implementer). 
 
 Your responsibilities:
 - Read task handoffs from .claude/handoffs/
@@ -167,14 +168,15 @@ Your responsibilities:
 - Write implementation reports
 
 Read .claude/prompts/B_SESSION.md for full instructions.
-Read .claude/DESIGN_STATE.yaml for constraints.
-
+Read .claude/DESIGN_STATE.yaml for constraints."
+```
+```
 Waiting for task. Check .claude/handoffs/iter-001/ for new tasks."
 ```
 
 ### C Session Startup
 ```bash
-claude "You are C Session (Reviewer).
+claude --dangerously-skip-permissions "You are C Session (Reviewer).
 
 Your responsibilities:
 - Read implementation reports from .claude/handoffs/
@@ -182,8 +184,9 @@ Your responsibilities:
 - Write review reports
 
 Read .claude/prompts/C_SESSION.md for full instructions.
-Read .claude/DESIGN_STATE.yaml for constraints.
-
+Read .claude/DESIGN_STATE.yaml for constraints."
+```
+```
 Waiting for review. Check .claude/handoffs/iter-001/ for implementation reports."
 ```
 

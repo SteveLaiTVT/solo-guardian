@@ -1,8 +1,8 @@
 /**
  * @file auth.service.ts
  * @description Authentication service - handles login/register logic
- * @task TASK-001-C, TASK-003, TASK-004, TASK-046
- * @design_state_version 3.7.0
+ * @task TASK-001-C, TASK-003, TASK-004, TASK-046, TASK-054
+ * @design_state_version 3.8.0
  */
 import {
   Injectable,
@@ -18,6 +18,7 @@ import * as crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { AuthRepository } from './auth.repository';
 import { RegisterDto, LoginDto, AuthResult, AuthTokens } from './dto';
+import { AnalyticsService } from '../analytics';
 
 const PRISMA_UNIQUE_CONSTRAINT_ERROR = 'P2002';
 
@@ -39,6 +40,7 @@ export class AuthService implements OnModuleInit {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   // DONE(B): Validate JWT secrets on startup - TASK-004
@@ -87,6 +89,9 @@ export class AuthService implements OnModuleInit {
 
     this.logger.log(`User registered: ${user.email} (role: ${role})`);
 
+    // DONE(B): Track registration event - TASK-054
+    await this.analyticsService.trackRegister(user.id);
+
     return {
       user: {
         id: user.id,
@@ -127,6 +132,9 @@ export class AuthService implements OnModuleInit {
     });
 
     this.logger.log(`User logged in: ${user.email} (role: ${role})`);
+
+    // DONE(B): Track login event - TASK-054
+    await this.analyticsService.trackLogin(user.id);
 
     return {
       user: {

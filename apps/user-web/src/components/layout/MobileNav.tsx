@@ -1,12 +1,12 @@
 /**
  * @file MobileNav.tsx
  * @description Mobile bottom navigation component
- * @task TASK-013, TASK-016
- * @design_state_version 1.4.2
+ * @task TASK-013, TASK-016, TASK-063
+ * @design_state_version 3.8.0
  */
 import { NavLink } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { Home, History, Users, Settings } from "lucide-react"
+import { Home, History, Users, Settings, Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
@@ -18,6 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: "/", icon: Home, labelKey: "nav.home" },
   { to: "/history", icon: History, labelKey: "nav.history" },
+  { to: "/caregiver", icon: Heart, labelKey: "nav.caregiver" },
   { to: "/contacts", icon: Users, labelKey: "nav.contacts" },
   { to: "/settings", icon: Settings, labelKey: "nav.settings" },
 ]

@@ -21,9 +21,9 @@ datasource db {
 // ============================================================
 // DONE(B): Created UserRole enum for RBAC - TASK-046
 enum UserRole {
-  user        // Regular user (default)
-  caregiver   // Can care for multiple elders
-  admin       // System administrator
+  user // Regular user (default)
+  caregiver // Can care for multiple elders
+  admin // System administrator
   super_admin // Super administrator with full access
 }
 
@@ -34,9 +34,9 @@ enum UserRole {
 // ============================================================
 // DONE(B): Created UserStatus enum - TASK-046
 enum UserStatus {
-  active    // Active user
+  active // Active user
   suspended // Suspended by admin
-  deleted   // Soft deleted
+  deleted // Soft deleted
 }
 
 // ============================================================
@@ -60,8 +60,12 @@ model User {
   // DONE(B): Add alerts relation - TASK-023
   alerts            Alert[]
   // DONE(B): Add caregiver relations - TASK-046
-  caregivingFor     CaregiverRelation[] @relation("CaregiverUser")
-  caredByUsers      CaregiverRelation[] @relation("ElderUser")
+  caregivingFor     CaregiverRelation[]   @relation("CaregiverUser")
+  caredByUsers      CaregiverRelation[]   @relation("ElderUser")
+  // DONE(B): Add caretaker check-ins relation - TASK-060
+  caretakerCheckIns CheckIn[]             @relation("CaretakerCheckIns")
+  // DONE(B): Add caregiver invitations relation - TASK-057
+  invitations       CaregiverInvitation[]
 
   @@index([role])
   @@index([status])
@@ -87,18 +91,22 @@ model RefreshToken {
 
 // ============================================================
 // CheckIn Model - Daily safety check-in records
-// @task TASK-005
+// @task TASK-005, TASK-060
+// @design_state_version 3.8.0
 // ============================================================
 model CheckIn {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  checkInDate String   @map("check_in_date") // YYYY-MM-DD format
-  checkedInAt DateTime @default(now()) @map("checked_in_at")
-  note        String?  @db.VarChar(500)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                     String   @id @default(uuid())
+  userId                 String   @map("user_id")
+  checkInDate            String   @map("check_in_date") // YYYY-MM-DD format
+  checkedInAt            DateTime @default(now()) @map("checked_in_at")
+  note                   String?  @db.VarChar(500)
+  // DONE(B): Added caretaker check-in tracking - TASK-060
+  checkedInByCaretakerId String?  @map("checked_in_by_caretaker_id")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caretaker User? @relation("CaretakerCheckIns", fields: [checkedInByCaretakerId], references: [id], onDelete: SetNull)
 
   @@unique([userId, checkInDate]) // One check-in per day per user
   @@index([userId])
@@ -153,12 +161,12 @@ model EmergencyContact {
   verificationTokenExpiresAt DateTime? @map("verification_token_expires_at")
 
   // DONE(B): Added phone verification fields - TASK-036
-  phoneVerified     Boolean   @default(false) @map("phone_verified")
-  phoneOtp          String?   @map("phone_otp")
-  phoneOtpExpiresAt DateTime? @map("phone_otp_expires_at")
+  phoneVerified     Boolean             @default(false) @map("phone_verified")
+  phoneOtp          String?             @map("phone_otp")
+  phoneOtpExpiresAt DateTime?           @map("phone_otp_expires_at")
   preferredChannel  NotificationChannel @default(email) @map("preferred_channel")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   // DONE(B): Add notifications relation - TASK-023
   notifications Notification[]
 
@@ -176,32 +184,32 @@ model EmergencyContact {
 // @design_state_version 1.6.0
 // ============================================================
 model UserPreferences {
-  id                  String   @id @default(uuid())
-  userId              String   @unique @map("user_id")
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // New feature behavior
-  preferFeaturesOn    Boolean  @default(false) @map("prefer_features_on")
+  preferFeaturesOn Boolean @default(false) @map("prefer_features_on")
 
   // Visual preferences
-  fontSize            Int      @default(16) @map("font_size")
-  highContrast        Boolean  @default(false) @map("high_contrast")
-  reducedMotion       Boolean  @default(false) @map("reduced_motion")
-  warmColors          Boolean  @default(false) @map("warm_colors")
+  fontSize      Int     @default(16) @map("font_size")
+  highContrast  Boolean @default(false) @map("high_contrast")
+  reducedMotion Boolean @default(false) @map("reduced_motion")
+  warmColors    Boolean @default(false) @map("warm_colors")
 
   // Core feature toggles
-  hobbyCheckIn        Boolean  @default(false) @map("hobby_check_in")
-  familyAccess        Boolean  @default(false) @map("family_access")
+  hobbyCheckIn Boolean @default(false) @map("hobby_check_in")
+  familyAccess Boolean @default(false) @map("family_access")
 
   // Flexible optional features
-  optionalFeatures    Json     @default("{}") @map("optional_features")
+  optionalFeatures Json @default("{}") @map("optional_features")
 
   // Onboarding
-  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+  onboardingCompleted Boolean @default(false) @map("onboarding_completed")
 
   // Timestamps
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("user_preferences")
 }
@@ -214,9 +222,9 @@ model UserPreferences {
 // DONE(B): Created AlertStatus enum - TASK-023
 enum AlertStatus {
   triggered // Alert created, notifications queued
-  notified  // All notifications sent
-  resolved  // User checked in late
-  expired   // Alert expired without resolution (next day)
+  notified // All notifications sent
+  resolved // User checked in late
+  expired // Alert expired without resolution (next day)
 }
 
 // ============================================================
@@ -227,7 +235,7 @@ enum AlertStatus {
 // DONE(B): Created NotificationChannel enum - TASK-023
 enum NotificationChannel {
   email // Email notification (MVP)
-  sms   // SMS notification (future)
+  sms // SMS notification (future)
 }
 
 // ============================================================
@@ -237,10 +245,10 @@ enum NotificationChannel {
 // ============================================================
 // DONE(B): Created NotificationStatus enum - TASK-023
 enum NotificationStatus {
-  pending   // Notification queued, not yet processed
-  sent      // Notification sent to provider
+  pending // Notification queued, not yet processed
+  sent // Notification sent to provider
   delivered // Delivery confirmed (future)
-  failed    // Notification failed after retries
+  failed // Notification failed after retries
 }
 
 // ============================================================
@@ -275,16 +283,16 @@ model Alert {
 // ============================================================
 // DONE(B): Implemented Notification model - TASK-023
 model Notification {
-  id          String             @id @default(uuid())
-  alertId     String             @map("alert_id")
-  contactId   String?            @map("contact_id")
+  id          String              @id @default(uuid())
+  alertId     String              @map("alert_id")
+  contactId   String?             @map("contact_id")
   channel     NotificationChannel @default(email)
   status      NotificationStatus  @default(pending)
-  sentAt      DateTime?          @map("sent_at")
-  deliveredAt DateTime?          @map("delivered_at")
+  sentAt      DateTime?           @map("sent_at")
+  deliveredAt DateTime?           @map("delivered_at")
   error       String?
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
 
   alert   Alert             @relation(fields: [alertId], references: [id], onDelete: Cascade)
   contact EmergencyContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
@@ -296,24 +304,117 @@ model Notification {
 
 // ============================================================
 // CaregiverRelation Model - Relationship between caregiver and elders
-// @task TASK-046
-// @design_state_version 3.7.0
+// @task TASK-046, TASK-057
+// @design_state_version 3.8.0
 // ============================================================
 // DONE(B): Implemented CaregiverRelation model - TASK-046
+// DONE(B): Added relationshipType and notes - TASK-057
 model CaregiverRelation {
-  id          String    @id @default(uuid())
-  caregiverId String    @map("caregiver_id")
-  elderId     String    @map("elder_id")
-  isAccepted  Boolean   @default(false) @map("is_accepted")
-  permissions Json      @default("{}") // Flexible permissions storage
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id               String   @id @default(uuid())
+  caregiverId      String   @map("caregiver_id")
+  elderId          String   @map("elder_id")
+  isAccepted       Boolean  @default(false) @map("is_accepted")
+  relationshipType String   @default("caregiver") @map("relationship_type") // "caregiver" | "family" | "caretaker"
+  permissions      Json     @default("{}") // Flexible permissions storage
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  caregiver User @relation("CaregiverUser", fields: [caregiverId], references: [id], onDelete: Cascade)
-  elder     User @relation("ElderUser", fields: [elderId], references: [id], onDelete: Cascade)
+  caregiver User            @relation("CaregiverUser", fields: [caregiverId], references: [id], onDelete: Cascade)
+  elder     User            @relation("ElderUser", fields: [elderId], references: [id], onDelete: Cascade)
+  notes     CaregiverNote[]
 
   @@unique([caregiverId, elderId])
   @@index([caregiverId])
   @@index([elderId])
   @@map("caregiver_relations")
+}
+
+// ============================================================
+// CaregiverNote Model - Daily observations from caretakers
+// @task TASK-057
+// @design_state_version 3.8.0
+// ============================================================
+// DONE(B): Implemented CaregiverNote model - TASK-057
+model CaregiverNote {
+  id         String   @id @default(uuid())
+  relationId String   @map("relation_id")
+  content    String   @db.VarChar(1000)
+  noteDate   String   @map("note_date") // YYYY-MM-DD format
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  relation CaregiverRelation @relation(fields: [relationId], references: [id], onDelete: Cascade)
+
+  @@index([relationId])
+  @@index([noteDate])
+  @@map("caregiver_notes")
+}
+
+// ============================================================
+// CaregiverInvitation Model - QR/Email/Phone invitation tokens
+// @task TASK-057
+// @design_state_version 3.8.0
+// ============================================================
+// DONE(B): Implemented CaregiverInvitation model - TASK-057
+model CaregiverInvitation {
+  id               String    @id @default(uuid())
+  inviterId        String    @map("inviter_id")
+  relationshipType String    @map("relationship_type") // "caregiver" | "family" | "caretaker"
+  targetEmail      String?   @map("target_email")
+  targetPhone      String?   @map("target_phone")
+  token            String    @unique
+  expiresAt        DateTime  @map("expires_at")
+  acceptedAt       DateTime? @map("accepted_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  inviter User @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([inviterId])
+  @@map("caregiver_invitations")
+}
+
+// ============================================================
+// EmailTemplate Model - Email template storage (multi-language, themes)
+// @task TASK-049
+// @design_state_version 3.8.0
+// ============================================================
+// DONE(B): Implemented EmailTemplate model - TASK-049
+model EmailTemplate {
+  id          String   @id @default(uuid())
+  code        String // "alert" | "reminder" | "verification"
+  language    String   @default("en") // en, zh, ja
+  subject     String
+  htmlContent String   @map("html_content") @db.Text
+  textContent String   @map("text_content") @db.Text
+  theme       String   @default("standard") // "standard" | "warm"
+  variables   Json     @default("[]") // List of variable names: ["userName", "contactName"]
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([code, language])
+  @@index([code])
+  @@map("email_templates")
+}
+
+// ============================================================
+// SmsTemplate Model - SMS template storage (multi-language)
+// @task TASK-049
+// @design_state_version 3.8.0
+// ============================================================
+// DONE(B): Implemented SmsTemplate model - TASK-049
+model SmsTemplate {
+  id        String   @id @default(uuid())
+  code      String // "alert" | "reminder" | "verification"
+  language  String   @default("en") // en, zh, ja
+  content   String   @db.VarChar(320) // SMS length limit
+  variables Json     @default("[]") // List of variable names
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([code, language])
+  @@index([code])
+  @@map("sms_templates")
 }

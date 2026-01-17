@@ -169,3 +169,88 @@ export interface VerifyPhoneResult {
   success: boolean
   message: string
 }
+
+// Caregiver types
+export type RelationshipType = 'caregiver' | 'family' | 'caretaker'
+
+export interface ElderSummary {
+  id: string
+  name: string
+  email: string
+  lastCheckIn: string | null
+  todayStatus: 'checked_in' | 'pending' | 'overdue'
+  isAccepted: boolean
+}
+
+export interface CaregiverSummary {
+  id: string
+  name: string
+  email: string
+  isAccepted: boolean
+}
+
+export interface ElderDetail extends ElderSummary {
+  checkInSettings: {
+    deadlineTime: string
+    reminderTime: string
+    timezone: string
+  } | null
+  pendingAlerts: number
+  emergencyContacts: Array<{
+    id: string
+    name: string
+    isVerified: boolean
+  }>
+}
+
+export interface CreateInvitationRequest {
+  relationshipType: RelationshipType
+  targetEmail?: string
+  targetPhone?: string
+}
+
+export interface InvitationResponse {
+  id: string
+  token: string
+  relationshipType: RelationshipType
+  targetEmail: string | null
+  targetPhone: string | null
+  expiresAt: string
+  inviterName: string
+  qrUrl: string
+}
+
+export interface InvitationDetails {
+  id: string
+  relationshipType: RelationshipType
+  inviter: {
+    id: string
+    name: string
+    email: string
+  }
+  expiresAt: string
+  isExpired: boolean
+  isAccepted: boolean
+}
+
+export interface CaregiverNote {
+  id: string
+  content: string
+  noteDate: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateNoteRequest {
+  content: string
+  noteDate?: string
+}
+
+export interface CaretakerCheckInRequest {
+  note?: string
+}
+
+export interface CaretakerCheckInResponse {
+  checkInDate: string
+  checkedInAt: string
+}

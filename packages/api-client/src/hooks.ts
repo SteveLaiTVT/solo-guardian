@@ -19,6 +19,16 @@ import type {
   UpdatePreferencesRequest,
   SendPhoneVerificationResult,
   VerifyPhoneResult,
+  ElderSummary,
+  ElderDetail,
+  CaregiverSummary,
+  CreateInvitationRequest,
+  InvitationResponse,
+  InvitationDetails,
+  CaregiverNote,
+  CreateNoteRequest,
+  CaretakerCheckInRequest,
+  CaretakerCheckInResponse,
 } from "./types"
 
 export function createHooks(client: AxiosInstance) {
@@ -220,6 +230,85 @@ export function createHooks(client: AxiosInstance) {
         queryKey: ["oauth", "providers"],
         queryFn: () =>
           api.oauth.getProviders().then((r: AxiosResponse<{ providers: ('google' | 'apple')[] }>) => r.data),
+      }),
+
+    // Caregiver hooks
+    useElders: () =>
+      useQuery({
+        queryKey: ["caregiver", "elders"],
+        queryFn: () =>
+          api.caregiver.getElders().then((r: AxiosResponse<ElderSummary[]>) => r.data),
+      }),
+
+    useElderDetail: (elderId: string) =>
+      useQuery({
+        queryKey: ["caregiver", "elders", elderId],
+        queryFn: () =>
+          api.caregiver.getElderDetail(elderId).then((r: AxiosResponse<ElderDetail>) => r.data),
+        enabled: !!elderId,
+      }),
+
+    useCaregivers: () =>
+      useQuery({
+        queryKey: ["caregiver", "caregivers"],
+        queryFn: () =>
+          api.caregiver.getCaregivers().then((r: AxiosResponse<CaregiverSummary[]>) => r.data),
+      }),
+
+    useCreateInvitation: () => {
+      return useMutation({
+        mutationFn: (data: CreateInvitationRequest) =>
+          api.caregiver.createInvitation(data).then((r: AxiosResponse<InvitationResponse>) => r.data),
+      })
+    },
+
+    useInvitation: (token: string) =>
+      useQuery({
+        queryKey: ["caregiver", "invitations", token],
+        queryFn: () =>
+          api.caregiver.getInvitation(token).then((r: AxiosResponse<InvitationDetails>) => r.data),
+        enabled: !!token,
+      }),
+
+    useAcceptInvitation: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (token: string) =>
+          api.caregiver.acceptInvitation(token).then((r: AxiosResponse<{ message: string }>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["caregiver"] })
+        },
+      })
+    },
+
+    useCheckInOnBehalf: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: ({ elderId, data }: { elderId: string; data?: CaretakerCheckInRequest }) =>
+          api.caregiver.checkInOnBehalf(elderId, data).then((r: AxiosResponse<CaretakerCheckInResponse>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["caregiver", "elders"] })
+        },
+      })
+    },
+
+    useAddNote: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: ({ elderId, data }: { elderId: string; data: CreateNoteRequest }) =>
+          api.caregiver.addNote(elderId, data).then((r: AxiosResponse<CaregiverNote>) => r.data),
+        onSuccess: (_data, variables) => {
+          void queryClient.invalidateQueries({ queryKey: ["caregiver", "elders", variables.elderId, "notes"] })
+        },
+      })
+    },
+
+    useElderNotes: (elderId: string) =>
+      useQuery({
+        queryKey: ["caregiver", "elders", elderId, "notes"],
+        queryFn: () =>
+          api.caregiver.getNotes(elderId).then((r: AxiosResponse<CaregiverNote[]>) => r.data),
+        enabled: !!elderId,
       }),
   }
 }

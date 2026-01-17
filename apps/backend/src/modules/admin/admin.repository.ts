@@ -1,8 +1,8 @@
 /**
  * @file admin.repository.ts
  * @description Admin repository for database operations
- * @task TASK-046
- * @design_state_version 3.7.0
+ * @task TASK-046, TASK-055
+ * @design_state_version 3.8.0
  * @note Uses fallback values for role/status until migration runs
  */
 import { Injectable } from '@nestjs/common';
@@ -236,5 +236,89 @@ export class AdminRepository {
     }
 
     return growth;
+  }
+
+  // DONE(B): Get at-risk users with consecutive missed check-ins - TASK-055
+  async getAtRiskUsers(minConsecutiveMisses: number = 2): Promise<Array<{
+    id: string;
+    email: string;
+    name: string;
+    consecutiveMisses: number;
+    lastCheckIn: string | null;
+    emergencyContactsCount: number;
+  }>> {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    // Get all users with their recent check-ins
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        checkIns: {
+          orderBy: { checkInDate: 'desc' },
+          take: 10,
+          select: { checkInDate: true },
+        },
+        checkInSettings: {
+          select: { deadlineTime: true, timezone: true },
+        },
+        _count: {
+          select: { emergencyContacts: true },
+        },
+      },
+    });
+
+    const atRiskUsers: Array<{
+      id: string;
+      email: string;
+      name: string;
+      consecutiveMisses: number;
+      lastCheckIn: string | null;
+      emergencyContactsCount: number;
+    }> = [];
+
+    for (const user of users) {
+      if (!user.checkInSettings) continue;
+
+      const checkInDates = new Set(user.checkIns.map((c) => c.checkInDate));
+      let consecutiveMisses = 0;
+
+      // Check backwards from today
+      for (let i = 0; i < 10; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(checkDate.getDate() - i);
+        const dateStr = checkDate.toISOString().split('T')[0];
+
+        // Skip today if deadline hasn't passed
+        if (i === 0) {
+          const [hour, minute] = user.checkInSettings.deadlineTime.split(':').map(Number);
+          const now = new Date();
+          const deadline = new Date();
+          deadline.setHours(hour, minute, 0, 0);
+          if (now < deadline) continue;
+        }
+
+        if (checkInDates.has(dateStr)) {
+          break;
+        }
+        consecutiveMisses++;
+      }
+
+      if (consecutiveMisses >= minConsecutiveMisses) {
+        atRiskUsers.push({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          consecutiveMisses,
+          lastCheckIn: user.checkIns[0]?.checkInDate || null,
+          emergencyContactsCount: user._count.emergencyContacts,
+        });
+      }
+    }
+
+    // Sort by consecutive misses descending
+    return atRiskUsers.sort((a, b) => b.consecutiveMisses - a.consecutiveMisses);
   }
 }
