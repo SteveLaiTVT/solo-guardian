@@ -8,4 +8,5 @@ export { LoginPage } from './LoginPage';
 export { DashboardPage } from './DashboardPage';
 export { UsersPage } from './UsersPage';
 export { AlertsPage } from './AlertsPage';
+export { TemplatesPage } from './TemplatesPage';
 export { SettingsPage } from './SettingsPage';

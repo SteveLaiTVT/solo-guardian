@@ -13,6 +13,7 @@ import {
   DashboardPage,
   UsersPage,
   AlertsPage,
+  TemplatesPage,
   SettingsPage,
 } from '@/pages';
 
@@ -32,6 +33,7 @@ export default function App(): React.ReactElement {
           <Route index element={<DashboardPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="alerts" element={<AlertsPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />

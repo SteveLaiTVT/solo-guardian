@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Table, Card, Select, Tag, Typography, Space } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import { adminApiEndpoints, AlertSummary } from '@/lib/api';
+import { adminApiEndpoints } from '@/lib/api';
 
 const { Title } = Typography;
 

@@ -14,6 +14,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  MailOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAdminAuthStore } from '@/stores/auth.store';
@@ -35,6 +36,11 @@ const menuItems = [
     key: '/admin/alerts',
     icon: <AlertOutlined />,
     label: 'Alerts',
+  },
+  {
+    key: '/admin/templates',
+    icon: <MailOutlined />,
+    label: 'Templates',
   },
   {
     key: '/admin/settings',

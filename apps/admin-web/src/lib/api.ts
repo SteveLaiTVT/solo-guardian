@@ -71,6 +71,38 @@ export const adminApiEndpoints = {
   // Alert management
   getAlerts: (params: AlertListParams): Promise<{ data: AlertListResponse }> =>
     adminApi.get('/admin/alerts', { params }),
+
+  // Email template management
+  getEmailTemplates: (): Promise<{ data: { data: EmailTemplate[] } }> =>
+    adminApi.get('/admin/templates/email'),
+
+  getEmailTemplate: (id: string): Promise<{ data: { data: EmailTemplate } }> =>
+    adminApi.get(`/admin/templates/email/${id}`),
+
+  createEmailTemplate: (data: CreateEmailTemplateDto): Promise<{ data: { data: EmailTemplate } }> =>
+    adminApi.post('/admin/templates/email', data),
+
+  updateEmailTemplate: (id: string, data: UpdateEmailTemplateDto): Promise<{ data: { data: EmailTemplate } }> =>
+    adminApi.put(`/admin/templates/email/${id}`, data),
+
+  deleteEmailTemplate: (id: string): Promise<void> =>
+    adminApi.delete(`/admin/templates/email/${id}`),
+
+  // SMS template management
+  getSmsTemplates: (): Promise<{ data: { data: SmsTemplate[] } }> =>
+    adminApi.get('/admin/templates/sms'),
+
+  getSmsTemplate: (id: string): Promise<{ data: { data: SmsTemplate } }> =>
+    adminApi.get(`/admin/templates/sms/${id}`),
+
+  createSmsTemplate: (data: CreateSmsTemplateDto): Promise<{ data: { data: SmsTemplate } }> =>
+    adminApi.post('/admin/templates/sms', data),
+
+  updateSmsTemplate: (id: string, data: UpdateSmsTemplateDto): Promise<{ data: { data: SmsTemplate } }> =>
+    adminApi.put(`/admin/templates/sms/${id}`, data),
+
+  deleteSmsTemplate: (id: string): Promise<void> =>
+    adminApi.delete(`/admin/templates/sms/${id}`),
 };
 
 // Types
@@ -140,4 +172,61 @@ export interface AlertSummary {
   status: string;
   triggeredAt: string;
   resolvedAt: string | null;
+}
+
+// Email template types
+export interface EmailTemplate {
+  id: string;
+  code: string;
+  language: string;
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  theme: string;
+  variables: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEmailTemplateDto {
+  code: string;
+  language: string;
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  theme?: string;
+  variables?: string[];
+}
+
+export interface UpdateEmailTemplateDto {
+  subject?: string;
+  htmlContent?: string;
+  textContent?: string;
+  theme?: string;
+  variables?: string[];
+  isActive?: boolean;
+}
+
+// SMS template types
+export interface SmsTemplate {
+  id: string;
+  code: string;
+  language: string;
+  content: string;
+  variables: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSmsTemplateDto {
+  code: string;
+  language: string;
+  content: string;
+  variables?: string[];
+}
+
+export interface UpdateSmsTemplateDto {
+  content?: string;
+  variables?: string[];
 }
