@@ -1,8 +1,8 @@
 /**
  * @file alert.service.ts
  * @description Alert Service - Business logic for alerts
- * @task TASK-027
- * @design_state_version 1.8.0
+ * @task TASK-027, TASK-070
+ * @design_state_version 3.9.0
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -174,5 +174,14 @@ export class AlertService implements OnModuleInit {
     }
 
     return expirableAlerts.length;
+  }
+
+  async getActiveAlertsForUser(userId: string): Promise<Alert[]> {
+    return this.alertRepository.findActiveAlertsByUserId(userId);
+  }
+
+  async hasActiveAlerts(userId: string): Promise<boolean> {
+    const alerts = await this.alertRepository.findActiveAlertsByUserId(userId);
+    return alerts.length > 0;
   }
 }

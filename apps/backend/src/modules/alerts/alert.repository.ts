@@ -1,8 +1,8 @@
 /**
  * @file alert.repository.ts
  * @description Alert Repository - Database operations for alerts
- * @task TASK-027
- * @design_state_version 1.8.0
+ * @task TASK-027, TASK-070
+ * @design_state_version 3.9.0
  */
 
 import { Injectable } from '@nestjs/common';
@@ -137,6 +137,16 @@ export class AlertRepository {
         alertDate: { lt: beforeDate },
         status: { in: ['triggered', 'notified'] },
       },
+    });
+  }
+
+  async findActiveAlertsByUserId(userId: string): Promise<Alert[]> {
+    return this.prisma.alert.findMany({
+      where: {
+        userId,
+        status: { in: ['triggered', 'notified'] },
+      },
+      orderBy: { triggeredAt: 'desc' },
     });
   }
 }
