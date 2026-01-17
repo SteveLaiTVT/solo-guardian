@@ -1,8 +1,8 @@
 /**
  * @file app.module.ts
  * @description Root application module
- * @task TASK-000-5, TASK-006, TASK-015, TASK-021, TASK-024, TASK-028
- * @design_state_version 1.8.0
+ * @task TASK-000-5, TASK-006, TASK-015, TASK-021, TASK-024, TASK-028, TASK-046
+ * @design_state_version 3.7.0
  */
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -20,6 +20,10 @@ import { AlertModule } from './modules/alerts';
 import { NotificationModule } from './modules/notifications';
 import { DetectorModule } from './modules/detector';
 import { HealthModule } from './modules/health';
+// DONE(B): Import AdminModule for admin dashboard - TASK-046
+import { AdminModule } from './modules/admin';
+// NOTE(B): CaregiverModule requires migration - uncomment after migration runs
+// import { CaregiverModule } from './modules/caregiver';
 
 @Module({
   imports: [
@@ -43,6 +47,10 @@ import { HealthModule } from './modules/health';
     DetectorModule,
     // Health check endpoint for monitoring
     HealthModule,
+    // DONE(B): Add AdminModule for admin dashboard - TASK-046
+    AdminModule,
+    // NOTE(B): CaregiverModule requires migration - uncomment after migration runs
+    // CaregiverModule,
   ],
 })
 export class AppModule {}

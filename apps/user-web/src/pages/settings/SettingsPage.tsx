@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TimePicker } from '@/components/ui/TimePicker'
 import { Label } from '@/components/ui/label'
-import { FeaturesSection, VisualSection } from '@/components/settings'
+import { FeaturesSection, VisualSection, ElderModeSection } from '@/components/settings'
 
 // DONE(B): Helper to convert time string to minutes for comparison - TASK-030
 function timeToMinutes(time: string): number {
@@ -170,6 +170,8 @@ export function SettingsPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+
+      <ElderModeSection />
 
       <FeaturesSection />
 

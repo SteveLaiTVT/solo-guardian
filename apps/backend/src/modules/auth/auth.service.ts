@@ -1,8 +1,8 @@
 /**
  * @file auth.service.ts
  * @description Authentication service - handles login/register logic
- * @task TASK-001-C, TASK-003, TASK-004
- * @design_state_version 0.6.0
+ * @task TASK-001-C, TASK-003, TASK-004, TASK-046
+ * @design_state_version 3.7.0
  */
 import {
   Injectable,
@@ -26,6 +26,9 @@ const ACCESS_TOKEN_EXPIRES_IN = '15m';
 const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 const REFRESH_TOKEN_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Role type for auth (matches schema when migration runs)
+type UserRoleType = 'user' | 'caregiver' | 'admin' | 'super_admin';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -70,7 +73,10 @@ export class AuthService implements OnModuleInit {
       throw error;
     }
 
-    const tokens = await this.generateTokens(user.id);
+    // DONE(B): Include role in token generation - TASK-046
+    // Use default role until migration runs
+    const role: UserRoleType = 'user';
+    const tokens = await this.generateTokens(user.id, role);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
 
     await this.authRepository.saveRefreshToken({
@@ -79,13 +85,14 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    this.logger.log(`User registered: ${user.email}`);
+    this.logger.log(`User registered: ${user.email} (role: ${role})`);
 
     return {
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: role,
         createdAt: user.createdAt,
       },
       tokens,
@@ -108,7 +115,10 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id);
+    // DONE(B): Include role in token generation - TASK-046
+    // Use default role until migration runs
+    const role: UserRoleType = 'user';
+    const tokens = await this.generateTokens(user.id, role);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
 
     await this.authRepository.saveRefreshToken({
@@ -117,13 +127,14 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    this.logger.log(`User logged in: ${user.email}`);
+    this.logger.log(`User logged in: ${user.email} (role: ${role})`);
 
     return {
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: role,
         createdAt: user.createdAt,
       },
       tokens,
@@ -141,7 +152,10 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    const tokens = await this.generateTokens(consumedToken.user.id);
+    // DONE(B): Include role in token generation - TASK-046
+    // Use default role until migration runs
+    const role: UserRoleType = 'user';
+    const tokens = await this.generateTokens(consumedToken.user.id, role);
     const newTokenHash = this.hashRefreshToken(tokens.refreshToken);
 
     await this.authRepository.saveRefreshToken({
@@ -157,6 +171,7 @@ export class AuthService implements OnModuleInit {
         id: consumedToken.user.id,
         email: consumedToken.user.email,
         name: consumedToken.user.name,
+        role: role,
         createdAt: consumedToken.user.createdAt,
       },
       tokens,
@@ -201,7 +216,11 @@ export class AuthService implements OnModuleInit {
     return bcrypt.compare(password, hash);
   }
 
-  private async generateTokens(userId: string): Promise<AuthTokens> {
+  // DONE(B): Updated to include role in JWT - TASK-046
+  private async generateTokens(
+    userId: string,
+    role: UserRoleType = 'user',
+  ): Promise<AuthTokens> {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
 
@@ -210,7 +229,7 @@ export class AuthService implements OnModuleInit {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId },
+        { sub: userId, role },
         { secret: accessSecret, expiresIn: ACCESS_TOKEN_EXPIRES_IN },
       ),
       this.jwtService.signAsync(

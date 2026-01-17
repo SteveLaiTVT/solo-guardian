@@ -1,11 +1,12 @@
 // ============================================================
 // Prisma Schema for Solo Guardian
-// @task TASK-001-A, TASK-005, TASK-014, TASK-020, TASK-023
-// @design_state_version 1.8.0
+// @task TASK-001-A, TASK-005, TASK-014, TASK-020, TASK-023, TASK-046
+// @design_state_version 3.7.0
 // ============================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -14,15 +15,42 @@ datasource db {
 }
 
 // ============================================================
+// UserRole Enum - User roles for RBAC
+// @task TASK-046
+// @design_state_version 3.7.0
+// ============================================================
+// DONE(B): Created UserRole enum for RBAC - TASK-046
+enum UserRole {
+  user        // Regular user (default)
+  caregiver   // Can care for multiple elders
+  admin       // System administrator
+  super_admin // Super administrator with full access
+}
+
+// ============================================================
+// UserStatus Enum - User account status
+// @task TASK-046
+// @design_state_version 3.7.0
+// ============================================================
+// DONE(B): Created UserStatus enum - TASK-046
+enum UserStatus {
+  active    // Active user
+  suspended // Suspended by admin
+  deleted   // Soft deleted
+}
+
+// ============================================================
 // User Model
 // ============================================================
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
   name         String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  role         UserRole   @default(user)
+  status       UserStatus @default(active)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   refreshTokens     RefreshToken[]
   checkIns          CheckIn[]
@@ -31,7 +59,12 @@ model User {
   preferences       UserPreferences?
   // DONE(B): Add alerts relation - TASK-023
   alerts            Alert[]
+  // DONE(B): Add caregiver relations - TASK-046
+  caregivingFor     CaregiverRelation[] @relation("CaregiverUser")
+  caredByUsers      CaregiverRelation[] @relation("ElderUser")
 
+  @@index([role])
+  @@index([status])
   @@map("users")
 }
 
@@ -259,4 +292,28 @@ model Notification {
   @@index([alertId])
   @@index([status])
   @@map("notifications")
+}
+
+// ============================================================
+// CaregiverRelation Model - Relationship between caregiver and elders
+// @task TASK-046
+// @design_state_version 3.7.0
+// ============================================================
+// DONE(B): Implemented CaregiverRelation model - TASK-046
+model CaregiverRelation {
+  id          String    @id @default(uuid())
+  caregiverId String    @map("caregiver_id")
+  elderId     String    @map("elder_id")
+  isAccepted  Boolean   @default(false) @map("is_accepted")
+  permissions Json      @default("{}") // Flexible permissions storage
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  caregiver User @relation("CaregiverUser", fields: [caregiverId], references: [id], onDelete: Cascade)
+  elder     User @relation("ElderUser", fields: [elderId], references: [id], onDelete: Cascade)
+
+  @@unique([caregiverId, elderId])
+  @@index([caregiverId])
+  @@index([elderId])
+  @@map("caregiver_relations")
 }
