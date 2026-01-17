@@ -21,7 +21,6 @@ import {
   Popconfirm,
   Switch,
   Tooltip,
-  Divider,
   Alert,
 } from 'antd';
 import {
@@ -151,6 +150,7 @@ export function TemplatesPage(): React.ReactElement {
   const [smsForm] = Form.useForm();
   const [selectedCode, setSelectedCode] = useState<string>('alert');
   const [emailContent, setEmailContent] = useState<string>('');
+  const [emailSubject, setEmailSubject] = useState<string>('');
   const [smsContent, setSmsContent] = useState<string>('');
 
   const currentVariables = useMemo(() => {
@@ -276,6 +276,7 @@ export function TemplatesPage(): React.ReactElement {
     setEditingEmail(template);
     setSelectedCode(template.code);
     setEmailContent(template.htmlContent);
+    setEmailSubject(template.subject);
     emailForm.setFieldsValue({
       subject: template.subject,
       theme: template.theme,
@@ -494,6 +495,7 @@ export function TemplatesPage(): React.ReactElement {
                   setEditingEmail(null);
                   setSelectedCode('alert');
                   setEmailContent('');
+                  setEmailSubject('');
                   emailForm.resetFields();
                   setEmailModalOpen(true);
                 }}
@@ -562,7 +564,7 @@ export function TemplatesPage(): React.ReactElement {
 
       <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
 
-      {/* Email Template Modal */}
+      {/* Email Template Modal - Split View */}
       <Modal
         title={editingEmail ? 'Edit Email Template' : 'Create Email Template'}
         open={emailModalOpen}
@@ -571,100 +573,158 @@ export function TemplatesPage(): React.ReactElement {
           setEditingEmail(null);
           emailForm.resetFields();
           setEmailContent('');
+          setEmailSubject('');
         }}
         footer={null}
-        width={900}
-        styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
+        width={1200}
+        styles={{ body: { padding: 0 } }}
       >
-        <Form
-          form={emailForm}
-          layout="vertical"
-          onFinish={handleEmailSubmit}
-        >
-          {!editingEmail && (
-            <Space style={{ width: '100%', marginBottom: 16 }} size="large">
+        <div style={{ display: 'flex', height: '75vh' }}>
+          {/* Left: Editor */}
+          <div style={{ flex: 1, padding: 24, overflowY: 'auto', borderRight: '1px solid #f0f0f0' }}>
+            <Form
+              form={emailForm}
+              layout="vertical"
+              onFinish={handleEmailSubmit}
+            >
+              {!editingEmail && (
+                <Space style={{ width: '100%', marginBottom: 16 }} size="middle" wrap>
+                  <Form.Item
+                    name="code"
+                    label="Template Type"
+                    rules={[{ required: true }]}
+                    style={{ marginBottom: 0, minWidth: 200 }}
+                  >
+                    <Select
+                      options={TEMPLATE_CODES.map(t => ({ value: t.value, label: t.label }))}
+                      placeholder="Select type"
+                      onChange={(value) => setSelectedCode(value)}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="language"
+                    label="Language"
+                    rules={[{ required: true }]}
+                    style={{ marginBottom: 0, minWidth: 120 }}
+                  >
+                    <Select options={LANGUAGES} placeholder="Select" />
+                  </Form.Item>
+                  <Form.Item
+                    name="theme"
+                    label="Theme"
+                    style={{ marginBottom: 0, minWidth: 140 }}
+                    initialValue="standard"
+                  >
+                    <Select options={THEMES} />
+                  </Form.Item>
+                </Space>
+              )}
+
+              {editingEmail && (
+                <Space style={{ marginBottom: 16 }}>
+                  <Tag color="blue">{TEMPLATE_CODES.find(t => t.value === editingEmail.code)?.label}</Tag>
+                  <Tag>{LANGUAGES.find(l => l.value === editingEmail.language)?.label}</Tag>
+                  <Form.Item name="isActive" valuePropName="checked" style={{ marginBottom: 0 }}>
+                    <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+                  </Form.Item>
+                </Space>
+              )}
+
+              {renderVariablePicker('email')}
+
               <Form.Item
-                name="code"
-                label="Template Type"
-                rules={[{ required: true }]}
-                style={{ marginBottom: 0, width: 250 }}
+                name="subject"
+                label="Email Subject"
+                rules={[{ required: true, message: 'Please enter subject' }]}
               >
-                <Select
-                  options={TEMPLATE_CODES.map(t => ({ value: t.value, label: t.label }))}
-                  placeholder="Select type"
-                  onChange={(value) => setSelectedCode(value)}
+                <Input
+                  placeholder="Enter subject (use {{userName}} for variables)"
+                  onChange={(e) => setEmailSubject(e.target.value)}
                 />
               </Form.Item>
-              <Form.Item
-                name="language"
-                label="Language"
-                rules={[{ required: true }]}
-                style={{ marginBottom: 0, width: 150 }}
-              >
-                <Select options={LANGUAGES} placeholder="Select" />
+
+              <Form.Item label="Email Content" required>
+                <div style={{ border: '1px solid #d9d9d9', borderRadius: 6 }}>
+                  <ReactQuill
+                    theme="snow"
+                    value={emailContent}
+                    onChange={setEmailContent}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    style={{ minHeight: 200 }}
+                    placeholder="Compose your email here..."
+                  />
+                </div>
               </Form.Item>
-              <Form.Item
-                name="theme"
-                label="Theme"
-                style={{ marginBottom: 0, width: 150 }}
-                initialValue="standard"
-              >
-                <Select options={THEMES} />
+
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit">
+                    {editingEmail ? 'Update Template' : 'Create Template'}
+                  </Button>
+                  <Button onClick={() => setEmailModalOpen(false)}>Cancel</Button>
+                </Space>
               </Form.Item>
-            </Space>
-          )}
+            </Form>
+          </div>
 
-          {editingEmail && (
-            <Space style={{ marginBottom: 16 }}>
-              <Tag color="blue">{TEMPLATE_CODES.find(t => t.value === editingEmail.code)?.label}</Tag>
-              <Tag>{LANGUAGES.find(l => l.value === editingEmail.language)?.label}</Tag>
-              <Form.Item name="isActive" valuePropName="checked" style={{ marginBottom: 0 }}>
-                <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
-              </Form.Item>
-            </Space>
-          )}
-
-          <Divider />
-
-          {renderVariablePicker('email')}
-
-          <Form.Item
-            name="subject"
-            label="Email Subject"
-            rules={[{ required: true, message: 'Please enter subject' }]}
-          >
-            <Input placeholder="Enter email subject (you can use variables like {{userName}})" />
-          </Form.Item>
-
-          <Form.Item label="Email Content" required>
-            <div style={{ border: '1px solid #d9d9d9', borderRadius: 6 }}>
-              <ReactQuill
-                theme="snow"
-                value={emailContent}
-                onChange={setEmailContent}
-                modules={quillModules}
-                formats={quillFormats}
-                style={{ minHeight: 250 }}
-                placeholder="Compose your email here. Use the toolbar to format text, or insert variables from above."
-              />
+          {/* Right: Live Preview */}
+          <div style={{ flex: 1, padding: 24, overflowY: 'auto', background: '#fafafa' }}>
+            <div style={{ marginBottom: 16 }}>
+              <Tag color="green">Live Preview</Tag>
+              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                Variables shown with example values
+              </Text>
             </div>
-            <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: 'block' }}>
-              Plain text version will be auto-generated from your content.
-            </Text>
-          </Form.Item>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                {editingEmail ? 'Update Template' : 'Create Template'}
-              </Button>
-              <Button onClick={() => setEmailModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
+            <Card size="small" style={{ marginBottom: 16 }}>
+              <Text strong>Subject: </Text>
+              <Text>
+                {(() => {
+                  let subject = emailSubject || 'Your email subject here...';
+                  currentVariables.forEach(v => {
+                    subject = subject.replace(
+                      new RegExp(`{{${v.key}}}`, 'g'),
+                      v.example
+                    );
+                  });
+                  return subject;
+                })()}
+              </Text>
+            </Card>
+
+            <Card
+              title="Email Body"
+              size="small"
+              styles={{ body: { background: '#fff', minHeight: 300 } }}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: (() => {
+                    let html = emailContent || '<p style="color:#999">Start typing to see preview...</p>';
+                    currentVariables.forEach(v => {
+                      html = html.replace(
+                        new RegExp(`{{${v.key}}}`, 'g'),
+                        `<span style="background:#e6f7ff;padding:1px 4px;border-radius:2px;color:#1890ff">${v.example}</span>`
+                      );
+                    });
+                    return html;
+                  })()
+                }}
+              />
+            </Card>
+
+            <Alert
+              type="info"
+              message="Blue highlighted text shows where variables will be replaced with real data."
+              style={{ marginTop: 16 }}
+              showIcon
+            />
+          </div>
+        </div>
       </Modal>
 
-      {/* SMS Template Modal */}
+      {/* SMS Template Modal - Split View */}
       <Modal
         title={editingSms ? 'Edit SMS Template' : 'Create SMS Template'}
         open={smsModalOpen}
@@ -675,69 +735,129 @@ export function TemplatesPage(): React.ReactElement {
           setSmsContent('');
         }}
         footer={null}
-        width={700}
+        width={900}
+        styles={{ body: { padding: 0 } }}
       >
-        <Form
-          form={smsForm}
-          layout="vertical"
-          onFinish={handleSmsSubmit}
-        >
-          {!editingSms && (
-            <Space style={{ width: '100%', marginBottom: 16 }} size="large">
-              <Form.Item
-                name="code"
-                label="Template Type"
-                rules={[{ required: true }]}
-                style={{ marginBottom: 0, width: 250 }}
-              >
-                <Select
-                  options={TEMPLATE_CODES.map(t => ({ value: t.value, label: t.label }))}
-                  placeholder="Select type"
-                  onChange={(value) => setSelectedCode(value)}
+        <div style={{ display: 'flex', minHeight: 400 }}>
+          {/* Left: Editor */}
+          <div style={{ flex: 1, padding: 24, borderRight: '1px solid #f0f0f0' }}>
+            <Form
+              form={smsForm}
+              layout="vertical"
+              onFinish={handleSmsSubmit}
+            >
+              {!editingSms && (
+                <Space style={{ width: '100%', marginBottom: 16 }} size="middle" wrap>
+                  <Form.Item
+                    name="code"
+                    label="Template Type"
+                    rules={[{ required: true }]}
+                    style={{ marginBottom: 0, minWidth: 200 }}
+                  >
+                    <Select
+                      options={TEMPLATE_CODES.map(t => ({ value: t.value, label: t.label }))}
+                      placeholder="Select type"
+                      onChange={(value) => setSelectedCode(value)}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="language"
+                    label="Language"
+                    rules={[{ required: true }]}
+                    style={{ marginBottom: 0, minWidth: 120 }}
+                  >
+                    <Select options={LANGUAGES} placeholder="Select" />
+                  </Form.Item>
+                </Space>
+              )}
+
+              {editingSms && (
+                <Space style={{ marginBottom: 16 }}>
+                  <Tag color="blue">{TEMPLATE_CODES.find(t => t.value === editingSms.code)?.label}</Tag>
+                  <Tag>{LANGUAGES.find(l => l.value === editingSms.language)?.label}</Tag>
+                </Space>
+              )}
+
+              {renderVariablePicker('sms')}
+
+              <Form.Item label="SMS Content" required>
+                <TextArea
+                  value={smsContent}
+                  onChange={(e) => setSmsContent(e.target.value)}
+                  rows={6}
+                  maxLength={320}
+                  showCount
+                  placeholder="Enter SMS message (max 320 characters)"
                 />
               </Form.Item>
-              <Form.Item
-                name="language"
-                label="Language"
-                rules={[{ required: true }]}
-                style={{ marginBottom: 0, width: 150 }}
-              >
-                <Select options={LANGUAGES} placeholder="Select" />
+
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit">
+                    {editingSms ? 'Update Template' : 'Create Template'}
+                  </Button>
+                  <Button onClick={() => setSmsModalOpen(false)}>Cancel</Button>
+                </Space>
               </Form.Item>
-            </Space>
-          )}
+            </Form>
+          </div>
 
-          {editingSms && (
-            <Space style={{ marginBottom: 16 }}>
-              <Tag color="blue">{TEMPLATE_CODES.find(t => t.value === editingSms.code)?.label}</Tag>
-              <Tag>{LANGUAGES.find(l => l.value === editingSms.language)?.label}</Tag>
-            </Space>
-          )}
+          {/* Right: Live Preview */}
+          <div style={{ flex: 1, padding: 24, background: '#fafafa' }}>
+            <div style={{ marginBottom: 16 }}>
+              <Tag color="green">Live Preview</Tag>
+              <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                How the SMS will appear
+              </Text>
+            </div>
 
-          <Divider />
+            {/* Phone mockup */}
+            <div style={{
+              maxWidth: 300,
+              margin: '0 auto',
+              background: '#fff',
+              borderRadius: 24,
+              padding: 16,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '8px solid #333',
+            }}>
+              <div style={{
+                background: '#e5e5ea',
+                borderRadius: 12,
+                padding: 12,
+                fontSize: 14,
+                lineHeight: 1.5,
+                minHeight: 100,
+              }}>
+                {(() => {
+                  let text = smsContent || 'Your SMS message will appear here...';
+                  currentVariables.forEach(v => {
+                    text = text.replace(
+                      new RegExp(`{{${v.key}}}`, 'g'),
+                      v.example
+                    );
+                  });
+                  return text;
+                })()}
+              </div>
+              <div style={{
+                textAlign: 'center',
+                marginTop: 12,
+                color: '#666',
+                fontSize: 12,
+              }}>
+                {smsContent.length}/320 characters
+              </div>
+            </div>
 
-          {renderVariablePicker('sms')}
-
-          <Form.Item label="SMS Content" required>
-            <TextArea
-              value={smsContent}
-              onChange={(e) => setSmsContent(e.target.value)}
-              rows={4}
-              maxLength={320}
-              showCount
-              placeholder="Enter SMS message (max 320 characters). Use variables like {{userName}}."
+            <Alert
+              type="info"
+              message="Keep SMS messages short and clear. Variables will be replaced with real user data."
+              style={{ marginTop: 24 }}
+              showIcon
             />
-          </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                {editingSms ? 'Update Template' : 'Create Template'}
-              </Button>
-              <Button onClick={() => setSmsModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
+          </div>
+        </div>
       </Modal>
 
       {/* Preview Modal */}
