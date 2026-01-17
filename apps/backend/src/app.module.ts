@@ -22,8 +22,8 @@ import { DetectorModule } from './modules/detector';
 import { HealthModule } from './modules/health';
 // DONE(B): Import AdminModule for admin dashboard - TASK-046
 import { AdminModule } from './modules/admin';
-// NOTE(B): CaregiverModule requires migration - uncomment after migration runs
-// import { CaregiverModule } from './modules/caregiver';
+// DONE(B): Import CaregiverModule - TASK-046 (enabled after migration)
+import { CaregiverModule } from './modules/caregiver';
 
 @Module({
   imports: [
@@ -49,8 +49,8 @@ import { AdminModule } from './modules/admin';
     HealthModule,
     // DONE(B): Add AdminModule for admin dashboard - TASK-046
     AdminModule,
-    // NOTE(B): CaregiverModule requires migration - uncomment after migration runs
-    // CaregiverModule,
+    // DONE(B): Add CaregiverModule - TASK-046 (enabled)
+    CaregiverModule,
   ],
 })
 export class AppModule {}

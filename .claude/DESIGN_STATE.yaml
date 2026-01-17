@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.7.0"
+  version: "3.8.0"
   updated_at: "2026-01-17"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Admin Dashboard & RBAC"
+  milestone: "Admin Dashboard Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -105,7 +105,10 @@ modules:
         completed_iteration: "iter-011"
       - name: "Role-Based Access Control (RBAC)"
         priority: "P0"
-        status: "pending"
+        status: "done"
+        started_iteration: "iter-013"
+        completed_iteration: "iter-013"
+        description: "UserRole enum, RolesGuard, AdminOnly decorator"
 
   user:
     status: "pending"
@@ -507,6 +510,96 @@ modules:
         description: "Run E2E tests in GitHub Actions"
         completed_task: "TASK-045"
 
+  admin_dashboard:
+    status: "done"
+    owner: "B Session"
+    description: "Admin web application for system management"
+    started_iteration: "iter-013"
+    completed_iteration: "iter-013"
+    skeleton_created: true
+    skeleton_version: "3.8.0"
+    features:
+      - name: "Admin Login"
+        priority: "P0"
+        status: "done"
+        description: "Admin-only login with role check"
+        completed_task: "TASK-046"
+      - name: "Dashboard Stats"
+        priority: "P0"
+        status: "done"
+        description: "Total users, active users, today check-ins, pending alerts"
+        completed_task: "TASK-046"
+      - name: "User Management"
+        priority: "P0"
+        status: "done"
+        description: "List, view detail, update status (active/suspended)"
+        completed_task: "TASK-046"
+      - name: "Alert Management"
+        priority: "P0"
+        status: "done"
+        description: "View and filter alerts"
+        completed_task: "TASK-046"
+      - name: "Admin Layout"
+        priority: "P0"
+        status: "done"
+        description: "Sidebar navigation, responsive layout"
+        completed_task: "TASK-046"
+
+  elder_mode:
+    status: "done"
+    owner: "B Session"
+    description: "Elder-friendly visual preset settings"
+    started_iteration: "iter-013"
+    completed_iteration: "iter-013"
+    skeleton_created: true
+    skeleton_version: "3.8.0"
+    features:
+      - name: "Quick Mode Presets"
+        priority: "P0"
+        status: "done"
+        description: "One-click apply elder-friendly or standard mode"
+        completed_task: "TASK-046"
+      - name: "Elder Mode Settings"
+        priority: "P0"
+        status: "done"
+        description: "Large text (22px), high contrast, reduced motion"
+        completed_task: "TASK-046"
+      - name: "E2E Tests"
+        priority: "P1"
+        status: "done"
+        description: "elder-mode.spec.ts for testing presets"
+        completed_task: "TASK-046"
+
+  caregiver:
+    status: "done"
+    owner: "B Session"
+    description: "Caregiver-elder relationship management"
+    started_iteration: "iter-013"
+    completed_iteration: "iter-013"
+    skeleton_created: true
+    skeleton_version: "3.8.0"
+    features:
+      - name: "Caregiver Relation Schema"
+        priority: "P0"
+        status: "done"
+        description: "CaregiverRelation model in Prisma schema"
+        completed_task: "TASK-046"
+      - name: "Frontend Components"
+        priority: "P0"
+        status: "done"
+        description: "CaregiverSection, EldersList, InviteElderDialog"
+        completed_task: "TASK-046"
+      - name: "Backend Module"
+        priority: "P0"
+        status: "done"
+        description: "CaregiverModule enabled in app.module.ts"
+        completed_task: "TASK-046"
+      - name: "E2E Tests"
+        priority: "P1"
+        status: "done"
+        description: "caregiver.spec.ts placeholder tests"
+        completed_task: "TASK-046"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -579,6 +672,32 @@ current_iterations: []
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-013"
+    goal: "Admin Dashboard, RBAC, Elder Mode & Caregiver Support"
+    started_at: "2026-01-17"
+    completed_at: "2026-01-17"
+    status: "completed"
+    summary: |
+      Admin dashboard and RBAC complete:
+      - RBAC: UserRole enum (user, caregiver, admin, super_admin)
+      - RBAC: UserStatus enum (active, suspended, deleted)
+      - RBAC: RolesGuard and AdminOnly decorator
+      - Admin-web: Full admin dashboard application
+      - Admin-web: Dashboard stats, user management, alert views
+      - Elder Mode: Quick preset settings (one-click apply)
+      - Caregiver: Schema ready (CaregiverRelation model)
+      - Caregiver: Frontend components ready (disabled backend)
+      - E2E tests: admin.spec.ts, elder-mode.spec.ts, caregiver.spec.ts
+    tasks_completed:
+      - id: "TASK-046"
+        title: "Admin Dashboard, RBAC, Elder Mode, Caregiver Support"
+        review_verdict: "pass"
+        note: "Large feature batch - backend module for caregiver disabled"
+    deferred_items: []
+    milestone: "Admin Dashboard Complete"
+    post_completion_notes:
+      - "Caregiver backend module enabled after initial completion"
+
   - id: "iter-012"
     goal: "E2E Testing Infrastructure"
     started_at: "2026-01-16"
@@ -1234,6 +1353,73 @@ decision_log:
         - "RadioGroup in contact form (Email / SMS)"
         - "SMS option disabled if no phone number"
         - "Warning if SMS selected but phone not verified"
+
+  - id: "ADR-019"
+    date: "2026-01-17"
+    decision: "Role-Based Access Control (RBAC) with UserRole enum"
+    rationale: |
+      - Need to distinguish admin users from regular users
+      - Support for caregiver role in future
+      - Simple role-based check using NestJS guards
+      - Roles stored in database and included in JWT payload
+    implementation:
+      schema:
+        UserRole: "user | caregiver | admin | super_admin"
+        UserStatus: "active | suspended | deleted"
+      guards:
+        - "RolesGuard: Checks user role against required roles"
+        - "AdminOnly: Shorthand decorator for admin/super_admin"
+      jwt_payload:
+        - "userId: string"
+        - "role: UserRole"
+      api_protection:
+        - "All /api/v1/admin/* endpoints require admin role"
+        - "Regular endpoints remain accessible to all authenticated users"
+
+  - id: "ADR-020"
+    date: "2026-01-17"
+    decision: "Admin Dashboard as separate React application"
+    rationale: |
+      - Separation of concerns between user and admin interfaces
+      - Different UI requirements (data tables vs check-in flow)
+      - Admin uses Ant Design for data-heavy interfaces
+      - User web uses shadcn/ui for simpler, mobile-first experience
+    implementation:
+      structure:
+        - "apps/admin-web: Separate Vite + React application"
+        - "Shared auth via same backend JWT tokens"
+        - "Admin-specific API endpoints in /api/v1/admin/*"
+      features:
+        - "Dashboard: Stats overview (users, check-ins, alerts)"
+        - "User Management: List, view, suspend users"
+        - "Alert Management: View and filter alerts"
+      auth_flow:
+        - "Login at /admin/login"
+        - "Backend validates user has admin/super_admin role"
+        - "Redirect to user-web login if not admin"
+
+  - id: "ADR-021"
+    date: "2026-01-17"
+    decision: "Caregiver-Elder relationship model"
+    rationale: |
+      - Enable family members to care for elderly users
+      - Caregiver can view elder's check-in status
+      - Elder must accept caregiver invitation
+      - Flexible permissions via JSON field
+    implementation:
+      schema:
+        CaregiverRelation:
+          - "id: UUID primary key"
+          - "caregiverId: FK to User (the caregiver)"
+          - "elderId: FK to User (the elder)"
+          - "isAccepted: Boolean (elder must accept)"
+          - "permissions: JSON (flexible permission storage)"
+          - "createdAt, updatedAt"
+      status: "Schema complete, backend module disabled for review"
+      notes: |
+        - Backend module code exists in caregiver.disabled.bak
+        - Frontend components ready (CaregiverSection, EldersList)
+        - Pending API design finalization before enabling
 
 # ============================================================
 # 8. Review History (Recorded by A Session)
