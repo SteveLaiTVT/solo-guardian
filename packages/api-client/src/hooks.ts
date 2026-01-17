@@ -29,6 +29,10 @@ import type {
   CreateNoteRequest,
   CaretakerCheckInRequest,
   CaretakerCheckInResponse,
+  LinkedContact,
+  PendingContactInvitation,
+  ContactLinkInvitationDetails,
+  AcceptContactLinkResult,
 } from "./types"
 
 export function createHooks(client: AxiosInstance) {
@@ -310,6 +314,40 @@ export function createHooks(client: AxiosInstance) {
           api.caregiver.getNotes(elderId).then((r: AxiosResponse<CaregiverNote[]>) => r.data),
         enabled: !!elderId,
       }),
+
+    // Linked Contacts hooks
+    useLinkedContacts: () =>
+      useQuery({
+        queryKey: ["contacts", "linked"],
+        queryFn: () =>
+          api.contacts.getLinkedContacts().then((r: AxiosResponse<LinkedContact[]>) => r.data),
+      }),
+
+    usePendingContactInvitations: () =>
+      useQuery({
+        queryKey: ["contacts", "linked", "pending"],
+        queryFn: () =>
+          api.contacts.getPendingInvitations().then((r: AxiosResponse<PendingContactInvitation[]>) => r.data),
+      }),
+
+    useContactLinkInvitation: (token: string) =>
+      useQuery({
+        queryKey: ["contacts", "link", token],
+        queryFn: () =>
+          api.contacts.getContactLinkInvitation(token).then((r: AxiosResponse<ContactLinkInvitationDetails>) => r.data),
+        enabled: !!token,
+      }),
+
+    useAcceptContactLink: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (token: string) =>
+          api.contacts.acceptContactLink(token).then((r: AxiosResponse<AcceptContactLinkResult>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["contacts", "linked"] })
+        },
+      })
+    },
   }
 }
 

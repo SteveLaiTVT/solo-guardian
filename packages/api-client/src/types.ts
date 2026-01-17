@@ -80,6 +80,9 @@ export interface UpdateSettingsRequest {
 // Notification channel type
 export type NotificationChannel = 'email' | 'sms'
 
+// Invitation status type
+export type InvitationStatus = 'none' | 'pending' | 'accepted'
+
 // Emergency Contact types
 export interface EmergencyContact {
   id: string
@@ -92,6 +95,9 @@ export interface EmergencyContact {
   phoneVerified: boolean
   preferredChannel: NotificationChannel
   isActive: boolean
+  linkedUserId: string | null
+  linkedUserName: string | null
+  invitationStatus: InvitationStatus
   createdAt: string
   updatedAt: string
 }
@@ -253,4 +259,34 @@ export interface CaretakerCheckInRequest {
 export interface CaretakerCheckInResponse {
   checkInDate: string
   checkedInAt: string
+}
+
+// Linked Contact types
+export interface LinkedContact {
+  id: string
+  elderName: string
+  elderEmail: string
+  contactName: string
+  relationshipSince: string
+  hasActiveAlerts: boolean
+}
+
+export interface PendingContactInvitation {
+  id: string
+  elderName: string
+  elderEmail: string
+  contactName: string
+  invitedAt: string
+}
+
+export interface ContactLinkInvitationDetails {
+  contactId: string
+  elderName: string
+  elderEmail: string
+  contactName: string
+}
+
+export interface AcceptContactLinkResult {
+  success: boolean
+  elderName: string
 }

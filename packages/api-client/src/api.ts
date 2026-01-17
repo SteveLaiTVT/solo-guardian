@@ -30,6 +30,10 @@ import type {
   CreateNoteRequest,
   CaretakerCheckInRequest,
   CaretakerCheckInResponse,
+  LinkedContact,
+  PendingContactInvitation,
+  ContactLinkInvitationDetails,
+  AcceptContactLinkResult,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -101,6 +105,19 @@ export function createApi(client: AxiosInstance) {
 
       resendPhoneVerification: (id: string) =>
         client.post<SendPhoneVerificationResult>(`/api/v1/emergency-contacts/${id}/resend-phone-verification`),
+
+      // Linked contacts endpoints
+      getLinkedContacts: () =>
+        client.get<LinkedContact[]>("/api/v1/emergency-contacts/linked"),
+
+      getPendingInvitations: () =>
+        client.get<PendingContactInvitation[]>("/api/v1/emergency-contacts/linked/pending"),
+
+      getContactLinkInvitation: (token: string) =>
+        client.get<ContactLinkInvitationDetails>(`/api/v1/emergency-contacts/link/${token}`),
+
+      acceptContactLink: (token: string) =>
+        client.post<AcceptContactLinkResult>(`/api/v1/emergency-contacts/link/${token}/accept`),
     },
 
     // Public endpoint (no auth required)
