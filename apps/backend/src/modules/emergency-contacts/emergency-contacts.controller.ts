@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.controller.ts
  * @description Controller for emergency contacts endpoints
- * @task TASK-015, TASK-031, TASK-033, TASK-036
- * @design_state_version 3.4.0
+ * @task TASK-015, TASK-031, TASK-033, TASK-036, TASK-067, TASK-068, TASK-069
+ * @design_state_version 3.9.0
  */
 import {
   Controller,
@@ -17,10 +17,13 @@ import {
   HttpStatus,
   UseGuards,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
-import { EmergencyContactsService } from './emergency-contacts.service';
+import { EmergencyContactsService, LinkedContactInfo, PendingInvitationInfo } from './emergency-contacts.service';
 import { ContactVerificationService } from './contact-verification.service';
 import { PhoneVerificationService } from './phone-verification.service';
+import { EmailService } from '../email/email.service';
 import {
   CreateContactDto,
   UpdateContactDto,
@@ -38,6 +41,8 @@ export class EmergencyContactsController {
     private readonly contactsService: EmergencyContactsService,
     private readonly verificationService: ContactVerificationService,
     private readonly phoneVerificationService: PhoneVerificationService,
+    @Inject(forwardRef(() => EmailService))
+    private readonly emailService: EmailService,
   ) {}
 
   @Get()
@@ -59,7 +64,8 @@ export class EmergencyContactsController {
     @Body() dto: CreateContactDto,
     @CurrentUser() userId: string,
   ): Promise<ContactResponseDto> {
-    return this.contactsService.create(userId, dto);
+    const result = await this.contactsService.create(userId, dto);
+    return result.contact;
   }
 
   @Put('reorder')
@@ -76,7 +82,8 @@ export class EmergencyContactsController {
     @Body() dto: UpdateContactDto,
     @CurrentUser() userId: string,
   ): Promise<ContactResponseDto> {
-    return this.contactsService.update(id, userId, dto);
+    const result = await this.contactsService.update(id, userId, dto);
+    return result.contact;
   }
 
   @Delete(':id')
@@ -152,6 +159,20 @@ export class EmergencyContactsController {
   ): Promise<ContactResponseDto> {
     return this.phoneVerificationService.resendPhoneVerification(id, userId);
   }
+
+  // ============================================================
+  // Linked Contact Endpoints - TASK-068, TASK-069
+  // ============================================================
+
+  @Get('linked')
+  async getLinkedContacts(@CurrentUser() userId: string): Promise<LinkedContactInfo[]> {
+    return this.contactsService.getLinkedContacts(userId);
+  }
+
+  @Get('linked/pending')
+  async getPendingInvitations(@CurrentUser() userId: string): Promise<PendingInvitationInfo[]> {
+    return this.contactsService.getPendingInvitations(userId);
+  }
 }
 
 @Controller('api/v1/verify-contact')
@@ -166,5 +187,31 @@ export class VerifyContactController {
       throw new BadRequestException('Token is required');
     }
     return this.verificationService.verifyContact(token);
+  }
+}
+
+@Controller('api/v1/emergency-contacts/link')
+export class ContactLinkController {
+  constructor(private readonly contactsService: EmergencyContactsService) {}
+
+  @Get(':token')
+  async getInvitationDetails(
+    @Param('token') token: string,
+  ): Promise<{ contactId: string; elderName: string; elderEmail: string; contactName: string } | null> {
+    const details = await this.contactsService.getInvitationDetails(token);
+    if (!details) {
+      throw new BadRequestException('Invalid or expired invitation');
+    }
+    return details;
+  }
+
+  @Post(':token/accept')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async acceptInvitation(
+    @Param('token') token: string,
+    @CurrentUser() userId: string,
+  ): Promise<{ success: boolean; elderName: string }> {
+    return this.contactsService.acceptInvitation(token, userId);
   }
 }

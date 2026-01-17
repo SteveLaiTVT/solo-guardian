@@ -1,14 +1,17 @@
 /**
  * @file emergency-contacts.service.ts
  * @description Service for emergency contacts CRUD operations
- * @task TASK-015
- * @design_state_version 2.0.0
+ * @task TASK-015, TASK-066, TASK-067, TASK-068, TASK-069, TASK-070
+ * @design_state_version 3.9.0
  */
 import {
   Injectable,
   Logger,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { EmergencyContact } from '@prisma/client';
 import { EmergencyContactsRepository } from './emergency-contacts.repository';
@@ -17,8 +20,30 @@ import {
   UpdateContactDto,
   ContactResponseDto,
 } from './dto';
+import { AlertService } from '../alerts';
 
 const MAX_CONTACTS = 5;
+
+type EmergencyContactWithLinkedUser = EmergencyContact & {
+  linkedUser: { id: string; name: string } | null;
+};
+
+export interface LinkedContactInfo {
+  id: string;
+  elderName: string;
+  elderEmail: string;
+  contactName: string;
+  relationshipSince: Date;
+  hasActiveAlerts: boolean;
+}
+
+export interface PendingInvitationInfo {
+  id: string;
+  elderName: string;
+  elderEmail: string;
+  contactName: string;
+  invitedAt: Date;
+}
 
 @Injectable()
 export class EmergencyContactsService {
@@ -26,6 +51,8 @@ export class EmergencyContactsService {
 
   constructor(
     private readonly contactsRepository: EmergencyContactsRepository,
+    @Inject(forwardRef(() => AlertService))
+    private readonly alertService: AlertService,
   ) {}
 
   async findAll(userId: string): Promise<ContactResponseDto[]> {
@@ -34,7 +61,7 @@ export class EmergencyContactsService {
   }
 
   async findOne(id: string, userId: string): Promise<ContactResponseDto> {
-    const contact = await this.contactsRepository.findById(id);
+    const contact = await this.contactsRepository.findByIdWithLinkedUser(id);
     if (!contact || contact.userId !== userId || contact.deletedAt) {
       throw new NotFoundException('Contact not found');
     }
@@ -44,7 +71,7 @@ export class EmergencyContactsService {
   async create(
     userId: string,
     dto: CreateContactDto,
-  ): Promise<ContactResponseDto> {
+  ): Promise<{ contact: ContactResponseDto; linkedUser: { linkedUserId: string; invitationToken: string } | null }> {
     const contacts = await this.contactsRepository.findAllByUserId(userId);
     if (contacts.length >= MAX_CONTACTS) {
       throw new BadRequestException(`Maximum ${MAX_CONTACTS} contacts allowed`);
@@ -76,24 +103,36 @@ export class EmergencyContactsService {
     });
 
     this.logger.log(`User ${userId} added emergency contact: ${dto.email}`);
-    return this.mapToResponse(contact);
+
+    const linkResult = await this.checkAndLinkUser(contact.id, dto.email, userId);
+
+    const contactWithLinkedUser = await this.contactsRepository.findByIdWithLinkedUser(contact.id);
+
+    return {
+      contact: this.mapToResponse(contactWithLinkedUser!),
+      linkedUser: linkResult,
+    };
   }
 
   async update(
     id: string,
     userId: string,
     dto: UpdateContactDto,
-  ): Promise<ContactResponseDto> {
+  ): Promise<{ contact: ContactResponseDto; linkedUser: { linkedUserId: string; invitationToken: string } | null }> {
     const contact = await this.contactsRepository.findById(id);
     if (!contact || contact.userId !== userId || contact.deletedAt) {
       throw new NotFoundException('Contact not found');
     }
 
-    if (dto.email && dto.email !== contact.email) {
-      const existing = await this.contactsRepository.findByEmail(userId, dto.email);
+    const emailChanged = dto.email && dto.email !== contact.email;
+
+    if (emailChanged) {
+      const existing = await this.contactsRepository.findByEmail(userId, dto.email!);
       if (existing) {
         throw new BadRequestException('Email already exists in contacts');
       }
+
+      await this.contactsRepository.clearInvitation(id);
     }
 
     const updated = await this.contactsRepository.update(id, {
@@ -105,7 +144,21 @@ export class EmergencyContactsService {
     });
 
     this.logger.log(`User ${userId} updated emergency contact: ${id}`);
-    return this.mapToResponse(updated);
+
+    let linkResult: { linkedUserId: string; invitationToken: string } | null = null;
+    if (emailChanged && dto.email) {
+      const result = await this.checkAndLinkUser(id, dto.email, userId);
+      if (result) {
+        linkResult = { linkedUserId: result.linkedUserId, invitationToken: result.invitationToken };
+      }
+    }
+
+    const contactWithLinkedUser = await this.contactsRepository.findByIdWithLinkedUser(id);
+
+    return {
+      contact: this.mapToResponse(contactWithLinkedUser!),
+      linkedUser: linkResult,
+    };
   }
 
   async remove(id: string, userId: string): Promise<void> {
@@ -136,11 +189,18 @@ export class EmergencyContactsService {
     );
 
     this.logger.log(`User ${userId} reordered emergency contacts`);
-    return updated.map((c) => this.mapToResponse(c));
+    return updated.map((c) => this.mapToResponseSimple(c));
   }
 
-  // DONE(B): Updated mapToResponse to include phoneVerified and preferredChannel - TASK-036
-  private mapToResponse(contact: EmergencyContact): ContactResponseDto {
+  // DONE(B): Updated mapToResponse to include phoneVerified, preferredChannel, and linked user fields - TASK-036, TASK-065
+  private mapToResponse(contact: EmergencyContactWithLinkedUser): ContactResponseDto {
+    let invitationStatus: 'none' | 'pending' | 'accepted' = 'none';
+    if (contact.invitationAcceptedAt) {
+      invitationStatus = 'accepted';
+    } else if (contact.invitationSentAt) {
+      invitationStatus = 'pending';
+    }
+
     return {
       id: contact.id,
       userId: contact.userId,
@@ -154,6 +214,141 @@ export class EmergencyContactsService {
       updatedAt: contact.updatedAt,
       phoneVerified: contact.phoneVerified,
       preferredChannel: contact.preferredChannel as 'email' | 'sms',
+      linkedUserId: contact.linkedUserId,
+      linkedUserName: contact.linkedUser?.name ?? null,
+      invitationStatus,
     };
+  }
+
+  private mapToResponseSimple(contact: EmergencyContact): ContactResponseDto {
+    let invitationStatus: 'none' | 'pending' | 'accepted' = 'none';
+    if (contact.invitationAcceptedAt) {
+      invitationStatus = 'accepted';
+    } else if (contact.invitationSentAt) {
+      invitationStatus = 'pending';
+    }
+
+    return {
+      id: contact.id,
+      userId: contact.userId,
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      priority: contact.priority,
+      isVerified: contact.isVerified,
+      isActive: contact.isActive,
+      createdAt: contact.createdAt,
+      updatedAt: contact.updatedAt,
+      phoneVerified: contact.phoneVerified,
+      preferredChannel: contact.preferredChannel as 'email' | 'sms',
+      linkedUserId: contact.linkedUserId,
+      linkedUserName: null,
+      invitationStatus,
+    };
+  }
+
+  // ============================================================
+  // Linked Contact Methods - TASK-065, TASK-066, TASK-068, TASK-069
+  // ============================================================
+
+  async checkAndLinkUser(
+    contactId: string,
+    email: string,
+    ownerId: string,
+  ): Promise<{ linkedUserId: string; invitationToken: string } | null> {
+    const existingUser = await this.contactsRepository.findUserByEmail(email);
+
+    if (!existingUser || existingUser.id === ownerId) {
+      return null;
+    }
+
+    const updated = await this.contactsRepository.setInvitationToken(
+      contactId,
+      existingUser.id,
+    );
+
+    this.logger.log(
+      `Contact ${contactId} linked to existing user ${existingUser.id}, invitation sent`,
+    );
+
+    return {
+      linkedUserId: existingUser.id,
+      invitationToken: updated.invitationToken!,
+    };
+  }
+
+  async getInvitationDetails(
+    token: string,
+  ): Promise<{ contactId: string; elderName: string; elderEmail: string; contactName: string } | null> {
+    const contact = await this.contactsRepository.findByInvitationToken(token);
+
+    if (!contact) {
+      return null;
+    }
+
+    return {
+      contactId: contact.id,
+      elderName: contact.user.name,
+      elderEmail: contact.user.email,
+      contactName: contact.name,
+    };
+  }
+
+  async acceptInvitation(
+    token: string,
+    acceptingUserId: string,
+  ): Promise<{ success: boolean; elderName: string }> {
+    const contact = await this.contactsRepository.findByInvitationToken(token);
+
+    if (!contact) {
+      throw new NotFoundException('Invitation not found or already accepted');
+    }
+
+    if (contact.linkedUserId !== acceptingUserId) {
+      throw new ForbiddenException('This invitation is not for you');
+    }
+
+    await this.contactsRepository.acceptInvitation(contact.id);
+
+    this.logger.log(
+      `User ${acceptingUserId} accepted contact link invitation from ${contact.user.name}`,
+    );
+
+    return {
+      success: true,
+      elderName: contact.user.name,
+    };
+  }
+
+  async getLinkedContacts(userId: string): Promise<LinkedContactInfo[]> {
+    const contacts = await this.contactsRepository.findContactsWhereUserIsLinked(userId);
+
+    const linkedContacts = await Promise.all(
+      contacts.map(async (contact) => {
+        const hasActiveAlerts = await this.alertService.hasActiveAlerts(contact.userId);
+        return {
+          id: contact.id,
+          elderName: contact.user.name,
+          elderEmail: contact.user.email,
+          contactName: contact.name,
+          relationshipSince: contact.invitationAcceptedAt!,
+          hasActiveAlerts,
+        };
+      }),
+    );
+
+    return linkedContacts;
+  }
+
+  async getPendingInvitations(userId: string): Promise<PendingInvitationInfo[]> {
+    const contacts = await this.contactsRepository.findPendingInvitationsForUser(userId);
+
+    return contacts.map((contact) => ({
+      id: contact.id,
+      elderName: contact.user.name,
+      elderEmail: contact.user.email,
+      contactName: contact.name,
+      invitedAt: contact.invitationSentAt!,
+    }));
   }
 }

@@ -1,19 +1,24 @@
 /**
  * @file emergency-contacts.repository.ts
  * @description Repository for emergency contacts database operations
- * @task TASK-015, TASK-031, TASK-033
- * @design_state_version 2.0.0
+ * @task TASK-015, TASK-031, TASK-033, TASK-065
+ * @design_state_version 3.9.0
  */
 import { Injectable } from '@nestjs/common';
-import { EmergencyContact, Prisma } from '@prisma/client';
+import { EmergencyContact, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+
+type EmergencyContactWithLinkedUser = EmergencyContact & {
+  linkedUser: { id: string; name: string } | null;
+};
 
 @Injectable()
 export class EmergencyContactsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   // DONE(B): Implemented findAllByUserId - TASK-015
-  async findAllByUserId(userId: string): Promise<EmergencyContact[]> {
+  // DONE(B): Updated to include linkedUser - TASK-065
+  async findAllByUserId(userId: string): Promise<EmergencyContactWithLinkedUser[]> {
     return this.prisma.emergencyContact.findMany({
       where: {
         userId,
@@ -21,6 +26,11 @@ export class EmergencyContactsRepository {
       },
       orderBy: {
         priority: 'asc',
+      },
+      include: {
+        linkedUser: {
+          select: { id: true, name: true },
+        },
       },
     });
   }
@@ -290,5 +300,121 @@ export class EmergencyContactsRepository {
     });
 
     return result.count;
+  }
+
+  // ============================================================
+  // Linked Contact Methods - TASK-065
+  // ============================================================
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async setInvitationToken(
+    id: string,
+    linkedUserId: string,
+  ): Promise<EmergencyContact> {
+    const INVITATION_EXPIRY_DAYS = 7;
+    const invitationToken = crypto.randomUUID();
+
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        linkedUserId,
+        invitationToken,
+        invitationSentAt: new Date(),
+      },
+    });
+  }
+
+  async findByInvitationToken(
+    token: string,
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } }) | null> {
+    return this.prisma.emergencyContact.findUnique({
+      where: { invitationToken: token },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+  }
+
+  async acceptInvitation(id: string): Promise<EmergencyContact> {
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        invitationAcceptedAt: new Date(),
+        invitationToken: null,
+      },
+    });
+  }
+
+  async findContactsWhereUserIsLinked(
+    linkedUserId: string,
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } })[]> {
+    return this.prisma.emergencyContact.findMany({
+      where: {
+        linkedUserId,
+        invitationAcceptedAt: { not: null },
+        deletedAt: null,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+      orderBy: {
+        invitationAcceptedAt: 'desc',
+      },
+    });
+  }
+
+  async findPendingInvitationsForUser(
+    linkedUserId: string,
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } })[]> {
+    return this.prisma.emergencyContact.findMany({
+      where: {
+        linkedUserId,
+        invitationSentAt: { not: null },
+        invitationAcceptedAt: null,
+        deletedAt: null,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+      orderBy: {
+        invitationSentAt: 'desc',
+      },
+    });
+  }
+
+  async clearInvitation(id: string): Promise<EmergencyContact> {
+    return this.prisma.emergencyContact.update({
+      where: { id },
+      data: {
+        linkedUserId: null,
+        invitationToken: null,
+        invitationSentAt: null,
+        invitationAcceptedAt: null,
+      },
+    });
+  }
+
+  async findByIdWithLinkedUser(
+    id: string,
+  ): Promise<EmergencyContactWithLinkedUser | null> {
+    return this.prisma.emergencyContact.findUnique({
+      where: { id },
+      include: {
+        linkedUser: {
+          select: { id: true, name: true },
+        },
+      },
+    });
   }
 }

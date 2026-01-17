@@ -184,10 +184,17 @@ export class PhoneVerificationService {
 
   /**
    * Map contact entity to response DTO
-   * DONE(B): Implemented mapToResponse - TASK-036
-   * @task TASK-036
+   * DONE(B): Implemented mapToResponse - TASK-036, TASK-065
+   * @task TASK-036, TASK-065
    */
   private mapToResponse(contact: EmergencyContact): ContactResponseDto {
+    let invitationStatus: 'none' | 'pending' | 'accepted' = 'none';
+    if (contact.invitationAcceptedAt) {
+      invitationStatus = 'accepted';
+    } else if (contact.invitationSentAt) {
+      invitationStatus = 'pending';
+    }
+
     return {
       id: contact.id,
       userId: contact.userId,
@@ -201,6 +208,9 @@ export class PhoneVerificationService {
       updatedAt: contact.updatedAt,
       phoneVerified: contact.phoneVerified,
       preferredChannel: contact.preferredChannel as 'email' | 'sms',
+      linkedUserId: contact.linkedUserId,
+      linkedUserName: null,
+      invitationStatus,
     };
   }
 }
