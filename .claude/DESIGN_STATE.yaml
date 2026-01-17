@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.8.0"
+  version: "3.9.0"
   updated_at: "2026-01-17"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Admin Dashboard Complete"
+  milestone: "Linked Emergency Contacts Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -180,8 +180,16 @@ modules:
         completed_task: "TASK-015"
       - name: "Contact Verification"
         priority: "P1"
-        status: "pending"
+        status: "done"
         description: "Verify contact email/phone before activation"
+        completed_task: "TASK-031"
+      - name: "Linked Contacts"
+        priority: "P1"
+        status: "done"
+        description: "Auto-link contacts to registered users, invitation flow"
+        started_iteration: "iter-014"
+        completed_iteration: "iter-014"
+        completed_tasks: ["TASK-065", "TASK-066", "TASK-067", "TASK-068", "TASK-069", "TASK-070", "TASK-071", "TASK-072", "TASK-073", "TASK-074"]
       - name: "Contact Limit"
         priority: "P0"
         status: "done"
@@ -672,6 +680,55 @@ current_iterations: []
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-014"
+    goal: "Linked Emergency Contacts (Phase D)"
+    started_at: "2026-01-17"
+    completed_at: "2026-01-17"
+    status: "completed"
+    summary: |
+      Linked emergency contacts feature complete:
+      - Auto-detect when contact email matches registered user
+      - Send invitation email to linked user
+      - Linked user can accept invitation to connect accounts
+      - Linked user can view elder's emergency alerts
+      - UI: Linked status badges on contacts list
+      - UI: LinkedContactsPage to view "people who added me"
+      - UI: AcceptContactLinkPage for invitation acceptance
+      - i18n translations for en/zh/ja
+    tasks_completed:
+      - id: "TASK-065"
+        title: "DB: Extend EmergencyContact with linkedUserId, invitation fields"
+        review_verdict: "pass"
+      - id: "TASK-066"
+        title: "Backend: Check for matching user when creating/updating contact"
+        review_verdict: "pass"
+      - id: "TASK-067"
+        title: "Backend: Send invitation email to linked user"
+        review_verdict: "pass"
+      - id: "TASK-068"
+        title: "Backend: Accept contact link invitation endpoint"
+        review_verdict: "pass"
+      - id: "TASK-069"
+        title: "Backend: Get contacts I'm linked to (as emergency contact)"
+        review_verdict: "pass"
+      - id: "TASK-070"
+        title: "Backend: Get emergency alerts for linked contacts"
+        review_verdict: "pass"
+      - id: "TASK-071"
+        title: "User-web: Show linked status badge on contacts list"
+        review_verdict: "pass"
+      - id: "TASK-072"
+        title: "User-web: Page to view 'People who added me as contact'"
+        review_verdict: "pass"
+      - id: "TASK-073"
+        title: "User-web: Accept invitation page"
+        review_verdict: "pass"
+      - id: "TASK-074"
+        title: "i18n: Add linked contacts translations (en/zh/ja)"
+        review_verdict: "pass"
+    deferred_items: []
+    milestone: "Linked Emergency Contacts Complete"
+
   - id: "iter-013"
     goal: "Admin Dashboard, RBAC, Elder Mode & Caregiver Support"
     started_at: "2026-01-17"
@@ -1420,6 +1477,38 @@ decision_log:
         - Backend module code exists in caregiver.disabled.bak
         - Frontend components ready (CaregiverSection, EldersList)
         - Pending API design finalization before enabling
+
+  - id: "ADR-022"
+    date: "2026-01-17"
+    decision: "Linked Emergency Contacts with invitation flow"
+    rationale: |
+      - Emergency contacts matching registered users can be linked
+      - Linked users can view elder's emergency alerts
+      - Builds trust by notifying contacts when added
+      - Creates bidirectional awareness between users
+    implementation:
+      schema_changes:
+        - "linkedUserId: FK to User (linked user ID)"
+        - "invitationToken: Unique token for acceptance"
+        - "invitationSentAt: When invitation was sent"
+        - "invitationAcceptedAt: When invitation was accepted"
+      flow: |
+        1. User A creates emergency contact with email "bob@example.com"
+        2. System checks if bob@example.com exists in Users table
+        3. If exists: generate invitationToken, send email, set invitationSentAt
+        4. User B clicks link, authenticates, accepts invitation
+        5. System sets linkedUserId = User B's ID, invitationAcceptedAt
+        6. User B can now see "User A added me" and view alerts
+      api_endpoints:
+        - "GET /api/v1/emergency-contacts/linked - Get contacts I'm linked to"
+        - "GET /api/v1/emergency-contacts/linked/pending - Get pending invitations"
+        - "GET /api/v1/contact-link/:token - Get invitation details"
+        - "POST /api/v1/contact-link/:token/accept - Accept invitation"
+      security:
+        - "Invitation token: 32-char random, 7-day expiry"
+        - "Only authenticated users can accept invitations"
+        - "Token must match accepting user's linkedUserId"
+        - "Only accepted linked contacts can view alerts"
 
 # ============================================================
 # 8. Review History (Recorded by A Session)
