@@ -65,5 +65,25 @@
       "resendFailed": "再送信に失敗しました。もう一度お試しください。",
       "invalidOtp": "6桁の確認コードを入力してください"
     }
+  },
+  "linked": {
+    "linked": "連携済み",
+    "pending": "保留中",
+    "title": "私を追加した人",
+    "subtitle": "これらの方々の緊急連絡先として登録されています",
+    "emptyState": "まだ誰もあなたを緊急連絡先に追加していません",
+    "emptyStateHint": "誰かがあなたを緊急連絡先に追加し、あなたが承認すると、ここに表示されます",
+    "pendingInvitations": "保留中の招待",
+    "noPendingInvitations": "保留中の招待はありません",
+    "acceptInvitation": "承認",
+    "viewAlerts": "アラートを見る",
+    "activeAlert": "アクティブなアラート",
+    "noActiveAlerts": "アクティブなアラートはありません",
+    "relationshipSince": "{{date}}に連携",
+    "invitedAt": "{{date}}に招待",
+    "acceptSuccess": "{{name}}のアカウントと連携しました",
+    "acceptError": "招待の承認に失敗しました",
+    "invitationFrom": "{{name}}があなたを緊急連絡先に追加しました",
+    "invitationDescription": "承認すると、チェックインを逃した際にアラートを確認できるようになります"
   }
 }

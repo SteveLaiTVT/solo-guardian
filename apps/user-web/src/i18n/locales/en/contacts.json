@@ -65,5 +65,25 @@
       "resendFailed": "Failed to resend code. Please try again.",
       "invalidOtp": "Please enter a 6-digit verification code"
     }
+  },
+  "linked": {
+    "linked": "Linked",
+    "pending": "Pending",
+    "title": "People Who Added Me",
+    "subtitle": "You are listed as an emergency contact for these people",
+    "emptyState": "No one has added you as an emergency contact yet",
+    "emptyStateHint": "When someone adds you as their emergency contact and you accept, they'll appear here",
+    "pendingInvitations": "Pending Invitations",
+    "noPendingInvitations": "No pending invitations",
+    "acceptInvitation": "Accept",
+    "viewAlerts": "View Alerts",
+    "activeAlert": "Active Alert",
+    "noActiveAlerts": "No active alerts",
+    "relationshipSince": "Connected since {{date}}",
+    "invitedAt": "Invited {{date}}",
+    "acceptSuccess": "You are now connected to {{name}}'s account",
+    "acceptError": "Failed to accept invitation",
+    "invitationFrom": "{{name}} added you as emergency contact",
+    "invitationDescription": "By accepting, you'll be able to see alerts when they miss a check-in"
   }
 }

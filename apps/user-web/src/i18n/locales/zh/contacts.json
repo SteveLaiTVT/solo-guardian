@@ -65,5 +65,25 @@
       "resendFailed": "重新发送失败，请重试。",
       "invalidOtp": "请输入6位验证码"
     }
+  },
+  "linked": {
+    "linked": "已关联",
+    "pending": "待确认",
+    "title": "添加我的人",
+    "subtitle": "您被列为这些人的紧急联系人",
+    "emptyState": "还没有人将您添加为紧急联系人",
+    "emptyStateHint": "当有人将您添加为紧急联系人并且您接受后，他们会显示在这里",
+    "pendingInvitations": "待处理邀请",
+    "noPendingInvitations": "没有待处理的邀请",
+    "acceptInvitation": "接受",
+    "viewAlerts": "查看警报",
+    "activeAlert": "活动警报",
+    "noActiveAlerts": "没有活动警报",
+    "relationshipSince": "关联于 {{date}}",
+    "invitedAt": "邀请于 {{date}}",
+    "acceptSuccess": "您已与 {{name}} 的账户建立关联",
+    "acceptError": "接受邀请失败",
+    "invitationFrom": "{{name}} 将您添加为紧急联系人",
+    "invitationDescription": "接受后，当他们错过签到时您将能够看到警报"
   }
 }
