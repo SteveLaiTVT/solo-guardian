@@ -1,10 +1,10 @@
 /**
  * @file create-contact.dto.ts
  * @description DTO for creating emergency contact
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-037
+ * @design_state_version 3.8.0
  */
-import { IsString, IsEmail, IsOptional, IsInt, Min, Max, MaxLength } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsInt, Min, Max, MaxLength, IsIn } from 'class-validator';
 
 export class CreateContactDto {
   @IsString()
@@ -24,4 +24,8 @@ export class CreateContactDto {
   @Min(1)
   @Max(5)
   priority?: number;
+
+  @IsOptional()
+  @IsIn(['email', 'sms'])
+  preferredChannel?: 'email' | 'sms';
 }

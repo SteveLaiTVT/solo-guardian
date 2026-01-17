@@ -1,10 +1,10 @@
 /**
  * @file update-contact.dto.ts
  * @description DTO for updating emergency contact
- * @task TASK-015
- * @design_state_version 1.4.1
+ * @task TASK-015, TASK-037
+ * @design_state_version 3.8.0
  */
-import { IsString, IsEmail, IsOptional, IsInt, Min, Max, MaxLength, IsBoolean } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsInt, Min, Max, MaxLength, IsBoolean, IsIn } from 'class-validator';
 
 export class UpdateContactDto {
   @IsOptional()
@@ -30,4 +30,8 @@ export class UpdateContactDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsIn(['email', 'sms'])
+  preferredChannel?: 'email' | 'sms';
 }
