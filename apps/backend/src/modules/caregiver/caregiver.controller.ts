@@ -40,7 +40,7 @@ interface JwtUser {
   userId: string;
 }
 
-@Controller('caregiver')
+@Controller('api/v1/caregiver')
 @UseGuards(JwtAuthGuard)
 export class CaregiverController {
   constructor(private readonly caregiverService: CaregiverService) {}

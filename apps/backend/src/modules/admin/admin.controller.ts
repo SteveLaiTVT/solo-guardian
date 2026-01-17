@@ -32,7 +32,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-@Controller('admin')
+@Controller('api/v1/admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @AdminOnly()
 export class AdminController {

@@ -33,7 +33,7 @@ interface OAuthCallbackQuery {
   error_description?: string;
 }
 
-@Controller('auth/oauth')
+@Controller('api/v1/auth/oauth')
 export class OAuthController {
   private readonly logger = new Logger(OAuthController.name);
 

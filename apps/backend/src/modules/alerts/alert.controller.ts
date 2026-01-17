@@ -22,7 +22,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AlertService } from './alert.service';
 
 // DONE(B): Implemented AlertController - TASK-027
-@Controller('alerts')
+@Controller('api/v1/alerts')
 // DONE(B): Add @UseGuards(JwtAuthGuard) - TASK-027
 @UseGuards(JwtAuthGuard)
 export class AlertController {
