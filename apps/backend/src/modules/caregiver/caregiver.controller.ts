@@ -31,10 +31,6 @@ import {
   NotesListResponseDto,
 } from './dto';
 
-interface JwtUser {
-  userId: string;
-}
-
 @Controller('api/v1/caregiver')
 @UseGuards(JwtAuthGuard)
 export class CaregiverController {
@@ -46,16 +42,16 @@ export class CaregiverController {
   @Get('elders')
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
-  async getMyElders(@CurrentUser() user: JwtUser): Promise<ElderSummary[]> {
-    return this.caregiverService.getMyElders(user.userId);
+  async getMyElders(@CurrentUser() userId: string): Promise<ElderSummary[]> {
+    return this.caregiverService.getMyElders(userId);
   }
 
   /**
    * Get list of caregivers for the current user (as elder)
    */
   @Get('caregivers')
-  async getMyCaregivers(@CurrentUser() user: JwtUser): Promise<CaregiverSummary[]> {
-    return this.caregiverService.getMyCaregivers(user.userId);
+  async getMyCaregivers(@CurrentUser() userId: string): Promise<CaregiverSummary[]> {
+    return this.caregiverService.getMyCaregivers(userId);
   }
 
   /**
@@ -65,10 +61,10 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async getElderDetail(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('elderId') elderId: string,
   ): Promise<ElderDetail> {
-    return this.caregiverService.getElderDetail(user.userId, elderId);
+    return this.caregiverService.getElderDetail(userId, elderId);
   }
 
   /**
@@ -78,10 +74,10 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async inviteElder(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Body() dto: InviteElderDto,
   ): Promise<{ message: string }> {
-    await this.caregiverService.inviteElder(user.userId, dto);
+    await this.caregiverService.inviteElder(userId, dto);
     return { message: 'Invitation sent' };
   }
 
@@ -90,10 +86,10 @@ export class CaregiverController {
    */
   @Post('accept')
   async acceptCaregiver(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Body() dto: AcceptInvitationDto,
   ): Promise<{ message: string }> {
-    await this.caregiverService.acceptCaregiver(user.userId, dto.caregiverId);
+    await this.caregiverService.acceptCaregiver(userId, dto.caregiverId);
     return { message: 'Caregiver accepted' };
   }
 
@@ -102,10 +98,10 @@ export class CaregiverController {
    */
   @Delete('caregivers/:caregiverId')
   async removeCaregiver(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('caregiverId') caregiverId: string,
   ): Promise<{ message: string }> {
-    await this.caregiverService.removeCaregiver(user.userId, caregiverId);
+    await this.caregiverService.removeCaregiver(userId, caregiverId);
     return { message: 'Caregiver removed' };
   }
 
@@ -116,10 +112,10 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async removeElder(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('elderId') elderId: string,
   ): Promise<{ message: string }> {
-    await this.caregiverService.removeElder(user.userId, elderId);
+    await this.caregiverService.removeElder(userId, elderId);
     return { message: 'Elder removed' };
   }
 
@@ -129,10 +125,10 @@ export class CaregiverController {
    */
   @Post('invitations')
   async createInvitation(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Body() dto: CreateInvitationDto,
   ): Promise<InvitationResponseDto> {
-    return this.caregiverService.createInvitation(user.userId, dto);
+    return this.caregiverService.createInvitation(userId, dto);
   }
 
   /**
@@ -148,10 +144,10 @@ export class CaregiverController {
    */
   @Post('invitations/:token/accept')
   async acceptInvitation(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('token') token: string,
   ): Promise<{ message: string }> {
-    await this.caregiverService.acceptInvitation(token, user.userId);
+    await this.caregiverService.acceptInvitation(token, userId);
     return { message: 'Invitation accepted' };
   }
 
@@ -163,11 +159,11 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async checkInOnBehalf(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('elderId') elderId: string,
     @Body() dto: { note?: string },
   ): Promise<{ checkInDate: string; checkedInAt: Date }> {
-    return this.caregiverService.checkInOnBehalf(user.userId, elderId, dto.note);
+    return this.caregiverService.checkInOnBehalf(userId, elderId, dto.note);
   }
 
   // DONE(B): Caregiver notes endpoints - TASK-061
@@ -178,11 +174,11 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async addNote(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('elderId') elderId: string,
     @Body() dto: CreateNoteDto,
   ): Promise<NoteResponseDto> {
-    return this.caregiverService.addNote(user.userId, elderId, dto);
+    return this.caregiverService.addNote(userId, elderId, dto);
   }
 
   /**
@@ -192,9 +188,9 @@ export class CaregiverController {
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
   async getNotes(
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() userId: string,
     @Param('elderId') elderId: string,
   ): Promise<NotesListResponseDto> {
-    return this.caregiverService.getNotes(user.userId, elderId);
+    return this.caregiverService.getNotes(userId, elderId);
   }
 }

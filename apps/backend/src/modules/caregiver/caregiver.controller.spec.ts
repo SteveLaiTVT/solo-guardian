@@ -6,7 +6,7 @@ describe('CaregiverController', () => {
   let controller: CaregiverController;
   let service: jest.Mocked<CaregiverService>;
 
-  const mockUser = { userId: 'user-1' };
+  const mockUserId = 'user-1';
 
   const mockElderSummary = {
     id: 'elder-1',
@@ -83,10 +83,10 @@ describe('CaregiverController', () => {
     it('should return list of elders', async () => {
       service.getMyElders.mockResolvedValue([mockElderSummary]);
 
-      const result = await controller.getMyElders(mockUser);
+      const result = await controller.getMyElders(mockUserId);
 
       expect(service.getMyElders).toHaveBeenCalledWith('user-1');
-      expect(result).toEqual({ success: true, data: [mockElderSummary] });
+      expect(result).toEqual([mockElderSummary]);
     });
   });
 
@@ -94,10 +94,10 @@ describe('CaregiverController', () => {
     it('should return list of caregivers', async () => {
       service.getMyCaregivers.mockResolvedValue([mockCaregiverSummary]);
 
-      const result = await controller.getMyCaregivers(mockUser);
+      const result = await controller.getMyCaregivers(mockUserId);
 
       expect(service.getMyCaregivers).toHaveBeenCalledWith('user-1');
-      expect(result).toEqual({ success: true, data: [mockCaregiverSummary] });
+      expect(result).toEqual([mockCaregiverSummary]);
     });
   });
 
@@ -105,10 +105,10 @@ describe('CaregiverController', () => {
     it('should return elder details', async () => {
       service.getElderDetail.mockResolvedValue(mockElderDetail);
 
-      const result = await controller.getElderDetail(mockUser, 'elder-1');
+      const result = await controller.getElderDetail(mockUserId, 'elder-1');
 
       expect(service.getElderDetail).toHaveBeenCalledWith('user-1', 'elder-1');
-      expect(result).toEqual({ success: true, data: mockElderDetail });
+      expect(result).toEqual(mockElderDetail);
     });
   });
 
@@ -116,10 +116,10 @@ describe('CaregiverController', () => {
     it('should send invitation to elder', async () => {
       service.inviteElder.mockResolvedValue(undefined);
 
-      const result = await controller.inviteElder(mockUser, { email: 'elder@example.com' });
+      const result = await controller.inviteElder(mockUserId, { email: 'elder@example.com' });
 
       expect(service.inviteElder).toHaveBeenCalledWith('user-1', { email: 'elder@example.com' });
-      expect(result).toEqual({ success: true, data: { message: 'Invitation sent' } });
+      expect(result).toEqual({ message: 'Invitation sent' });
     });
   });
 
@@ -127,10 +127,10 @@ describe('CaregiverController', () => {
     it('should accept caregiver invitation', async () => {
       service.acceptCaregiver.mockResolvedValue(undefined);
 
-      const result = await controller.acceptCaregiver(mockUser, { caregiverId: 'caregiver-1' });
+      const result = await controller.acceptCaregiver(mockUserId, { caregiverId: 'caregiver-1' });
 
       expect(service.acceptCaregiver).toHaveBeenCalledWith('user-1', 'caregiver-1');
-      expect(result).toEqual({ success: true, data: { message: 'Caregiver accepted' } });
+      expect(result).toEqual({ message: 'Caregiver accepted' });
     });
   });
 
@@ -138,10 +138,10 @@ describe('CaregiverController', () => {
     it('should remove caregiver', async () => {
       service.removeCaregiver.mockResolvedValue(undefined);
 
-      const result = await controller.removeCaregiver(mockUser, 'caregiver-1');
+      const result = await controller.removeCaregiver(mockUserId, 'caregiver-1');
 
       expect(service.removeCaregiver).toHaveBeenCalledWith('user-1', 'caregiver-1');
-      expect(result).toEqual({ success: true, data: { message: 'Caregiver removed' } });
+      expect(result).toEqual({ message: 'Caregiver removed' });
     });
   });
 
@@ -149,10 +149,10 @@ describe('CaregiverController', () => {
     it('should remove elder', async () => {
       service.removeElder.mockResolvedValue(undefined);
 
-      const result = await controller.removeElder(mockUser, 'elder-1');
+      const result = await controller.removeElder(mockUserId, 'elder-1');
 
       expect(service.removeElder).toHaveBeenCalledWith('user-1', 'elder-1');
-      expect(result).toEqual({ success: true, data: { message: 'Elder removed' } });
+      expect(result).toEqual({ message: 'Elder removed' });
     });
   });
 
@@ -160,7 +160,7 @@ describe('CaregiverController', () => {
     it('should create invitation', async () => {
       service.createInvitation.mockResolvedValue(mockInvitationResponse);
 
-      const result = await controller.createInvitation(mockUser, {
+      const result = await controller.createInvitation(mockUserId, {
         relationshipType: 'caregiver',
         targetEmail: 'target@example.com',
       });
@@ -169,7 +169,7 @@ describe('CaregiverController', () => {
         relationshipType: 'caregiver',
         targetEmail: 'target@example.com',
       });
-      expect(result).toEqual({ success: true, data: mockInvitationResponse });
+      expect(result).toEqual(mockInvitationResponse);
     });
   });
 
@@ -180,7 +180,7 @@ describe('CaregiverController', () => {
       const result = await controller.getInvitationDetails('test-token');
 
       expect(service.getInvitationDetails).toHaveBeenCalledWith('test-token');
-      expect(result).toEqual({ success: true, data: mockInvitationDetails });
+      expect(result).toEqual(mockInvitationDetails);
     });
   });
 
@@ -188,10 +188,10 @@ describe('CaregiverController', () => {
     it('should accept invitation', async () => {
       service.acceptInvitation.mockResolvedValue(undefined);
 
-      const result = await controller.acceptInvitation(mockUser, 'test-token');
+      const result = await controller.acceptInvitation(mockUserId, 'test-token');
 
       expect(service.acceptInvitation).toHaveBeenCalledWith('test-token', 'user-1');
-      expect(result).toEqual({ success: true, data: { message: 'Invitation accepted' } });
+      expect(result).toEqual({ message: 'Invitation accepted' });
     });
   });
 
@@ -200,10 +200,10 @@ describe('CaregiverController', () => {
       const checkInResult = { checkInDate: '2025-01-15', checkedInAt: new Date() };
       service.checkInOnBehalf.mockResolvedValue(checkInResult);
 
-      const result = await controller.checkInOnBehalf(mockUser, 'elder-1', { note: 'Test note' });
+      const result = await controller.checkInOnBehalf(mockUserId, 'elder-1', { note: 'Test note' });
 
       expect(service.checkInOnBehalf).toHaveBeenCalledWith('user-1', 'elder-1', 'Test note');
-      expect(result).toEqual({ success: true, data: checkInResult });
+      expect(result).toEqual(checkInResult);
     });
   });
 
@@ -218,7 +218,7 @@ describe('CaregiverController', () => {
       };
       service.addNote.mockResolvedValue(note);
 
-      const result = await controller.addNote(mockUser, 'elder-1', {
+      const result = await controller.addNote(mockUserId, 'elder-1', {
         content: 'Test note',
         noteDate: '2025-01-15',
       });
@@ -227,7 +227,7 @@ describe('CaregiverController', () => {
         content: 'Test note',
         noteDate: '2025-01-15',
       });
-      expect(result).toEqual({ success: true, data: note });
+      expect(result).toEqual(note);
     });
   });
 
@@ -239,10 +239,10 @@ describe('CaregiverController', () => {
       };
       service.getNotes.mockResolvedValue(notesResult);
 
-      const result = await controller.getNotes(mockUser, 'elder-1');
+      const result = await controller.getNotes(mockUserId, 'elder-1');
 
       expect(service.getNotes).toHaveBeenCalledWith('user-1', 'elder-1');
-      expect(result).toEqual({ success: true, data: notesResult });
+      expect(result).toEqual(notesResult);
     });
   });
 });
