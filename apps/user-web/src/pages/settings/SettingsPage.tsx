@@ -6,6 +6,7 @@
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { hooks } from '@/lib/api'
@@ -29,6 +30,7 @@ export function SettingsPage(): JSX.Element {
   const { t: tCommon } = useTranslation('common')
   const { t: tAuth } = useTranslation('auth')
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const clearTokens = useAuthStore((s) => s.clearTokens)
   const { data: settings, isLoading, error } = hooks.useSettings()
   const updateMutation = hooks.useUpdateSettings()
@@ -72,6 +74,7 @@ export function SettingsPage(): JSX.Element {
   }
 
   const handleLogout = (): void => {
+    queryClient.clear() // Clear all cached queries to prevent data leak between users
     clearTokens()
     navigate('/login')
   }

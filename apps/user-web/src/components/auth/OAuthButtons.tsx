@@ -75,9 +75,13 @@ interface OAuthButtonsProps {
 
 export function OAuthButtons({
   mode = 'login',
-  onSuccess,
-  onError,
+  onSuccess: _onSuccess,
+  onError: _onError,
 }: OAuthButtonsProps): JSX.Element {
+  // Note: onSuccess/onError reserved for future inline OAuth flow (popup mode)
+  // Currently using redirect flow, so callbacks handled in OAuthCallback.tsx
+  void _onSuccess
+  void _onError
   const { t } = useTranslation('auth')
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
 

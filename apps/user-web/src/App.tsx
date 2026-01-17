@@ -19,7 +19,7 @@ import { OnboardingPage } from '@/pages/onboarding'
 // DONE(B): Import VerifyContactPage - TASK-033
 import { VerifyContactPage } from '@/pages/verify-contact'
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
