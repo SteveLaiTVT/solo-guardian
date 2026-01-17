@@ -61,9 +61,9 @@ test.describe('Elder Mode', () => {
   test('should show visual settings section', async ({ authenticatedPage }) => {
     await authenticatedPage.goto('/settings');
 
-    // Visual section should be visible
-    await expect(authenticatedPage.locator('text=Font Size')).toBeVisible();
-    await expect(authenticatedPage.locator('text=High Contrast')).toBeVisible();
-    await expect(authenticatedPage.locator('text=Reduce Motion')).toBeVisible();
+    // Visual section should be visible - use more specific selectors to avoid strict mode violations
+    await expect(authenticatedPage.locator('h3:has-text("Font Size")')).toBeVisible();
+    await expect(authenticatedPage.locator('h3:has-text("High Contrast")')).toBeVisible();
+    await expect(authenticatedPage.locator('h3:has-text("Reduce Motion")')).toBeVisible();
   });
 });

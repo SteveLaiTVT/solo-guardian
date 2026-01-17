@@ -10,13 +10,13 @@ test.describe('Caregiver Features', () => {
   test.describe('API Endpoints', () => {
     test('caregiver endpoints should require authentication', async ({ request }) => {
       // Try to access caregiver endpoints without auth
-      const response = await request.get('/api/v1/caregiver/elders');
+      const response = await request.get('http://localhost:3000/caregiver/elders');
       expect(response.status()).toBe(401);
     });
 
     test('caregiver list should return empty for new users', async ({ authenticatedPage }) => {
       // Make API request through the authenticated context
-      const response = await authenticatedPage.request.get('/api/v1/caregiver/caregivers');
+      const response = await authenticatedPage.request.get('http://localhost:3000/caregiver/caregivers');
 
       // Should succeed but return empty list
       if (response.ok()) {
@@ -29,7 +29,7 @@ test.describe('Caregiver Features', () => {
     test('should reject self-invitation', async ({ authenticatedPage }) => {
       // Get current user's email
       // Note: This test requires knowing the user's email from the authenticated fixture
-      const selfInviteResponse = await authenticatedPage.request.post('/api/v1/caregiver/invite', {
+      const selfInviteResponse = await authenticatedPage.request.post('http://localhost:3000/caregiver/invite', {
         data: { email: 'test@example.com' }, // This would need to match the auth user's email
       });
 
@@ -61,20 +61,20 @@ test.describe('Caregiver Features', () => {
 
 test.describe('RBAC Protection', () => {
   test('regular user cannot access admin endpoints', async ({ authenticatedPage }) => {
-    const response = await authenticatedPage.request.get('/api/v1/admin/dashboard/stats');
+    const response = await authenticatedPage.request.get('http://localhost:3000/admin/dashboard/stats');
 
     // Should be forbidden (403) for regular users
     expect(response.status()).toBe(403);
   });
 
   test('regular user cannot access user management', async ({ authenticatedPage }) => {
-    const response = await authenticatedPage.request.get('/api/v1/admin/users');
+    const response = await authenticatedPage.request.get('http://localhost:3000/admin/users');
 
     expect(response.status()).toBe(403);
   });
 
   test('regular user cannot access alerts management', async ({ authenticatedPage }) => {
-    const response = await authenticatedPage.request.get('/api/v1/admin/alerts');
+    const response = await authenticatedPage.request.get('http://localhost:3000/admin/alerts');
 
     expect(response.status()).toBe(403);
   });
