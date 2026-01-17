@@ -5,7 +5,7 @@
  * @design_state_version 3.9.0
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { AlertRepository } from './alert.repository';
 import { NotificationService } from '../notifications';
@@ -22,7 +22,8 @@ export class AlertService implements OnModuleInit {
   constructor(
     private readonly alertRepository: AlertRepository,
     private readonly notificationService: NotificationService,
-    // DONE(B): Inject EmergencyContactsService - TASK-027
+    // DONE(B): Inject EmergencyContactsService with forwardRef - TASK-027, TASK-070
+    @Inject(forwardRef(() => EmergencyContactsService))
     private readonly emergencyContactsService: EmergencyContactsService,
     private readonly moduleRef: ModuleRef,
   ) {}

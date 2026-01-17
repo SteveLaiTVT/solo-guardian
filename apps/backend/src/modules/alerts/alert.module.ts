@@ -5,7 +5,7 @@
  * @design_state_version 1.8.0
  */
 
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { NotificationModule } from '../notifications';
 // DONE(B): Import EmergencyContactsModule - TASK-027
@@ -19,8 +19,8 @@ import { AlertController } from './alert.controller';
   imports: [
     PrismaModule,
     NotificationModule,
-    // DONE(B): Import EmergencyContactsModule - TASK-027
-    EmergencyContactsModule,
+    // DONE(B): Import EmergencyContactsModule with forwardRef - TASK-027, TASK-070
+    forwardRef(() => EmergencyContactsModule),
   ],
   controllers: [AlertController],
   providers: [AlertRepository, AlertService],
