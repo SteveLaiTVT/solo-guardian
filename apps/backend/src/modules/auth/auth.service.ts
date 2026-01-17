@@ -116,8 +116,7 @@ export class AuthService implements OnModuleInit {
     }
 
     // DONE(B): Include role in token generation - TASK-046
-    // Use default role until migration runs
-    const role: UserRoleType = 'user';
+    const role = user.role as UserRoleType;
     const tokens = await this.generateTokens(user.id, role);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
 
@@ -153,8 +152,7 @@ export class AuthService implements OnModuleInit {
     }
 
     // DONE(B): Include role in token generation - TASK-046
-    // Use default role until migration runs
-    const role: UserRoleType = 'user';
+    const role = consumedToken.user.role as UserRoleType;
     const tokens = await this.generateTokens(consumedToken.user.id, role);
     const newTokenHash = this.hashRefreshToken(tokens.refreshToken);
 

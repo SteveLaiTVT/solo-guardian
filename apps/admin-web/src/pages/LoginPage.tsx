@@ -27,7 +27,11 @@ export function LoginPage(): React.ReactElement {
     setLoading(true);
     try {
       const response = await adminApi.post('/auth/login', values);
-      const { accessToken, refreshToken, user } = response.data.data;
+      const responseData = response.data.data || response.data;
+      const user = responseData.user;
+      const tokens = responseData.tokens || responseData;
+      const accessToken = tokens.accessToken;
+      const refreshToken = tokens.refreshToken;
 
       // Check if user has admin role
       if (user.role !== 'admin' && user.role !== 'super_admin') {
