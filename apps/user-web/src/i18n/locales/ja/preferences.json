@@ -1,4 +1,12 @@
 {
+  "elderMode": {
+    "title": "クイックモードプリセット",
+    "description": "ワンクリックで視覚設定を適用",
+    "elderMode": "シニア向けモード",
+    "elderModeDesc": "大きな文字、高コントラスト、アニメーション軽減",
+    "standardMode": "標準モード",
+    "standardModeDesc": "デフォルト設定、通常の文字サイズ"
+  },
   "features": {
     "title": "機能",
     "description": "機能設定を管理",

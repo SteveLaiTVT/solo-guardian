@@ -1,4 +1,12 @@
 {
+  "elderMode": {
+    "title": "Quick Mode Presets",
+    "description": "Apply preset visual settings with one click",
+    "elderMode": "Elder-Friendly Mode",
+    "elderModeDesc": "Large text, high contrast, reduced animations",
+    "standardMode": "Standard Mode",
+    "standardModeDesc": "Default settings with normal text size"
+  },
   "features": {
     "title": "Features",
     "description": "Manage your feature preferences",

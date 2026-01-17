@@ -1,4 +1,12 @@
 {
+  "elderMode": {
+    "title": "快捷模式预设",
+    "description": "一键应用视觉设置",
+    "elderMode": "长者友好模式",
+    "elderModeDesc": "大字体、高对比度、减少动画",
+    "standardMode": "标准模式",
+    "standardModeDesc": "默认设置，正常字体大小"
+  },
   "features": {
     "title": "功能",
     "description": "管理您的功能偏好",
