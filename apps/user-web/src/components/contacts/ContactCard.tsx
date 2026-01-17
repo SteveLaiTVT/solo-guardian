@@ -1,11 +1,11 @@
 /**
  * @file ContactCard.tsx
  * @description Card component displaying a single emergency contact with verification status
- * @task TASK-037
- * @design_state_version 3.4.0
+ * @task TASK-037, TASK-071
+ * @design_state_version 3.9.0
  */
 import { useTranslation } from 'react-i18next'
-import { Mail, Phone, Pencil, Trash2, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react'
+import { Mail, Phone, Pencil, Trash2, CheckCircle2, AlertCircle, MessageSquare, Link2 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { EmergencyContact } from '@solo-guardian/api-client'
@@ -57,6 +57,19 @@ export function ContactCard({
                   </>
                 )}
               </span>
+              {/* Linked Status Badge */}
+              {contact.invitationStatus === 'accepted' && (
+                <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <Link2 className="mr-1 h-3 w-3" />
+                  {t('linked.linked')}
+                </span>
+              )}
+              {contact.invitationStatus === 'pending' && (
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                  <Link2 className="mr-1 h-3 w-3" />
+                  {t('linked.pending')}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex space-x-1">
