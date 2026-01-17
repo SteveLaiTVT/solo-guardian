@@ -31,11 +31,6 @@ import {
   NotesListResponseDto,
 } from './dto';
 
-interface ApiResponse<T> {
-  success: true;
-  data: T;
-}
-
 interface JwtUser {
   userId: string;
 }
@@ -51,22 +46,16 @@ export class CaregiverController {
   @Get('elders')
   @UseGuards(RolesGuard)
   @CaregiverOrAdmin()
-  async getMyElders(
-    @CurrentUser() user: JwtUser,
-  ): Promise<ApiResponse<ElderSummary[]>> {
-    const elders = await this.caregiverService.getMyElders(user.userId);
-    return { success: true, data: elders };
+  async getMyElders(@CurrentUser() user: JwtUser): Promise<ElderSummary[]> {
+    return this.caregiverService.getMyElders(user.userId);
   }
 
   /**
    * Get list of caregivers for the current user (as elder)
    */
   @Get('caregivers')
-  async getMyCaregivers(
-    @CurrentUser() user: JwtUser,
-  ): Promise<ApiResponse<CaregiverSummary[]>> {
-    const caregivers = await this.caregiverService.getMyCaregivers(user.userId);
-    return { success: true, data: caregivers };
+  async getMyCaregivers(@CurrentUser() user: JwtUser): Promise<CaregiverSummary[]> {
+    return this.caregiverService.getMyCaregivers(user.userId);
   }
 
   /**
@@ -78,9 +67,8 @@ export class CaregiverController {
   async getElderDetail(
     @CurrentUser() user: JwtUser,
     @Param('elderId') elderId: string,
-  ): Promise<ApiResponse<ElderDetail>> {
-    const elder = await this.caregiverService.getElderDetail(user.userId, elderId);
-    return { success: true, data: elder };
+  ): Promise<ElderDetail> {
+    return this.caregiverService.getElderDetail(user.userId, elderId);
   }
 
   /**
@@ -92,9 +80,9 @@ export class CaregiverController {
   async inviteElder(
     @CurrentUser() user: JwtUser,
     @Body() dto: InviteElderDto,
-  ): Promise<ApiResponse<{ message: string }>> {
+  ): Promise<{ message: string }> {
     await this.caregiverService.inviteElder(user.userId, dto);
-    return { success: true, data: { message: 'Invitation sent' } };
+    return { message: 'Invitation sent' };
   }
 
   /**
@@ -104,9 +92,9 @@ export class CaregiverController {
   async acceptCaregiver(
     @CurrentUser() user: JwtUser,
     @Body() dto: AcceptInvitationDto,
-  ): Promise<ApiResponse<{ message: string }>> {
+  ): Promise<{ message: string }> {
     await this.caregiverService.acceptCaregiver(user.userId, dto.caregiverId);
-    return { success: true, data: { message: 'Caregiver accepted' } };
+    return { message: 'Caregiver accepted' };
   }
 
   /**
@@ -116,9 +104,9 @@ export class CaregiverController {
   async removeCaregiver(
     @CurrentUser() user: JwtUser,
     @Param('caregiverId') caregiverId: string,
-  ): Promise<ApiResponse<{ message: string }>> {
+  ): Promise<{ message: string }> {
     await this.caregiverService.removeCaregiver(user.userId, caregiverId);
-    return { success: true, data: { message: 'Caregiver removed' } };
+    return { message: 'Caregiver removed' };
   }
 
   /**
@@ -130,9 +118,9 @@ export class CaregiverController {
   async removeElder(
     @CurrentUser() user: JwtUser,
     @Param('elderId') elderId: string,
-  ): Promise<ApiResponse<{ message: string }>> {
+  ): Promise<{ message: string }> {
     await this.caregiverService.removeElder(user.userId, elderId);
-    return { success: true, data: { message: 'Elder removed' } };
+    return { message: 'Elder removed' };
   }
 
   // DONE(B): Invitation endpoints - TASK-058
@@ -143,20 +131,16 @@ export class CaregiverController {
   async createInvitation(
     @CurrentUser() user: JwtUser,
     @Body() dto: CreateInvitationDto,
-  ): Promise<ApiResponse<InvitationResponseDto>> {
-    const invitation = await this.caregiverService.createInvitation(user.userId, dto);
-    return { success: true, data: invitation };
+  ): Promise<InvitationResponseDto> {
+    return this.caregiverService.createInvitation(user.userId, dto);
   }
 
   /**
    * Get invitation details (public - no auth required for viewing)
    */
   @Get('invitations/:token')
-  async getInvitationDetails(
-    @Param('token') token: string,
-  ): Promise<ApiResponse<InvitationDetailsDto>> {
-    const details = await this.caregiverService.getInvitationDetails(token);
-    return { success: true, data: details };
+  async getInvitationDetails(@Param('token') token: string): Promise<InvitationDetailsDto> {
+    return this.caregiverService.getInvitationDetails(token);
   }
 
   /**
@@ -166,9 +150,9 @@ export class CaregiverController {
   async acceptInvitation(
     @CurrentUser() user: JwtUser,
     @Param('token') token: string,
-  ): Promise<ApiResponse<{ message: string }>> {
+  ): Promise<{ message: string }> {
     await this.caregiverService.acceptInvitation(token, user.userId);
-    return { success: true, data: { message: 'Invitation accepted' } };
+    return { message: 'Invitation accepted' };
   }
 
   // DONE(B): Caretaker check-in endpoint - TASK-060
@@ -182,9 +166,8 @@ export class CaregiverController {
     @CurrentUser() user: JwtUser,
     @Param('elderId') elderId: string,
     @Body() dto: { note?: string },
-  ): Promise<ApiResponse<{ checkInDate: string; checkedInAt: Date }>> {
-    const result = await this.caregiverService.checkInOnBehalf(user.userId, elderId, dto.note);
-    return { success: true, data: result };
+  ): Promise<{ checkInDate: string; checkedInAt: Date }> {
+    return this.caregiverService.checkInOnBehalf(user.userId, elderId, dto.note);
   }
 
   // DONE(B): Caregiver notes endpoints - TASK-061
@@ -198,9 +181,8 @@ export class CaregiverController {
     @CurrentUser() user: JwtUser,
     @Param('elderId') elderId: string,
     @Body() dto: CreateNoteDto,
-  ): Promise<ApiResponse<NoteResponseDto>> {
-    const note = await this.caregiverService.addNote(user.userId, elderId, dto);
-    return { success: true, data: note };
+  ): Promise<NoteResponseDto> {
+    return this.caregiverService.addNote(user.userId, elderId, dto);
   }
 
   /**
@@ -212,8 +194,7 @@ export class CaregiverController {
   async getNotes(
     @CurrentUser() user: JwtUser,
     @Param('elderId') elderId: string,
-  ): Promise<ApiResponse<NotesListResponseDto>> {
-    const result = await this.caregiverService.getNotes(user.userId, elderId);
-    return { success: true, data: result };
+  ): Promise<NotesListResponseDto> {
+    return this.caregiverService.getNotes(user.userId, elderId);
   }
 }

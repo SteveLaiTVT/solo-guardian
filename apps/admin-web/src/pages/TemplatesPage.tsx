@@ -58,10 +58,30 @@ const THEMES = [
 ];
 
 const TEMPLATE_CODES = [
-  { value: 'alert', label: 'Alert Notification', description: 'Sent when user misses check-in' },
-  { value: 'reminder', label: 'Check-in Reminder', description: 'Daily reminder to check in' },
-  { value: 'verification', label: 'Contact Verification', description: 'Verify emergency contact email' },
-  { value: 'contact_link', label: 'Contact Link Invitation', description: 'Invite contact to link accounts' },
+  {
+    value: 'alert',
+    label: 'Alert Notification',
+    description: 'Sent when user misses check-in',
+    triggerRules: 'Automatically sent when user has NOT checked in and their deadline time has passed. System checks every minute. Emails go to all active emergency contacts.',
+  },
+  {
+    value: 'reminder',
+    label: 'Check-in Reminder',
+    description: 'Daily reminder to check in',
+    triggerRules: 'Automatically sent to users with reminders enabled, between their reminder time and deadline time. Only sent once per day if they have not checked in.',
+  },
+  {
+    value: 'verification',
+    label: 'Contact Verification',
+    description: 'Verify emergency contact email',
+    triggerRules: 'Sent when a user adds a new emergency contact. Contains a verification link for the contact to confirm their email.',
+  },
+  {
+    value: 'contact_link',
+    label: 'Contact Link Invitation',
+    description: 'Invite contact to link accounts',
+    triggerRules: 'Sent when a user adds an emergency contact whose email matches a registered user. The linked user can view alerts.',
+  },
 ];
 
 // Predefined variables for each template type
@@ -684,6 +704,18 @@ export function TemplatesPage(): React.ReactElement {
                 </Space>
               )}
 
+              {/* Trigger Rules Info */}
+              <Alert
+                type="warning"
+                message="When is this email sent?"
+                description={
+                  TEMPLATE_CODES.find(t => t.value === selectedCode)?.triggerRules ||
+                  'Select a template type to see when emails are triggered.'
+                }
+                style={{ marginBottom: 16 }}
+                showIcon
+              />
+
               {renderVariablePicker('email')}
 
               <Form.Item
@@ -833,6 +865,18 @@ export function TemplatesPage(): React.ReactElement {
                   <Tag>{LANGUAGES.find(l => l.value === editingSms.language)?.label}</Tag>
                 </Space>
               )}
+
+              {/* Trigger Rules Info */}
+              <Alert
+                type="warning"
+                message="When is this SMS sent?"
+                description={
+                  TEMPLATE_CODES.find(t => t.value === selectedCode)?.triggerRules ||
+                  'Select a template type to see when SMS messages are triggered.'
+                }
+                style={{ marginBottom: 16 }}
+                showIcon
+              />
 
               {renderVariablePicker('sms')}
 
