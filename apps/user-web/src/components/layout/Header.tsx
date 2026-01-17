@@ -4,11 +4,25 @@
  * @task TASK-013, TASK-016
  * @design_state_version 1.4.2
  */
-import { Link } from "react-router-dom"
+import { NavLink, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { User, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Home, History, Heart, Users, Settings } from "lucide-react"
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher"
+import { cn } from "@/lib/utils"
+
+interface NavItem {
+  to: string
+  icon: React.ComponentType<{ className?: string }>
+  labelKey: string
+}
+
+const navItems: NavItem[] = [
+  { to: "/", icon: Home, labelKey: "nav.home" },
+  { to: "/history", icon: History, labelKey: "nav.history" },
+  { to: "/caregiver", icon: Heart, labelKey: "nav.caregiver" },
+  { to: "/contacts", icon: Users, labelKey: "nav.contacts" },
+  { to: "/settings", icon: Settings, labelKey: "nav.settings" },
+]
 
 export function Header(): JSX.Element {
   const { t } = useTranslation('common');
@@ -19,20 +33,31 @@ export function Header(): JSX.Element {
         <Link to="/" className="flex items-center space-x-2">
           <span className="font-bold text-lg">{t('appName')}</span>
         </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-1 ml-6">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === "/"}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )
+              }
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{t(item.labelKey)}</span>
+            </NavLink>
+          ))}
+        </nav>
+
         <div className="flex flex-1 items-center justify-end space-x-2">
           <LanguageSwitcher />
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/contacts">
-              <Users className="h-5 w-5" />
-              <span className="sr-only">{t('nav.contacts')}</span>
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/settings">
-              <User className="h-5 w-5" />
-              <span className="sr-only">{t('nav.settings')}</span>
-            </Link>
-          </Button>
         </div>
       </div>
     </header>
