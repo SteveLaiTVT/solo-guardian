@@ -121,6 +121,7 @@ export class AuthRepository {
         username: true,
         phone: true,
         name: true,
+        avatar: true,
         birthYear: true,
         role: true,
         status: true,

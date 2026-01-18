@@ -4,7 +4,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as OSS from 'ali-oss';
+import OSS from 'ali-oss';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 

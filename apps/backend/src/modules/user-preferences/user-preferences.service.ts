@@ -141,7 +141,7 @@ export class UserPreferencesService {
     file: Express.Multer.File,
   ): Promise<ProfileResponseDto> {
     if (!this.storageService.isConfigured()) {
-      throw new BusinessException('SYSTEM_INTERNAL', {
+      throw new BusinessException('SYSTEM_SERVICE_UNAVAILABLE', {
         details: { message: 'Storage service not configured' },
       });
     }

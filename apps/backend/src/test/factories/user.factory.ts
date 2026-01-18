@@ -11,6 +11,7 @@ export function createMockUser(overrides: Partial<User> = {}): User {
     phone: null,
     passwordHash: '$2a$12$hashedpassword',
     name: 'Test User',
+    avatar: null,
     birthYear: null,
     role: 'user' as UserRole,
     status: 'active' as UserStatus,
