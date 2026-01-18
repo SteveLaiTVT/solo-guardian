@@ -58,11 +58,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     if (state.settings != null) {
       final currentSettings = state.settings!;
       final optimisticSettings = CheckInSettings(
-        id: currentSettings.id,
         userId: currentSettings.userId,
         deadlineTime: deadlineTime ?? currentSettings.deadlineTime,
         reminderTime: reminderTime ?? currentSettings.reminderTime,
         reminderEnabled: reminderEnabled ?? currentSettings.reminderEnabled,
+        timezone: currentSettings.timezone,
         createdAt: currentSettings.createdAt,
         updatedAt: currentSettings.updatedAt,
       );
