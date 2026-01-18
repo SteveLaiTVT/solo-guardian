@@ -12,6 +12,7 @@ import '../../providers/preferences_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/language_switcher.dart';
 import '../../widgets/profile_edit_dialog.dart';
+import '../../widgets/settings_widgets.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -433,159 +434,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildCheckInSettings(AppLocalizations l10n, ThemeData theme) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final settings = ref.watch(settingsProvider).settings;
-        if (settings == null) return const SizedBox.shrink();
-
-        return Column(
-          children: [
-            // Deadline Time
-            ListTile(
-              leading: Icon(Icons.access_time, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsDeadline, style: const TextStyle(fontSize: 18)),
-              subtitle: Text(l10n.settingsDeadlineDesc, style: const TextStyle(fontSize: 14)),
-              trailing: TextButton(
-                onPressed: () => _showTimePickerDialog(
-                  l10n.settingsDeadline,
-                  settings.deadlineTime,
-                  (time) async {
-                    await ref.read(settingsProvider.notifier).updateSettings(
-                          deadlineTime: time,
-                        );
-                  },
-                ),
-                child: Text(
-                  settings.deadlineTime,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-
-            // Reminder Enabled
-            SwitchListTile(
-              secondary: Icon(Icons.notifications, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsReminderEnabled, style: const TextStyle(fontSize: 18)),
-              subtitle: Text(l10n.settingsReminderEnabledDesc, style: const TextStyle(fontSize: 14)),
-              value: settings.reminderEnabled,
-              onChanged: (value) async {
-                await ref.read(settingsProvider.notifier).updateSettings(
-                      reminderEnabled: value,
-                    );
-              },
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-
-            // Reminder Time
-            if (settings.reminderEnabled)
-              ListTile(
-                leading: Icon(Icons.alarm, size: 28, color: theme.colorScheme.primary),
-                title: Text(l10n.settingsReminderTime, style: const TextStyle(fontSize: 18)),
-                trailing: TextButton(
-                  onPressed: () => _showTimePickerDialog(
-                    l10n.settingsReminderTime,
-                    settings.reminderTime,
-                    (time) async {
-                      await ref.read(settingsProvider.notifier).updateSettings(
-                            reminderTime: time,
-                          );
-                    },
-                  ),
-                  child: Text(
-                    settings.reminderTime,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              ),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        DeadlineTimeSetting(showTimePickerDialog: _showTimePickerDialog),
+        const ReminderEnabledSetting(),
+        ReminderTimeSetting(showTimePickerDialog: _showTimePickerDialog),
+      ],
     );
   }
 
   Widget _buildAppearanceSettings(AppLocalizations l10n, ThemeData theme) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final prefs = ref.watch(preferencesProvider).preferences;
-        if (prefs == null) return const SizedBox.shrink();
-
-        return Column(
-          children: [
-            // Theme
-            ListTile(
-              leading: Icon(Icons.color_lens, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18)),
-              trailing: DropdownButton<ThemeType>(
-                value: prefs.theme,
-                items: ThemeType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(_getThemeName(type, l10n), style: const TextStyle(fontSize: 16)),
-                  );
-                }).toList(),
-                onChanged: (value) async {
-                  if (value != null) {
-                    await ref.read(preferencesProvider.notifier).updatePreferences(
-                          theme: value.name,
-                        );
-                  }
-                },
-                underline: const SizedBox.shrink(),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-
-            // Font Size
-            ListTile(
-              leading: Icon(Icons.text_fields, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsFontSize, style: const TextStyle(fontSize: 18)),
-              subtitle: Slider(
-                value: prefs.fontSize.toDouble(),
-                min: 14,
-                max: 24,
-                divisions: 5,
-                label: '${prefs.fontSize}',
-                onChanged: (value) async {
-                  await ref.read(preferencesProvider.notifier).updatePreferences(
-                        fontSize: value.round(),
-                      );
-                },
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-
-            // High Contrast
-            SwitchListTile(
-              secondary: Icon(Icons.contrast, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsHighContrast, style: const TextStyle(fontSize: 18)),
-              subtitle: Text(l10n.settingsHighContrastDesc, style: const TextStyle(fontSize: 14)),
-              value: prefs.highContrast,
-              onChanged: (value) async {
-                await ref.read(preferencesProvider.notifier).updatePreferences(
-                      highContrast: value,
-                    );
-              },
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-
-            // Reduced Motion
-            SwitchListTile(
-              secondary: Icon(Icons.animation, size: 28, color: theme.colorScheme.primary),
-              title: Text(l10n.settingsReducedMotion, style: const TextStyle(fontSize: 18)),
-              subtitle: Text(l10n.settingsReducedMotionDesc, style: const TextStyle(fontSize: 14)),
-              value: prefs.reducedMotion,
-              onChanged: (value) async {
-                await ref.read(preferencesProvider.notifier).updatePreferences(
-                      reducedMotion: value,
-                    );
-              },
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            ),
-          ],
-        );
-      },
+    return const Column(
+      children: [
+        ThemeSetting(),
+        FontSizeSetting(),
+        HighContrastSetting(),
+        ReducedMotionSetting(),
+      ],
     );
   }
 

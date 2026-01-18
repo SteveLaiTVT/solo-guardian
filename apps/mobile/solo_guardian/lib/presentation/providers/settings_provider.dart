@@ -54,7 +54,21 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     String? reminderTime,
     bool? reminderEnabled,
   }) async {
-    state = state.copyWith(isLoading: true, error: null, errorI18nKey: null);
+    // Optimistic update - update UI immediately without loading state
+    if (state.settings != null) {
+      final currentSettings = state.settings!;
+      final optimisticSettings = CheckInSettings(
+        id: currentSettings.id,
+        userId: currentSettings.userId,
+        deadlineTime: deadlineTime ?? currentSettings.deadlineTime,
+        reminderTime: reminderTime ?? currentSettings.reminderTime,
+        reminderEnabled: reminderEnabled ?? currentSettings.reminderEnabled,
+        createdAt: currentSettings.createdAt,
+        updatedAt: currentSettings.updatedAt,
+      );
+      state = SettingsState(settings: optimisticSettings);
+    }
+
     try {
       final settingsRepo = _ref.read(settingsRepositoryProvider);
       final settings = await settingsRepo.updateSettings(
@@ -62,10 +76,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         reminderTime: reminderTime,
         reminderEnabled: reminderEnabled,
       );
+      // Update with server response
       state = SettingsState(settings: settings);
     } catch (e) {
       final (errorMsg, i18nKey) = _extractError(e);
-      state = state.copyWith(isLoading: false, error: errorMsg, errorI18nKey: i18nKey);
+      // Keep the optimistic update but set error
+      state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
     }
   }

@@ -57,7 +57,38 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
     bool? highContrast,
     bool? reducedMotion,
   }) async {
-    state = state.copyWith(isLoading: true, error: null, errorI18nKey: null);
+    // Optimistic update - update UI immediately without loading state
+    if (state.preferences != null) {
+      final current = state.preferences!;
+
+      // Parse theme if provided
+      ThemeType? parsedTheme;
+      if (theme != null) {
+        parsedTheme = ThemeType.values.firstWhere(
+          (t) => t.name == theme,
+          orElse: () => current.theme,
+        );
+      }
+
+      final optimisticPrefs = UserPreferences(
+        id: current.id,
+        userId: current.userId,
+        preferFeaturesOn: current.preferFeaturesOn,
+        theme: parsedTheme ?? current.theme,
+        fontSize: fontSize ?? current.fontSize,
+        highContrast: highContrast ?? current.highContrast,
+        reducedMotion: reducedMotion ?? current.reducedMotion,
+        warmColors: current.warmColors,
+        hobbyCheckIn: current.hobbyCheckIn,
+        familyAccess: current.familyAccess,
+        optionalFeatures: current.optionalFeatures,
+        onboardingCompleted: current.onboardingCompleted,
+        createdAt: current.createdAt,
+        updatedAt: current.updatedAt,
+      );
+      state = PreferencesState(preferences: optimisticPrefs);
+    }
+
     try {
       final prefsRepo = _ref.read(preferencesRepositoryProvider);
       final preferences = await prefsRepo.updatePreferences(
@@ -67,10 +98,12 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
         highContrast: highContrast,
         reducedMotion: reducedMotion,
       );
+      // Update with server response
       state = PreferencesState(preferences: preferences);
     } catch (e) {
       final (errorMsg, i18nKey) = _extractError(e);
-      state = state.copyWith(isLoading: false, error: errorMsg, errorI18nKey: i18nKey);
+      // Keep the optimistic update but set error
+      state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
     }
   }
