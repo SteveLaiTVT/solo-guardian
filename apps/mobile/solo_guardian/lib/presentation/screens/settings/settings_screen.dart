@@ -35,6 +35,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _handleLogout() async {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -64,6 +65,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _pickAndUploadAvatar() async {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final picker = ImagePicker();
 
     final source = await showModalBottomSheet<ImageSource>(
@@ -71,34 +73,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera, size: 32),
-                title: Text(
-                  l10n.settingsAvatarCamera,
-                  style: theme.textTheme.titleMedium,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_camera, size: 32),
+                  title: Text(
+                    l10n.settingsAvatarCamera,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 ),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library, size: 32),
-                title: Text(
-                  l10n.settingsAvatarGallery,
-                  style: theme.textTheme.titleMedium,
+                ListTile(
+                  leading: const Icon(Icons.photo_library, size: 32),
+                  title: Text(
+                    l10n.settingsAvatarGallery,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 ),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     if (source == null) return;
