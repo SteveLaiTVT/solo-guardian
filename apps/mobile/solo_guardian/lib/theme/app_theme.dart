@@ -161,6 +161,28 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return highContrast ? Colors.black : Colors.white;
+          }
+          return highContrast ? const Color(0xFF666666) : null;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return c.primary;
+          }
+          return highContrast ? const Color(0xFF333333) : null;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (highContrast) {
+            return states.contains(WidgetState.selected)
+                ? c.primary
+                : const Color(0xFF999999);
+          }
+          return null;
+        }),
+      ),
       pageTransitionsTheme: reducedMotion
           ? const PageTransitionsTheme(
               builders: {
