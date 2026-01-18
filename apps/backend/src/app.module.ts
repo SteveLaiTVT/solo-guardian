@@ -28,6 +28,8 @@ import { CaregiverModule } from './modules/caregiver';
 import { TemplatesModule } from './modules/templates';
 // DONE(B): Import AnalyticsModule - TASK-053
 import { AnalyticsModule } from './modules/analytics';
+// Import StorageModule for file uploads
+import { StorageModule } from './modules/storage';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { AnalyticsModule } from './modules/analytics';
     TemplatesModule,
     // DONE(B): Add AnalyticsModule - TASK-053
     AnalyticsModule,
+    // Add StorageModule for file uploads (global)
+    StorageModule,
   ],
 })
 export class AppModule {}
