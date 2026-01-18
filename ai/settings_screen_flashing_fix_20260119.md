@@ -141,17 +141,75 @@ Widget _buildAppearanceSettings(AppLocalizations l10n, ThemeData theme) {
 - ✅ UI 立即响应用户操作
 - ✅ 流畅的用户体验
 
+## 附加修复：字体大小响应问题
+
+### 问题
+用户在设置中更改字体大小时，界面文字没有任何变化。
+
+### 原因
+设置界面所有文字都使用了硬编码的 `fontSize`，例如：
+- `const TextStyle(fontSize: 18)`
+- `const TextStyle(fontSize: 16)`
+
+这些常量不会随着主题的 `fontSize` 设置变化。
+
+### 解决方案
+将所有硬编码的字体大小替换为主题的 `textTheme` 样式：
+
+```dart
+// 之前 - 硬编码
+Text(l10n.settingsDeadline, style: const TextStyle(fontSize: 18))
+
+// 之后 - 使用主题
+Text(l10n.settingsDeadline, style: theme.textTheme.titleMedium)
+```
+
+### 映射关系
+- `fontSize: 20` → `theme.textTheme.titleLarge`
+- `fontSize: 18` → `theme.textTheme.titleMedium`
+- `fontSize: 16` → `theme.textTheme.bodyLarge`
+- `fontSize: 14` → `theme.textTheme.bodyMedium`
+- `fontSize: 24` → `theme.textTheme.headlineMedium`
+
+### 效果
+现在当用户拖动字体大小滑块（14-24px）时，设置界面的所有文字都会立即随之缩放。
+
+## 附加修复：高对比度模式 Switch 可见性
+
+### 问题
+在高对比度模式下，开关（Switch）控件几乎看不见。
+
+### 原因
+高对比度模式使用黑色背景和黄色主色，但 Switch 组件没有专门的配色方案。
+
+### 解决方案
+在 `app_theme.dart` 中添加 `switchTheme` 配置：
+
+**高对比度模式下：**
+- 激活状态：黑色拇指 + 黄色轨道 + 黄色边框
+- 未激活状态：深灰色拇指 + 深灰色轨道 + 浅灰色边框
+
+**普通模式下：**
+- 保持 Flutter 默认样式
+
+### 效果
+在高对比度模式下，所有 Switch 开关都具有清晰的视觉对比度，易于识别和操作。
+
 ## 修改文件列表
 
-1. `apps/mobile/solo_guardian/lib/presentation/providers/settings_provider.dart` - 修改
+1. `apps/mobile/solo_guardian/lib/presentation/providers/settings_provider.dart` - 修改（修复编译错误）
 2. `apps/mobile/solo_guardian/lib/presentation/providers/preferences_provider.dart` - 修改
 3. `apps/mobile/solo_guardian/lib/presentation/widgets/settings_widgets.dart` - 新建
 4. `apps/mobile/solo_guardian/lib/presentation/screens/settings/settings_screen.dart` - 修改
+5. `apps/mobile/solo_guardian/lib/presentation/widgets/profile_edit_dialog.dart` - 修改（字体响应）
+6. `apps/mobile/solo_guardian/lib/theme/app_theme.dart` - 修改（Switch 可见性）
 
 ## 测试建议
 
-运行应用后测试以下操作，确认没有闪屏现象：
+运行应用后测试以下操作：
 
+### 闪屏测试
+确认以下操作没有闪屏现象：
 1. 切换提醒开关
 2. 修改每日截止时间
 3. 修改提醒时间
@@ -161,3 +219,17 @@ Widget _buildAppearanceSettings(AppLocalizations l10n, ThemeData theme) {
 7. 切换减少动画开关
 
 所有操作都应该流畅进行，不会看到页面闪烁或重新加载。
+
+### 字体大小测试
+1. 将字体大小滑块拖到最小（14）
+2. 观察设置页面所有文字是否变小
+3. 将字体大小滑块拖到最大（24）
+4. 观察设置页面所有文字是否变大
+5. 在不同字体大小下，确认所有文字都清晰可读
+
+### 高对比度测试
+1. 开启高对比度模式
+2. 观察页面是否变为黑底黄字
+3. 检查所有 Switch 开关是否清晰可见
+4. 尝试切换各个开关，确认状态清晰可辨
+5. 关闭高对比度模式，确认恢复正常
