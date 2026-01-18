@@ -29,14 +29,30 @@ export class StorageService {
     this.endpoint = this.configService.get<string>('ALIYUN_OSS_ENDPOINT') || '';
     this.cdnDomain = this.configService.get<string>('ALIYUN_OSS_CDN_DOMAIN') || '';
 
-    if (region && accessKeyId && accessKeySecret && this.bucket) {
-      this.client = new OSS({
-        region,
-        accessKeyId,
-        accessKeySecret,
-        bucket: this.bucket,
-      });
-      this.logger.log('Aliyun OSS client initialized');
+    // Validate that config values are real (not placeholder values)
+    const isValidConfig =
+      region &&
+      accessKeyId &&
+      accessKeySecret &&
+      this.bucket &&
+      !region.includes('your-') &&
+      !accessKeyId.includes('your-') &&
+      !accessKeySecret.includes('your-') &&
+      !this.bucket.includes('your-');
+
+    if (isValidConfig) {
+      try {
+        this.client = new OSS({
+          region,
+          accessKeyId,
+          accessKeySecret,
+          bucket: this.bucket,
+        });
+        this.logger.log('Aliyun OSS client initialized');
+      } catch (error) {
+        this.logger.warn(`Failed to initialize OSS client: ${error}`);
+        this.client = null;
+      }
     } else {
       this.logger.warn('Aliyun OSS not configured - file uploads will be disabled');
     }
