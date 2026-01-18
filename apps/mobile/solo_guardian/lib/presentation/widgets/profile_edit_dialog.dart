@@ -45,7 +45,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     // Validate
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = l10n.registerNameEmpty);
+      setState(() => _error = l10n.validationNameRequired);
       return;
     }
 
@@ -111,7 +111,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: l10n.registerName,
+                labelText: l10n.fieldsName,
                 labelStyle: const TextStyle(fontSize: 18),
                 prefixIcon: const Icon(Icons.person_outline, size: 28),
                 border: OutlineInputBorder(

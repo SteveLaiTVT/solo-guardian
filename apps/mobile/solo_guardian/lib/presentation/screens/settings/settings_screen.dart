@@ -7,6 +7,7 @@ import '../../../data/models/preferences.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/core_providers.dart';
 import '../../providers/preferences_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/language_switcher.dart';
