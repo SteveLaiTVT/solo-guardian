@@ -150,6 +150,8 @@
     }
   },
   "save": "Save",
+  "close": "Close",
+  "checkInNote": "Note",
 
   "caregiverElders": "Elders",
   "caregiverCaregivers": "My Caregivers",

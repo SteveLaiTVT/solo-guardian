@@ -133,7 +133,7 @@ abstract class AppLocalizations {
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
-  /// **'Save Changes'**
+  /// **'Save'**
   String get save;
 
   /// No description provided for @saving.
@@ -723,6 +723,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to sign out?'**
   String get settingsLogoutConfirm;
+
+  /// No description provided for @settingsEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get settingsEditProfile;
+
+  /// No description provided for @settingsProfileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get settingsProfileUpdated;
+
+  /// No description provided for @settingsEditProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get settingsEditProfileTitle;
+
+  /// No description provided for @settingsBirthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth Year (Optional)'**
+  String get settingsBirthYear;
+
+  /// No description provided for @settingsBirthYearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1960'**
+  String get settingsBirthYearHint;
+
+  /// No description provided for @settingsBirthYearInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid birth year format'**
+  String get settingsBirthYearInvalid;
+
+  /// No description provided for @settingsBirthYearRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth year must be between 1900 and {year}'**
+  String settingsBirthYearRange(String year);
 
   /// No description provided for @caregiverElders.
   ///

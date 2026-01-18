@@ -150,6 +150,8 @@
     }
   },
   "save": "保存",
+  "close": "閉じる",
+  "checkInNote": "メモ",
 
   "caregiverElders": "お年寄り",
   "caregiverCaregivers": "私の介護者",

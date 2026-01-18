@@ -150,6 +150,8 @@
     }
   },
   "save": "保存",
+  "close": "关闭",
+  "checkInNote": "备注",
 
   "caregiverElders": "长辈",
   "caregiverCaregivers": "我的看护人",

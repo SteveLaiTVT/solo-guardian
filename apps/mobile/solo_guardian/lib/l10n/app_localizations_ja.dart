@@ -330,6 +330,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsLogoutConfirm => 'ログアウトしてもよろしいですか？';
 
   @override
+  String get settingsEditProfile => 'プロフィールを編集';
+
+  @override
+  String get settingsProfileUpdated => 'プロフィールが更新されました';
+
+  @override
+  String get settingsEditProfileTitle => 'プロフィールを編集';
+
+  @override
+  String get settingsBirthYear => '生年（オプション）';
+
+  @override
+  String get settingsBirthYearHint => '例：1960';
+
+  @override
+  String get settingsBirthYearInvalid => '生年の形式が正しくありません';
+
+  @override
+  String settingsBirthYearRange(String year) {
+    return '生年は1900から$yearの間である必要があります';
+  }
+
+  @override
   String get caregiverElders => 'お年寄り';
 
   @override

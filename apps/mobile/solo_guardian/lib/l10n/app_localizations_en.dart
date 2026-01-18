@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get save => 'Save Changes';
+  String get save => 'Save';
 
   @override
   String get saving => 'Saving...';
@@ -335,6 +335,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLogoutConfirm => 'Are you sure you want to sign out?';
+
+  @override
+  String get settingsEditProfile => 'Edit Profile';
+
+  @override
+  String get settingsProfileUpdated => 'Profile updated successfully';
+
+  @override
+  String get settingsEditProfileTitle => 'Edit Profile';
+
+  @override
+  String get settingsBirthYear => 'Birth Year (Optional)';
+
+  @override
+  String get settingsBirthYearHint => 'e.g. 1960';
+
+  @override
+  String get settingsBirthYearInvalid => 'Invalid birth year format';
+
+  @override
+  String settingsBirthYearRange(String year) {
+    return 'Birth year must be between 1900 and $year';
+  }
 
   @override
   String get caregiverElders => 'Elders';

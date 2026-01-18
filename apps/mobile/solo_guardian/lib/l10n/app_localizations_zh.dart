@@ -329,6 +329,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLogoutConfirm => '确定要退出登录吗？';
 
   @override
+  String get settingsEditProfile => '编辑个人资料';
+
+  @override
+  String get settingsProfileUpdated => '个人资料已更新';
+
+  @override
+  String get settingsEditProfileTitle => '编辑个人资料';
+
+  @override
+  String get settingsBirthYear => '出生年份（选填）';
+
+  @override
+  String get settingsBirthYearHint => '例如：1960';
+
+  @override
+  String get settingsBirthYearInvalid => '出生年份格式不正确';
+
+  @override
+  String settingsBirthYearRange(String year) {
+    return '出生年份应在 1900 到 $year 之间';
+  }
+
+  @override
   String get caregiverElders => '长辈';
 
   @override
