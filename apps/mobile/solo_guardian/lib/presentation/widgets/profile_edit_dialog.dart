@@ -112,7 +112,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: l10n.fieldsName,
-                labelStyle: const TextStyle(fontSize: 18),
+                labelStyle: theme.textTheme.titleMedium,
                 prefixIcon: const Icon(Icons.person_outline, size: 28),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -122,7 +122,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                   vertical: 16,
                 ),
               ),
-              style: const TextStyle(fontSize: 18),
+              style: theme.textTheme.titleMedium,
               enabled: !_isLoading,
             ),
             const SizedBox(height: 16),
@@ -132,7 +132,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
               controller: _birthYearController,
               decoration: InputDecoration(
                 labelText: '出生年份（选填）',
-                labelStyle: const TextStyle(fontSize: 18),
+                labelStyle: theme.textTheme.titleMedium,
                 prefixIcon: const Icon(Icons.cake_outlined, size: 28),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -143,7 +143,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                 ),
                 hintText: '例如：1960',
               ),
-              style: const TextStyle(fontSize: 18),
+              style: theme.textTheme.titleMedium,
               keyboardType: TextInputType.number,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -163,9 +163,8 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                 ),
                 child: Text(
                   _error!,
-                  style: TextStyle(
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
-                    fontSize: 16,
                   ),
                 ),
               ),
@@ -189,7 +188,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                     ),
                     child: Text(
                       l10n.cancel,
-                      style: const TextStyle(fontSize: 18),
+                      style: theme.textTheme.titleMedium,
                     ),
                   ),
                 ),
@@ -214,7 +213,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                           )
                         : Text(
                             '保存',
-                            style: const TextStyle(fontSize: 18),
+                            style: theme.textTheme.titleMedium,
                           ),
                   ),
                 ),

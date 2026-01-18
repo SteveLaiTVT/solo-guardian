@@ -39,19 +39,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(l10n.settingsLogoutTitle, style: const TextStyle(fontSize: 20)),
-        content: Text(l10n.settingsLogoutConfirm, style: const TextStyle(fontSize: 18)),
+        title: Text(l10n.settingsLogoutTitle, style: theme.textTheme.titleLarge),
+        content: Text(l10n.settingsLogoutConfirm, style: theme.textTheme.titleMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel, style: const TextStyle(fontSize: 18)),
+            child: Text(l10n.cancel, style: theme.textTheme.titleMedium),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.settingsLogout, style: const TextStyle(fontSize: 18)),
+            child: Text(l10n.settingsLogout, style: theme.textTheme.titleMedium),
           ),
         ],
       ),
@@ -81,7 +81,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.photo_camera, size: 32),
                 title: Text(
                   l10n.settingsAvatarCamera,
-                  style: const TextStyle(fontSize: 18),
+                  style: theme.textTheme.titleMedium,
                 ),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -90,7 +90,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.photo_library, size: 32),
                 title: Text(
                   l10n.settingsAvatarGallery,
-                  style: const TextStyle(fontSize: 18),
+                  style: theme.textTheme.titleMedium,
                 ),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -119,7 +119,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.settingsAvatarSuccess, style: const TextStyle(fontSize: 16)),
+            content: Text(l10n.settingsAvatarSuccess, style: theme.textTheme.bodyLarge),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -128,7 +128,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.settingsAvatarError, style: const TextStyle(fontSize: 16)),
+            content: Text(l10n.settingsAvatarError, style: theme.textTheme.bodyLarge),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -165,9 +165,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (result == true && mounted) {
+      final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('个人资料已更新', style: TextStyle(fontSize: 16)),
+        SnackBar(
+          content: Text('个人资料已更新', style: theme.textTheme.bodyLarge),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -181,7 +182,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.navSettings, style: const TextStyle(fontSize: 20)),
+        title: Text(l10n.navSettings, style: theme.textTheme.titleLarge),
         centerTitle: true,
       ),
       body: Consumer(
@@ -418,7 +419,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               OutlinedButton.icon(
                 onPressed: _showProfileEditDialog,
                 icon: const Icon(Icons.edit, size: 20),
-                label: const Text('编辑个人资料', style: TextStyle(fontSize: 16)),
+                label: Text('编辑个人资料', style: theme.textTheme.bodyLarge),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -472,9 +473,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
               title: Row(
                 children: [
-                  Text(lang.flag, style: const TextStyle(fontSize: 24)),
+                  Text(lang.flag, style: theme.textTheme.headlineMedium),
                   const SizedBox(width: 12),
-                  Text(lang.name, style: const TextStyle(fontSize: 18)),
+                  Text(lang.name, style: theme.textTheme.titleMedium),
                 ],
               ),
               selected: isSelected,
@@ -531,7 +532,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 12),
             Text(
               error,
-              style: const TextStyle(fontSize: 16),
+              style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -541,7 +542,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(preferencesProvider.notifier).loadPreferences();
               },
               icon: const Icon(Icons.refresh, size: 24),
-              label: Text(l10n.retry, style: const TextStyle(fontSize: 18)),
+              label: Text(l10n.retry, style: theme.textTheme.titleMedium),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               ),

@@ -28,8 +28,8 @@ class DeadlineTimeSetting extends ConsumerWidget {
 
     return ListTile(
       leading: Icon(Icons.access_time, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsDeadline, style: const TextStyle(fontSize: 18)),
-      subtitle: Text(l10n.settingsDeadlineDesc, style: const TextStyle(fontSize: 14)),
+      title: Text(l10n.settingsDeadline, style: theme.textTheme.titleMedium),
+      subtitle: Text(l10n.settingsDeadlineDesc, style: theme.textTheme.bodyMedium),
       trailing: TextButton(
         onPressed: () => showTimePickerDialog(
           l10n.settingsDeadline,
@@ -42,7 +42,7 @@ class DeadlineTimeSetting extends ConsumerWidget {
         ),
         child: Text(
           deadlineTime,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -68,8 +68,8 @@ class ReminderEnabledSetting extends ConsumerWidget {
 
     return SwitchListTile(
       secondary: Icon(Icons.notifications, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsReminderEnabled, style: const TextStyle(fontSize: 18)),
-      subtitle: Text(l10n.settingsReminderEnabledDesc, style: const TextStyle(fontSize: 14)),
+      title: Text(l10n.settingsReminderEnabled, style: theme.textTheme.titleMedium),
+      subtitle: Text(l10n.settingsReminderEnabledDesc, style: theme.textTheme.bodyMedium),
       value: reminderEnabled,
       onChanged: (value) async {
         await ref.read(settingsProvider.notifier).updateSettings(
@@ -106,7 +106,7 @@ class ReminderTimeSetting extends ConsumerWidget {
 
     return ListTile(
       leading: Icon(Icons.alarm, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsReminderTime, style: const TextStyle(fontSize: 18)),
+      title: Text(l10n.settingsReminderTime, style: theme.textTheme.titleMedium),
       trailing: TextButton(
         onPressed: () => showTimePickerDialog(
           l10n.settingsReminderTime,
@@ -119,7 +119,7 @@ class ReminderTimeSetting extends ConsumerWidget {
         ),
         child: Text(
           settings.reminderTime,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -158,13 +158,13 @@ class ThemeSetting extends ConsumerWidget {
 
     return ListTile(
       leading: Icon(Icons.color_lens, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18)),
+      title: Text(l10n.settingsTheme, style: theme.textTheme.titleMedium),
       trailing: DropdownButton<ThemeType>(
         value: currentTheme,
         items: ThemeType.values.map((type) {
           return DropdownMenuItem(
             value: type,
-            child: Text(_getThemeName(type, l10n), style: const TextStyle(fontSize: 16)),
+            child: Text(_getThemeName(type, l10n), style: theme.textTheme.bodyLarge),
           );
         }).toList(),
         onChanged: (value) async {
@@ -199,7 +199,7 @@ class FontSizeSetting extends ConsumerWidget {
 
     return ListTile(
       leading: Icon(Icons.text_fields, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsFontSize, style: const TextStyle(fontSize: 18)),
+      title: Text(l10n.settingsFontSize, style: theme.textTheme.titleMedium),
       subtitle: Slider(
         value: fontSize.toDouble(),
         min: 14,
@@ -235,8 +235,8 @@ class HighContrastSetting extends ConsumerWidget {
 
     return SwitchListTile(
       secondary: Icon(Icons.contrast, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsHighContrast, style: const TextStyle(fontSize: 18)),
-      subtitle: Text(l10n.settingsHighContrastDesc, style: const TextStyle(fontSize: 14)),
+      title: Text(l10n.settingsHighContrast, style: theme.textTheme.titleMedium),
+      subtitle: Text(l10n.settingsHighContrastDesc, style: theme.textTheme.bodyMedium),
       value: highContrast,
       onChanged: (value) async {
         await ref.read(preferencesProvider.notifier).updatePreferences(
@@ -266,8 +266,8 @@ class ReducedMotionSetting extends ConsumerWidget {
 
     return SwitchListTile(
       secondary: Icon(Icons.animation, size: 28, color: theme.colorScheme.primary),
-      title: Text(l10n.settingsReducedMotion, style: const TextStyle(fontSize: 18)),
-      subtitle: Text(l10n.settingsReducedMotionDesc, style: const TextStyle(fontSize: 14)),
+      title: Text(l10n.settingsReducedMotion, style: theme.textTheme.titleMedium),
+      subtitle: Text(l10n.settingsReducedMotionDesc, style: theme.textTheme.bodyMedium),
       value: reducedMotion,
       onChanged: (value) async {
         await ref.read(preferencesProvider.notifier).updatePreferences(
