@@ -13,6 +13,7 @@ describe('AuthController', () => {
       email: 'test@example.com',
       username: null,
       phone: null,
+      avatar: null,
       name: 'Test User',
       role: 'user',
       createdAt: new Date('2025-01-01'),

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow all connections by default (for development) -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificates -->
+            <certificates src="system" />
+            <!-- Trust user-added certificates -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Specific configuration for Aliyun OSS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">oss-cn-shenzhen.aliyuncs.com</domain>
+        <domain includeSubdomains="true">solo-guardian.oss-cn-shenzhen.aliyuncs.com</domain>
+        <domain includeSubdomains="true">aliyuncs.com</domain>
+        <trust-anchors>
+            <!-- Trust system certificates -->
+            <certificates src="system" />
+            <!-- Trust user-added certificates -->
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

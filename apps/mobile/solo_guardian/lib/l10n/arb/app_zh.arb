@@ -1,0 +1,345 @@
+{
+  "@@locale": "zh",
+  "appName": "独居守护",
+  "loading": "加载中...",
+  "error": "发生错误",
+  "retry": "重试",
+  "cancel": "取消",
+  "save": "保存",
+  "saving": "保存中...",
+  "delete": "删除",
+  "ok": "确定",
+  "accept": "接受",
+
+  "navHome": "首页",
+  "navHistory": "历史",
+  "navCare": "关怀",
+  "navContacts": "联系人",
+  "navSettings": "设置",
+
+  "greetingMorning": "早上好！",
+  "greetingAfternoon": "下午好！",
+  "greetingEvening": "晚上好！",
+
+  "loginTitle": "欢迎回来",
+  "loginSubtitle": "登录您的账户以继续",
+  "loginButton": "登录",
+  "loginLoading": "登录中...",
+  "loginNoAccount": "还没有账户？",
+  "loginSignUp": "注册",
+  "loginFailed": "登录失败",
+
+  "registerTitle": "创建账户",
+  "registerSubtitle": "输入您的信息开始使用",
+  "registerButton": "创建账户",
+  "registerLoading": "创建中...",
+  "registerHasAccount": "已有账户？",
+  "registerSignIn": "登录",
+  "registerFailed": "注册失败",
+  "registerIdentifiersSection": "您希望如何登录？",
+  "registerIdentifiersHintOptional": "可选 - 您可以稍后添加",
+  "registerNoIdentifierTitle": "没有登录标识",
+  "registerNoIdentifierDescription": "您没有提供用户名、邮箱或手机号。确定要继续吗？",
+  "registerNoIdentifierCancel": "返回",
+  "registerNoIdentifierConfirm": "继续",
+
+  "fieldsEmail": "邮箱",
+  "fieldsEmailPlaceholder": "you@example.com",
+  "fieldsPassword": "密码",
+  "fieldsPasswordPlaceholder": "••••••••",
+  "fieldsName": "姓名",
+  "fieldsNamePlaceholder": "您的姓名",
+  "fieldsConfirmPassword": "确认密码",
+  "fieldsIdentifier": "用户名、邮箱、手机号或ID",
+  "fieldsIdentifierPlaceholder": "输入用户名、邮箱、手机号或ID",
+  "fieldsUsername": "用户名",
+  "fieldsUsernamePlaceholder": "选择用户名",
+  "fieldsPhone": "手机号",
+  "fieldsPhonePlaceholder": "+86 1234567890",
+
+  "validationEmailInvalid": "请输入有效的邮箱",
+  "validationEmailRequired": "邮箱是必填项",
+  "validationPasswordRequired": "密码是必填项",
+  "validationPasswordMinLength": "密码至少需要8个字符",
+  "validationConfirmRequired": "请确认您的密码",
+  "validationPasswordMismatch": "密码不匹配",
+  "validationNameRequired": "姓名是必填项",
+
+  "statusSafe": "今天您很安全！",
+  "statusCheckedInAt": "已在 {time} 签到",
+  "@statusCheckedInAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusDeadline": "截止时间：{time}",
+  "@statusDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusAlreadyCheckedIn": "已签到",
+  "statusTapToCheckIn": "点击按钮签到",
+  "buttonCheckIn": "签到",
+  "buttonCheckingIn": "签到中...",
+
+  "historyEmpty": "暂无签到记录",
+
+  "contactsEmpty": "暂无紧急联系人",
+  "contactsAdd": "添加联系人",
+  "contactsAddTitle": "添加紧急联系人",
+  "contactsLinked": "关联",
+  "contactsDeleteTitle": "删除联系人",
+  "contactsDeleteConfirm": "确定要删除 {name} 吗？",
+  "@contactsDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "linkedContactsTitle": "关联联系人",
+  "linkedContactsEmpty": "暂无关联联系人",
+  "linkedContactsPending": "待处理邀请",
+  "linkedContactsActive": "已激活关联",
+  "linkedContactsSince": "自 {date} 起",
+  "@linkedContactsSince": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+
+  "settingsCheckIn": "签到设置",
+  "settingsCheckInDesc": "配置您的每日签到时间",
+  "settingsDeadline": "每日截止时间",
+  "settingsDeadlineDesc": "每天需要完成签到的时间",
+  "settingsReminder": "提醒",
+  "settingsReminderEnabled": "开启提醒",
+  "settingsReminderEnabledDesc": "在截止时间前收到提醒通知",
+  "settingsReminderTime": "提醒时间",
+  "settingsVisual": "显示设置",
+  "settingsVisualDesc": "自定义外观和无障碍选项",
+  "settingsTheme": "颜色主题",
+  "settingsFontSize": "字体大小",
+  "settingsHighContrast": "高对比度",
+  "settingsHighContrastDesc": "增强对比度以提高可读性",
+  "settingsReducedMotion": "减少动画",
+  "settingsReducedMotionDesc": "减少应用中的动画效果",
+  "settingsLanguage": "语言",
+  "settingsAvatarCamera": "拍照",
+  "settingsAvatarGallery": "从相册选择",
+  "settingsAvatarTapToChange": "点击头像更换",
+  "settingsAvatarSuccess": "头像更新成功",
+  "settingsAvatarError": "头像更新失败",
+  "settingsAccountTitle": "账户",
+  "settingsAccountDesc": "管理您的账户设置",
+  "settingsLogout": "退出登录",
+  "settingsLogoutTitle": "退出登录",
+  "settingsLogoutConfirm": "确定要退出登录吗？",
+
+  "caregiverElders": "长辈",
+  "caregiverCaregivers": "我的看护人",
+  "caregiverEldersEmpty": "暂无需要照顾的长辈",
+  "caregiverCaregiversEmpty": "暂无添加的看护人",
+  "caregiverStatusCheckedIn": "今日已签到",
+  "caregiverStatusPending": "待签到",
+  "caregiverStatusOverdue": "已逾期",
+  "caregiverCheckIn": "代签到",
+  "caregiverCheckInTitle": "代为签到",
+  "caregiverCheckInConfirm": "确定为 {name} 签到吗？",
+  "@caregiverCheckInConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverCheckInSuccess": "已为 {name} 签到",
+  "@caregiverCheckInSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverDeadline": "截止时间：{time}",
+  "@caregiverDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "caregiverPendingAlerts": "{count} 个待处理警报",
+  "@caregiverPendingAlerts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "caregiverInvite": "邀请看护人",
+  "caregiverInviteTitle": "选择关系类型",
+  "caregiverTypeCaregiver": "看护人",
+  "caregiverTypeFamily": "家人",
+  "caregiverTypeCaretaker": "护理员",
+  "caregiverInvitationCreated": "邀请已创建",
+  "caregiverShareLink": "分享此链接：",
+
+  "onboardingNext": "下一步",
+  "onboardingBack": "返回",
+  "onboardingSkip": "跳过",
+  "onboardingComplete": "开始使用",
+  "onboardingFinish": "完成",
+  "onboardingSaving": "保存中...",
+
+  "onboardingWelcomeTitle": "欢迎使用独居守护",
+  "onboardingWelcomeSubtitle": "您的安全守护伙伴",
+
+  "onboardingProfileTitle": "关于您",
+  "onboardingProfileSubtitle": "帮助我们为您个性化体验",
+  "onboardingBirthYear": "出生年份",
+  "onboardingBirthYearHint": "这有助于我们为您定制适合年龄段的内容",
+  "onboardingBirthYearTap": "点击输入年份",
+  "onboardingBirthYearEnter": "输入年份",
+  "onboardingBirthYearInvalid": "请输入有效的年份",
+
+  "onboardingThemeTitle": "选择主题",
+  "onboardingThemeSubtitle": "选择一个让您感觉舒适的配色方案",
+  "onboardingThemeStandard": "标准",
+  "onboardingThemeWarm": "温暖",
+  "onboardingThemeNature": "自然",
+  "onboardingThemeOcean": "海洋",
+
+  "onboardingPreferenceTitle": "新功能设置",
+  "onboardingPreferenceSubtitle": "当我们推出新功能时，您希望如何处理？",
+  "onboardingPreferenceEnableAll": "自动启用",
+  "onboardingPreferenceEnableAllDesc": "新功能上线后立即可用",
+  "onboardingPreferenceKeepSimple": "保持简洁",
+  "onboardingPreferenceKeepSimpleDesc": "我会自己选择要启用的功能",
+
+  "onboardingFeaturesTitle": "个性化您的体验",
+  "onboardingFeaturesSubtitle": "选择您想要启用的可选功能",
+  "onboardingFeatureHobby": "兴趣打卡",
+  "onboardingFeatureHobbyDesc": "分享今天让您开心的事",
+  "onboardingFeatureFamily": "家人访问",
+  "onboardingFeatureFamilyDesc": "让家人可以查看您的状态",
+  "onboardingFeatureCheckIn": "每日签到确认安全",
+  "onboardingFeatureContacts": "紧急联系人会收到通知",
+  "onboardingFeatureAlerts": "错过签到自动发送警报",
+  "onboardingFeatureCaregiver": "支持家人和看护人",
+
+  "onboardingVisualTitle": "视觉舒适度",
+  "onboardingVisualSubtitle": "根据您的喜好调整显示设置",
+  "onboardingFontSize": "字体大小",
+  "onboardingFontSizePreview": "预览文本",
+  "onboardingHighContrast": "高对比度",
+  "onboardingReducedMotion": "减少动画",
+  "onboardingWarmColors": "暖色调",
+  "onboardingPreferencesTitle": "无障碍",
+
+  "onboardingCheckInTitle": "每日打卡",
+  "onboardingCheckInSubtitle": "通过每日打卡让亲人知道您一切安好",
+  "onboardingCheckInDescription": "每天点击签到按钮，让您的联系人知道您是安全的",
+  "onboardingCheckInHowTo": "如何打卡",
+  "onboardingCheckInHowToDesc": "只需每天点击首页的打卡按钮。您还可以添加关于近况的备注。",
+  "onboardingCheckInDeadline": "打卡截止时间",
+  "onboardingCheckInDeadlineDesc": "在设置中设定每日截止时间。如果您未按时打卡，您的紧急联系人将收到通知。",
+  "onboardingCheckInReminder": "获取提醒",
+  "onboardingCheckInReminderDesc": "开启每日提醒帮助您记得打卡。您可以自定义提醒时间。",
+
+  "onboardingContactsTitle": "紧急联系人",
+  "onboardingContactsSubtitle": "添加在您错过打卡时会收到通知的联系人",
+  "onboardingContactsDescription": "添加最多5个联系人，如果您错过签到，他们会收到通知",
+  "onboardingContactsAdd": "添加联系人",
+  "onboardingContactsAddDesc": "添加最多5位紧急联系人，包括他们的邮箱和手机号码。",
+  "onboardingContactsVerify": "验证联系人",
+  "onboardingContactsVerifyDesc": "联系人需要验证邮箱才能收到通知。他们会收到确认链接。",
+  "onboardingContactsAlert": "警报通知",
+  "onboardingContactsAlertDesc": "如果您错过打卡截止时间，您的联系人将通过邮件或短信收到通知。",
+  "onboardingContactsPrivacy": "您的隐私",
+  "onboardingContactsPrivacyDesc": "联系人只能看到您是否打卡 - 无法看到您的备注或其他详情。",
+
+  "onboardingCaregiverTitle": "家人与护理者",
+  "onboardingCaregiverSubtitle": "让家人监控您的打卡状态",
+  "onboardingCaregiverDescription": "邀请家人或看护人监控您的签到情况",
+  "onboardingCaregiverInvite": "邀请家人",
+  "onboardingCaregiverInviteDesc": "邀请家人或护理者查看您的打卡状态，帮助关注您的健康状况。",
+  "onboardingCaregiverQr": "快速二维码邀请",
+  "onboardingCaregiverQrDesc": "分享二维码轻松邀请。他们只需扫码即可加入，无需输入任何内容。",
+  "onboardingCaregiverMonitor": "状态监控",
+  "onboardingCaregiverMonitorDesc": "受邀的家人可以查看您的每日打卡状态，并在需要时收到提醒。",
+  "onboardingCaregiverCheckIn": "代为打卡",
+  "onboardingCaregiverCheckInDesc": "护理者可以在您无法亲自打卡时代为打卡。",
+
+  "verifyContactSuccess": "邮箱已验证！",
+  "verifyContactFailed": "验证失败",
+  "verifyContactMessage": "{contactName} 已被验证为 {userName} 的紧急联系人",
+  "@verifyContactMessage": {
+    "placeholders": {
+      "contactName": {"type": "String"},
+      "userName": {"type": "String"}
+    }
+  },
+
+  "acceptInvitationTitle": "看护人邀请",
+  "acceptInvitationMessage": "{name} 邀请您成为他们的看护人",
+  "@acceptInvitationMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptInvitationFailed": "加载邀请失败",
+  "acceptInvitationExpired": "此邀请已过期",
+  "acceptInvitationAlreadyAccepted": "此邀请已被接受",
+
+  "acceptContactLinkTitle": "紧急联系人关联",
+  "acceptContactLinkMessage": "{name} 已将您添加为紧急联系人",
+  "@acceptContactLinkMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptContactLinkFailed": "加载邀请失败",
+
+  "errorTitleUser": "请检查您的输入",
+  "errorTitleSystem": "出了点问题",
+  "errorAuthInvalidCredentials": "邮箱或密码不正确，请重试。",
+  "errorAuthTokenExpired": "您的会话已过期，请重新登录。",
+  "errorAuthTokenInvalid": "您的会话无效，请重新登录。",
+  "errorAuthUnauthorized": "您没有权限访问此内容。",
+  "errorValidationFailed": "请检查您的输入后重试。",
+  "errorValidationEmailInvalid": "请输入有效的邮箱地址。",
+  "errorValidationRequiredField": "此字段为必填项。",
+  "errorUserNotFound": "用户不存在。",
+  "errorUserEmailExists": "此邮箱已注册，请尝试登录。",
+  "errorContactNotFound": "联系人不存在。",
+  "errorContactLimitReached": "您最多可以添加 5 位紧急联系人。请删除一位后再添加。",
+  "errorContactEmailExists": "此邮箱已在您的联系人列表中。",
+  "errorCheckinAlreadyToday": "您今天已经签到了，做得好！",
+  "errorCheckinSettingsNotFound": "请先设置您的签到选项。",
+  "errorPreferencesNotFound": "未找到偏好设置，让我们来设置一下吧！",
+  "errorPreferencesInvalidFeature": "无效的功能名称。",
+  "errorNetworkFailed": "无法连接网络，请检查您的网络连接。",
+  "errorSystemInternal": "抱歉，我们这边出了点问题。请稍后重试。",
+  "errorSystemUnavailable": "服务暂时不可用，请稍后重试。",
+  "errorSystemRateLimited": "请求太频繁，请稍等片刻后重试。",
+  "errorUnknown": "发生了意外错误，请重试。",
+
+  "statusPending": "待签到",
+  "statusPendingSubtitle": "点击下方按钮进行签到",
+  "statusOverdue": "已逾期",
+  "statusOverdueTitle": "签到已逾期！",
+  "statusOverdueSubtitle": "您的联系人可能很快会收到通知",
+  "statusTimeRemaining": "剩余 {time}",
+  "@statusTimeRemaining": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+
+  "checkInNow": "立即签到！",
+  "checkInSuccessTitle": "签到成功！",
+  "checkInSuccessMessage": "太棒了！您的联系人已收到您安全的通知。",
+  "checkInSuccessSubtitle": "您的联系人已知道您是安全的",
+
+  "errorTipCheckConnection": "请检查您的网络连接后重试。",
+
+  "tipPendingTitle": "每日签到",
+  "tipPendingContent": "在截止时间前签到，让您的联系人知道您是安全的。",
+  "tipOverdueTitle": "别担心！",
+  "tipOverdueContent": "您仍然可以现在签到，您的联系人会收到您安全的通知。",
+  "tipCheckedInTitle": "今天已完成！",
+  "tipCheckedInContent": "明天再来进行下一次签到，保重！"
+}

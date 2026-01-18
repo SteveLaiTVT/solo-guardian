@@ -1,0 +1,345 @@
+{
+  "@@locale": "ja",
+  "appName": "ソロガーディアン",
+  "loading": "読み込み中...",
+  "error": "エラーが発生しました",
+  "retry": "再試行",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "saving": "保存中...",
+  "delete": "削除",
+  "ok": "OK",
+  "accept": "承認",
+
+  "navHome": "ホーム",
+  "navHistory": "履歴",
+  "navCare": "ケア",
+  "navContacts": "連絡先",
+  "navSettings": "設定",
+
+  "greetingMorning": "おはようございます！",
+  "greetingAfternoon": "こんにちは！",
+  "greetingEvening": "こんばんは！",
+
+  "loginTitle": "おかえりなさい",
+  "loginSubtitle": "アカウントにログインしてください",
+  "loginButton": "ログイン",
+  "loginLoading": "ログイン中...",
+  "loginNoAccount": "アカウントをお持ちでないですか？",
+  "loginSignUp": "新規登録",
+  "loginFailed": "ログインに失敗しました",
+
+  "registerTitle": "アカウント作成",
+  "registerSubtitle": "情報を入力して始めましょう",
+  "registerButton": "アカウント作成",
+  "registerLoading": "作成中...",
+  "registerHasAccount": "すでにアカウントをお持ちですか？",
+  "registerSignIn": "ログイン",
+  "registerFailed": "登録に失敗しました",
+  "registerIdentifiersSection": "ログイン方法を選択",
+  "registerIdentifiersHintOptional": "オプション - 後で追加できます",
+  "registerNoIdentifierTitle": "ログイン識別子がありません",
+  "registerNoIdentifierDescription": "ユーザー名、メール、電話番号が入力されていません。続けますか？",
+  "registerNoIdentifierCancel": "戻る",
+  "registerNoIdentifierConfirm": "続ける",
+
+  "fieldsEmail": "メール",
+  "fieldsEmailPlaceholder": "you@example.com",
+  "fieldsPassword": "パスワード",
+  "fieldsPasswordPlaceholder": "••••••••",
+  "fieldsName": "名前",
+  "fieldsNamePlaceholder": "お名前",
+  "fieldsConfirmPassword": "パスワード確認",
+  "fieldsIdentifier": "ユーザー名、メール、電話番号、またはID",
+  "fieldsIdentifierPlaceholder": "ユーザー名、メール、電話番号、またはIDを入力",
+  "fieldsUsername": "ユーザー名",
+  "fieldsUsernamePlaceholder": "ユーザー名を選択",
+  "fieldsPhone": "電話番号",
+  "fieldsPhonePlaceholder": "+81 90 1234 5678",
+
+  "validationEmailInvalid": "有効なメールアドレスを入力してください",
+  "validationEmailRequired": "メールアドレスは必須です",
+  "validationPasswordRequired": "パスワードは必須です",
+  "validationPasswordMinLength": "パスワードは8文字以上必要です",
+  "validationConfirmRequired": "パスワードを確認してください",
+  "validationPasswordMismatch": "パスワードが一致しません",
+  "validationNameRequired": "名前は必須です",
+
+  "statusSafe": "今日は安全です！",
+  "statusCheckedInAt": "{time} にチェックイン済み",
+  "@statusCheckedInAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusDeadline": "締め切り：{time}",
+  "@statusDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusAlreadyCheckedIn": "チェックイン済み",
+  "statusTapToCheckIn": "ボタンをタップしてチェックイン",
+  "buttonCheckIn": "チェックイン",
+  "buttonCheckingIn": "チェックイン中...",
+
+  "historyEmpty": "チェックイン履歴がありません",
+
+  "contactsEmpty": "緊急連絡先がありません",
+  "contactsAdd": "連絡先を追加",
+  "contactsAddTitle": "緊急連絡先を追加",
+  "contactsLinked": "リンク",
+  "contactsDeleteTitle": "連絡先を削除",
+  "contactsDeleteConfirm": "{name} を削除してもよろしいですか？",
+  "@contactsDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "linkedContactsTitle": "リンクされた連絡先",
+  "linkedContactsEmpty": "リンクされた連絡先がありません",
+  "linkedContactsPending": "保留中の招待",
+  "linkedContactsActive": "アクティブなリンク",
+  "linkedContactsSince": "{date} から",
+  "@linkedContactsSince": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+
+  "settingsCheckIn": "チェックイン設定",
+  "settingsCheckInDesc": "毎日のチェックインスケジュールを設定",
+  "settingsDeadline": "毎日の締め切り",
+  "settingsDeadlineDesc": "毎日チェックインする必要がある時刻",
+  "settingsReminder": "リマインダー",
+  "settingsReminderEnabled": "リマインダーを有効化",
+  "settingsReminderEnabledDesc": "締め切り前に通知を受け取る",
+  "settingsReminderTime": "リマインダー時刻",
+  "settingsVisual": "表示設定",
+  "settingsVisualDesc": "外観とアクセシビリティをカスタマイズ",
+  "settingsTheme": "カラーテーマ",
+  "settingsFontSize": "文字サイズ",
+  "settingsHighContrast": "高コントラスト",
+  "settingsHighContrastDesc": "視認性を高めるためコントラストを上げる",
+  "settingsReducedMotion": "モーション軽減",
+  "settingsReducedMotionDesc": "アプリ全体のアニメーションを最小化",
+  "settingsLanguage": "言語",
+  "settingsAvatarCamera": "写真を撮る",
+  "settingsAvatarGallery": "ギャラリーから選択",
+  "settingsAvatarTapToChange": "タップしてアバターを変更",
+  "settingsAvatarSuccess": "アバターが更新されました",
+  "settingsAvatarError": "アバターの更新に失敗しました",
+  "settingsAccountTitle": "アカウント",
+  "settingsAccountDesc": "アカウント設定を管理",
+  "settingsLogout": "ログアウト",
+  "settingsLogoutTitle": "ログアウト",
+  "settingsLogoutConfirm": "ログアウトしてもよろしいですか？",
+
+  "caregiverElders": "お年寄り",
+  "caregiverCaregivers": "私の介護者",
+  "caregiverEldersEmpty": "ケアする方がいません",
+  "caregiverCaregiversEmpty": "介護者が追加されていません",
+  "caregiverStatusCheckedIn": "今日チェックイン済み",
+  "caregiverStatusPending": "チェックイン待ち",
+  "caregiverStatusOverdue": "期限切れ",
+  "caregiverCheckIn": "代理チェックイン",
+  "caregiverCheckInTitle": "代理チェックイン",
+  "caregiverCheckInConfirm": "{name} の代わりにチェックインしますか？",
+  "@caregiverCheckInConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverCheckInSuccess": "{name} のチェックインが完了しました",
+  "@caregiverCheckInSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverDeadline": "締め切り：{time}",
+  "@caregiverDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "caregiverPendingAlerts": "{count} 件の保留中アラート",
+  "@caregiverPendingAlerts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "caregiverInvite": "介護者を招待",
+  "caregiverInviteTitle": "関係タイプを選択",
+  "caregiverTypeCaregiver": "介護者",
+  "caregiverTypeFamily": "家族",
+  "caregiverTypeCaretaker": "ケアテイカー",
+  "caregiverInvitationCreated": "招待が作成されました",
+  "caregiverShareLink": "このリンクを共有：",
+
+  "onboardingNext": "次へ",
+  "onboardingBack": "戻る",
+  "onboardingSkip": "スキップ",
+  "onboardingComplete": "始める",
+  "onboardingFinish": "完了",
+  "onboardingSaving": "保存中...",
+
+  "onboardingWelcomeTitle": "Solo Guardianへようこそ",
+  "onboardingWelcomeSubtitle": "あなたの安心を守るパートナー",
+
+  "onboardingProfileTitle": "あなたについて",
+  "onboardingProfileSubtitle": "あなたに合った体験を提供するために",
+  "onboardingBirthYear": "生まれ年",
+  "onboardingBirthYearHint": "年齢層に合ったコンテンツを提供するために使用します",
+  "onboardingBirthYearTap": "タップして年を入力",
+  "onboardingBirthYearEnter": "年を入力",
+  "onboardingBirthYearInvalid": "有効な年を入力してください",
+
+  "onboardingThemeTitle": "テーマを選択",
+  "onboardingThemeSubtitle": "お好みの配色を選んでください",
+  "onboardingThemeStandard": "スタンダード",
+  "onboardingThemeWarm": "ウォーム",
+  "onboardingThemeNature": "ナチュラル",
+  "onboardingThemeOcean": "オーシャン",
+
+  "onboardingPreferenceTitle": "新機能設定",
+  "onboardingPreferenceSubtitle": "新機能が追加されたとき、どのように対応しますか？",
+  "onboardingPreferenceEnableAll": "自動的に有効化",
+  "onboardingPreferenceEnableAllDesc": "新機能が利用可能になり次第アクセスできます",
+  "onboardingPreferenceKeepSimple": "シンプルに",
+  "onboardingPreferenceKeepSimpleDesc": "どの機能を有効にするか自分で選びます",
+
+  "onboardingFeaturesTitle": "体験をカスタマイズ",
+  "onboardingFeaturesSubtitle": "有効にしたいオプション機能を選択してください",
+  "onboardingFeatureHobby": "趣味チェックイン",
+  "onboardingFeatureHobbyDesc": "今日嬉しかったことを共有",
+  "onboardingFeatureFamily": "家族アクセス",
+  "onboardingFeatureFamilyDesc": "家族があなたの状態を確認できます",
+  "onboardingFeatureCheckIn": "毎日のチェックインで安全を確認",
+  "onboardingFeatureContacts": "緊急連絡先に通知",
+  "onboardingFeatureAlerts": "チェックインを逃すと自動アラート",
+  "onboardingFeatureCaregiver": "大切な人のための介護者サポート",
+
+  "onboardingVisualTitle": "視覚的な快適さ",
+  "onboardingVisualSubtitle": "お好みに合わせて表示設定を調整",
+  "onboardingFontSize": "フォントサイズ",
+  "onboardingFontSizePreview": "プレビューテキスト",
+  "onboardingHighContrast": "高コントラスト",
+  "onboardingReducedMotion": "アニメーション軽減",
+  "onboardingWarmColors": "暖色系",
+  "onboardingPreferencesTitle": "アクセシビリティ",
+
+  "onboardingCheckInTitle": "毎日のチェックイン",
+  "onboardingCheckInSubtitle": "毎日のチェックインで大切な人にあなたの安全を知らせましょう",
+  "onboardingCheckInDescription": "チェックインボタンを1日1回タップして、連絡先にあなたの安全を知らせましょう",
+  "onboardingCheckInHowTo": "チェックインの方法",
+  "onboardingCheckInHowToDesc": "ホーム画面のチェックインボタンを1日1回タップするだけ。近況についてメモを追加することもできます。",
+  "onboardingCheckInDeadline": "チェックイン期限",
+  "onboardingCheckInDeadlineDesc": "設定で毎日の期限を設定してください。期限までにチェックインしないと、連絡先に通知が届きます。",
+  "onboardingCheckInReminder": "リマインダーを受け取る",
+  "onboardingCheckInReminderDesc": "毎日のリマインダーを有効にして、チェックインを忘れないようにしましょう。リマインダーの時間はカスタマイズできます。",
+
+  "onboardingContactsTitle": "緊急連絡先",
+  "onboardingContactsSubtitle": "チェックインを忘れたときに通知を受ける人を追加",
+  "onboardingContactsDescription": "チェックインを逃した場合に通知される連絡先を最大5人まで追加できます",
+  "onboardingContactsAdd": "連絡先を追加",
+  "onboardingContactsAddDesc": "最大5人の緊急連絡先をメールアドレスと電話番号付きで追加できます。",
+  "onboardingContactsVerify": "連絡先を確認",
+  "onboardingContactsVerifyDesc": "連絡先は通知を受け取るためにメールを確認する必要があります。確認リンクが届きます。",
+  "onboardingContactsAlert": "アラート通知",
+  "onboardingContactsAlertDesc": "チェックイン期限を過ぎると、連絡先にメールまたはSMSで通知されます。",
+  "onboardingContactsPrivacy": "あなたのプライバシー",
+  "onboardingContactsPrivacyDesc": "連絡先はチェックインしたかどうかだけを確認でき、メモやその他の詳細は見られません。",
+
+  "onboardingCaregiverTitle": "家族と介護者",
+  "onboardingCaregiverSubtitle": "家族があなたのチェックイン状況を監視できるようにする",
+  "onboardingCaregiverDescription": "家族や介護者を招待してチェックインを監視してもらえます",
+  "onboardingCaregiverInvite": "家族を招待",
+  "onboardingCaregiverInviteDesc": "家族や介護者を招待して、あなたのチェックイン状況を確認し、健康状態を見守ってもらいましょう。",
+  "onboardingCaregiverQr": "QRコードで簡単招待",
+  "onboardingCaregiverQrDesc": "QRコードを共有して簡単に招待。スキャンするだけで参加でき、入力は不要です。",
+  "onboardingCaregiverMonitor": "状況の監視",
+  "onboardingCaregiverMonitorDesc": "招待された家族は毎日のチェックイン状況を確認でき、必要に応じてアラートを受け取れます。",
+  "onboardingCaregiverCheckIn": "代理チェックイン",
+  "onboardingCaregiverCheckInDesc": "介護者はあなたが自分でチェックインできない場合に代わりにチェックインできます。",
+
+  "verifyContactSuccess": "メール確認完了！",
+  "verifyContactFailed": "確認に失敗しました",
+  "verifyContactMessage": "{contactName} は {userName} の緊急連絡先として確認されました",
+  "@verifyContactMessage": {
+    "placeholders": {
+      "contactName": {"type": "String"},
+      "userName": {"type": "String"}
+    }
+  },
+
+  "acceptInvitationTitle": "介護者招待",
+  "acceptInvitationMessage": "{name} があなたを介護者として招待しています",
+  "@acceptInvitationMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptInvitationFailed": "招待の読み込みに失敗しました",
+  "acceptInvitationExpired": "この招待は期限切れです",
+  "acceptInvitationAlreadyAccepted": "この招待はすでに承認されています",
+
+  "acceptContactLinkTitle": "緊急連絡先リンク",
+  "acceptContactLinkMessage": "{name} があなたを緊急連絡先として追加しました",
+  "@acceptContactLinkMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptContactLinkFailed": "招待の読み込みに失敗しました",
+
+  "errorTitleUser": "入力内容をご確認ください",
+  "errorTitleSystem": "問題が発生しました",
+  "errorAuthInvalidCredentials": "メールアドレスまたはパスワードが正しくありません。もう一度お試しください。",
+  "errorAuthTokenExpired": "セッションの有効期限が切れました。再度ログインしてください。",
+  "errorAuthTokenInvalid": "セッションが無効です。再度ログインしてください。",
+  "errorAuthUnauthorized": "このコンテンツにアクセスする権限がありません。",
+  "errorValidationFailed": "入力内容を確認して、もう一度お試しください。",
+  "errorValidationEmailInvalid": "有効なメールアドレスを入力してください。",
+  "errorValidationRequiredField": "この項目は必須です。",
+  "errorUserNotFound": "ユーザーが見つかりません。",
+  "errorUserEmailExists": "このメールアドレスは既に登録されています。ログインをお試しください。",
+  "errorContactNotFound": "連絡先が見つかりません。",
+  "errorContactLimitReached": "緊急連絡先は最大5件まで登録できます。追加するには、既存の連絡先を削除してください。",
+  "errorContactEmailExists": "このメールアドレスは既に連絡先に登録されています。",
+  "errorCheckinAlreadyToday": "今日はすでにチェックイン済みです。お疲れ様です！",
+  "errorCheckinSettingsNotFound": "まずチェックイン設定を行ってください。",
+  "errorPreferencesNotFound": "設定が見つかりません。設定しましょう！",
+  "errorPreferencesInvalidFeature": "無効な機能名です。",
+  "errorNetworkFailed": "接続できません。インターネット接続をご確認ください。",
+  "errorSystemInternal": "申し訳ございません、システムに問題が発生しました。しばらくしてからもう一度お試しください。",
+  "errorSystemUnavailable": "サービスは一時的に利用できません。しばらくしてからもう一度お試しください。",
+  "errorSystemRateLimited": "リクエストが多すぎます。しばらくお待ちいただいてからお試しください。",
+  "errorUnknown": "予期しないエラーが発生しました。もう一度お試しください。",
+
+  "statusPending": "待機中",
+  "statusPendingSubtitle": "下のボタンをタップしてチェックイン",
+  "statusOverdue": "期限切れ",
+  "statusOverdueTitle": "チェックイン期限切れ！",
+  "statusOverdueSubtitle": "連絡先にまもなく通知される可能性があります",
+  "statusTimeRemaining": "残り {time}",
+  "@statusTimeRemaining": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+
+  "checkInNow": "今すぐチェックイン！",
+  "checkInSuccessTitle": "チェックイン完了！",
+  "checkInSuccessMessage": "お疲れ様です！あなたが無事であることが連絡先に通知されました。",
+  "checkInSuccessSubtitle": "連絡先にあなたの安全が伝わりました",
+
+  "errorTipCheckConnection": "インターネット接続を確認して、もう一度お試しください。",
+
+  "tipPendingTitle": "毎日のチェックイン",
+  "tipPendingContent": "締め切り前にチェックインして、連絡先にあなたが無事であることを知らせましょう。",
+  "tipOverdueTitle": "ご心配なく！",
+  "tipOverdueContent": "今すぐチェックインできます。連絡先にあなたが無事であることが通知されます。",
+  "tipCheckedInTitle": "今日は完了！",
+  "tipCheckedInContent": "次のチェックインは明日です。お気をつけて！"
+}

@@ -146,6 +146,16 @@ export function createApi(client: AxiosInstance) {
 
       updateProfile: (data: UpdateProfileRequest) =>
         client.patch<User>("/api/v1/preferences/profile", data),
+
+      uploadAvatar: (file: File) => {
+        const formData = new FormData()
+        formData.append("avatar", file)
+        return client.post<User>("/api/v1/preferences/profile/avatar", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+      },
     },
 
     // OAuth endpoints

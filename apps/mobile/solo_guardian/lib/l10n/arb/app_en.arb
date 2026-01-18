@@ -1,0 +1,328 @@
+{
+  "@@locale": "en",
+  "appName": "Solo Guardian",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save Changes",
+  "saving": "Saving...",
+  "delete": "Delete",
+  "ok": "OK",
+  "accept": "Accept",
+
+  "navHome": "Home",
+  "navHistory": "History",
+  "navCare": "Care",
+  "navContacts": "Contacts",
+  "navSettings": "Settings",
+
+  "greetingMorning": "Good morning!",
+  "greetingAfternoon": "Good afternoon!",
+  "greetingEvening": "Good evening!",
+
+  "loginTitle": "Welcome back",
+  "loginSubtitle": "Sign in to your account to continue",
+  "loginButton": "Sign in",
+  "loginLoading": "Signing in...",
+  "loginNoAccount": "Don't have an account?",
+  "loginSignUp": "Sign up",
+  "loginFailed": "Login failed",
+
+  "registerTitle": "Create an account",
+  "registerSubtitle": "Enter your details to get started",
+  "registerButton": "Create account",
+  "registerLoading": "Creating account...",
+  "registerHasAccount": "Already have an account?",
+  "registerSignIn": "Sign in",
+  "registerFailed": "Registration failed",
+  "registerIdentifiersSection": "How would you like to sign in?",
+  "registerIdentifiersHintOptional": "Optional - You can add these later",
+  "registerNoIdentifierTitle": "No Login Identifier",
+  "registerNoIdentifierDescription": "You haven't provided a username, email, or phone number. Are you sure you want to continue?",
+  "registerNoIdentifierCancel": "Go back",
+  "registerNoIdentifierConfirm": "Continue anyway",
+
+  "fieldsEmail": "Email",
+  "fieldsEmailPlaceholder": "you@example.com",
+  "fieldsPassword": "Password",
+  "fieldsPasswordPlaceholder": "••••••••",
+  "fieldsName": "Name",
+  "fieldsNamePlaceholder": "Your name",
+  "fieldsConfirmPassword": "Confirm Password",
+  "fieldsIdentifier": "Username, Email, Phone, or ID",
+  "fieldsIdentifierPlaceholder": "Enter username, email, phone, or ID",
+  "fieldsUsername": "Username",
+  "fieldsUsernamePlaceholder": "Choose a username",
+  "fieldsPhone": "Phone Number",
+  "fieldsPhonePlaceholder": "+1234567890",
+
+  "validationEmailInvalid": "Please enter a valid email",
+  "validationEmailRequired": "Email is required",
+  "validationPasswordRequired": "Password is required",
+  "validationPasswordMinLength": "Password must be at least 8 characters",
+  "validationConfirmRequired": "Please confirm your password",
+  "validationPasswordMismatch": "Passwords do not match",
+  "validationNameRequired": "Name is required",
+
+  "statusSafe": "You're safe today!",
+  "statusCheckedInAt": "Checked in at {time}",
+  "@statusCheckedInAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusDeadline": "Deadline: {time}",
+  "@statusDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "statusAlreadyCheckedIn": "Already checked in",
+  "statusTapToCheckIn": "Tap the button to check in",
+  "buttonCheckIn": "Check In",
+  "buttonCheckingIn": "Checking in...",
+
+  "historyEmpty": "No check-in history yet",
+
+  "contactsEmpty": "No emergency contacts yet",
+  "contactsAdd": "Add Contact",
+  "contactsAddTitle": "Add Emergency Contact",
+  "contactsLinked": "Linked",
+  "contactsDeleteTitle": "Delete Contact",
+  "contactsDeleteConfirm": "Are you sure you want to delete {name}?",
+  "@contactsDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "linkedContactsTitle": "Linked Contacts",
+  "linkedContactsEmpty": "No linked contacts",
+  "linkedContactsPending": "Pending Invitations",
+  "linkedContactsActive": "Active Links",
+  "linkedContactsSince": "Since {date}",
+  "@linkedContactsSince": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+
+  "settingsCheckIn": "Check-in Settings",
+  "settingsCheckInDesc": "Configure your daily check-in schedule",
+  "settingsDeadline": "Daily Deadline",
+  "settingsDeadlineDesc": "Time by which you need to check in each day",
+  "settingsReminder": "Reminder",
+  "settingsReminderEnabled": "Enable Reminder",
+  "settingsReminderEnabledDesc": "Receive a notification before your deadline",
+  "settingsReminderTime": "Reminder Time",
+  "settingsVisual": "Display Settings",
+  "settingsVisualDesc": "Customize appearance and accessibility",
+  "settingsTheme": "Color Theme",
+  "settingsFontSize": "Text Size",
+  "settingsHighContrast": "High Contrast",
+  "settingsHighContrastDesc": "Increase contrast for better visibility",
+  "settingsReducedMotion": "Reduced Motion",
+  "settingsReducedMotionDesc": "Minimize animations throughout the app",
+  "settingsLanguage": "Language",
+  "settingsAvatarCamera": "Take Photo",
+  "settingsAvatarGallery": "Choose from Gallery",
+  "settingsAvatarTapToChange": "Tap avatar to change",
+  "settingsAvatarSuccess": "Avatar updated successfully",
+  "settingsAvatarError": "Failed to update avatar",
+  "settingsAccountTitle": "Account",
+  "settingsAccountDesc": "Manage your account settings",
+  "settingsLogout": "Sign Out",
+  "settingsLogoutTitle": "Sign Out",
+  "settingsLogoutConfirm": "Are you sure you want to sign out?",
+
+  "caregiverElders": "Elders",
+  "caregiverCaregivers": "My Caregivers",
+  "caregiverEldersEmpty": "No elders to care for",
+  "caregiverCaregiversEmpty": "No caregivers added",
+  "caregiverStatusCheckedIn": "Checked in today",
+  "caregiverStatusPending": "Pending check-in",
+  "caregiverStatusOverdue": "Overdue",
+  "caregiverCheckIn": "Check In",
+  "caregiverCheckInTitle": "Check In on Behalf",
+  "caregiverCheckInConfirm": "Check in on behalf of {name}?",
+  "@caregiverCheckInConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverCheckInSuccess": "Checked in for {name}",
+  "@caregiverCheckInSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "caregiverDeadline": "Deadline: {time}",
+  "@caregiverDeadline": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "caregiverPendingAlerts": "{count} pending alerts",
+  "@caregiverPendingAlerts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "caregiverInvite": "Invite Caregiver",
+  "caregiverInviteTitle": "Choose Relationship Type",
+  "caregiverTypeCaregiver": "Caregiver",
+  "caregiverTypeFamily": "Family Member",
+  "caregiverTypeCaretaker": "Caretaker",
+  "caregiverInvitationCreated": "Invitation Created",
+  "caregiverShareLink": "Share this link:",
+
+  "onboardingNext": "Next",
+  "onboardingBack": "Back",
+  "onboardingSkip": "Skip",
+  "onboardingComplete": "Get Started",
+  "onboardingWelcomeTitle": "Welcome to Solo Guardian",
+  "onboardingWelcomeSubtitle": "Your safety companion for peace of mind",
+  "onboardingProfileTitle": "About You",
+  "onboardingProfileSubtitle": "Help us personalize your experience",
+  "onboardingBirthYear": "Year of Birth",
+  "onboardingBirthYearHint": "This helps us customize content for your age group",
+  "onboardingBirthYearTap": "Tap to enter year",
+  "onboardingBirthYearEnter": "Enter Year",
+  "onboardingBirthYearInvalid": "Please enter a valid year",
+  "onboardingFinish": "Finish",
+  "onboardingSaving": "Saving...",
+  "onboardingThemeTitle": "Choose Your Theme",
+  "onboardingThemeSubtitle": "Select a color scheme that feels right for you",
+  "onboardingThemeStandard": "Standard",
+  "onboardingThemeWarm": "Warm",
+  "onboardingThemeNature": "Nature",
+  "onboardingThemeOcean": "Ocean",
+  "onboardingPreferenceTitle": "New Features",
+  "onboardingPreferenceSubtitle": "When we add new features, how would you like us to handle them?",
+  "onboardingPreferenceEnableAll": "Enable automatically",
+  "onboardingPreferenceEnableAllDesc": "Get access to new features as soon as they're available",
+  "onboardingPreferenceKeepSimple": "Keep it simple",
+  "onboardingPreferenceKeepSimpleDesc": "I'll choose which features to enable",
+  "onboardingFeaturesTitle": "Customize Your Experience",
+  "onboardingFeaturesSubtitle": "Choose which optional features you'd like to enable",
+  "onboardingFeatureHobby": "Hobby Check-in",
+  "onboardingFeatureHobbyDesc": "Share what made you happy today",
+  "onboardingFeatureFamily": "Family Access",
+  "onboardingFeatureFamilyDesc": "Let family members check your status",
+  "onboardingVisualTitle": "Visual Comfort",
+  "onboardingVisualSubtitle": "Adjust the display settings to your preference",
+  "onboardingFontSize": "Font Size",
+  "onboardingFontSizePreview": "Preview text",
+  "onboardingHighContrast": "High Contrast",
+  "onboardingReducedMotion": "Reduce Animations",
+  "onboardingWarmColors": "Warm Colors",
+  "onboardingCheckInTitle": "Daily Check-in",
+  "onboardingCheckInSubtitle": "Let your loved ones know you're safe with a daily check-in",
+  "onboardingCheckInHowTo": "How to Check In",
+  "onboardingCheckInHowToDesc": "Simply tap the check-in button on the home screen once a day. You can also add a note about how you're doing.",
+  "onboardingCheckInDeadline": "Check-in Deadline",
+  "onboardingCheckInDeadlineDesc": "Set your daily deadline in Settings. If you don't check in by then, your contacts will be notified.",
+  "onboardingCheckInReminder": "Get Reminders",
+  "onboardingCheckInReminderDesc": "Enable daily reminders to help you remember to check in. You can customize the reminder time.",
+  "onboardingContactsTitle": "Emergency Contacts",
+  "onboardingContactsSubtitle": "Add people who will be notified if you miss a check-in",
+  "onboardingContactsAdd": "Add Contacts",
+  "onboardingContactsAddDesc": "Add up to 5 emergency contacts with their email and phone number.",
+  "onboardingContactsVerify": "Verify Contacts",
+  "onboardingContactsVerifyDesc": "Contacts need to verify their email to receive notifications. They'll get a confirmation link.",
+  "onboardingContactsAlert": "Alert Notifications",
+  "onboardingContactsAlertDesc": "If you miss your check-in deadline, your contacts will be notified by email or SMS.",
+  "onboardingContactsPrivacy": "Your Privacy",
+  "onboardingContactsPrivacyDesc": "Contacts can only see if you checked in - they cannot see your notes or other details.",
+  "onboardingCaregiverTitle": "Family & Caregivers",
+  "onboardingCaregiverSubtitle": "Let family members monitor your check-in status",
+  "onboardingCaregiverInvite": "Invite Family",
+  "onboardingCaregiverInviteDesc": "Invite family members or caregivers to view your check-in status and help monitor your well-being.",
+  "onboardingCaregiverQr": "Quick QR Invite",
+  "onboardingCaregiverQrDesc": "Share a QR code for easy invitation. They can scan it to join without typing anything.",
+  "onboardingCaregiverMonitor": "Status Monitoring",
+  "onboardingCaregiverMonitorDesc": "Invited family members can see your daily check-in status and receive alerts if needed.",
+  "onboardingCaregiverCheckIn": "Caregiver Check-in",
+  "onboardingCaregiverCheckInDesc": "Caregivers can check in on your behalf if you're unable to do it yourself.",
+
+  "verifyContactSuccess": "Email Verified!",
+  "verifyContactFailed": "Verification Failed",
+  "verifyContactMessage": "{contactName} has been verified as an emergency contact for {userName}",
+  "@verifyContactMessage": {
+    "placeholders": {
+      "contactName": {"type": "String"},
+      "userName": {"type": "String"}
+    }
+  },
+
+  "acceptInvitationTitle": "Caregiver Invitation",
+  "acceptInvitationMessage": "{name} has invited you to be their caregiver",
+  "@acceptInvitationMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptInvitationFailed": "Failed to load invitation",
+  "acceptInvitationExpired": "This invitation has expired",
+  "acceptInvitationAlreadyAccepted": "This invitation has already been accepted",
+
+  "acceptContactLinkTitle": "Emergency Contact Link",
+  "acceptContactLinkMessage": "{name} has added you as an emergency contact",
+  "@acceptContactLinkMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "acceptContactLinkFailed": "Failed to load invitation",
+
+  "errorTitleUser": "Please check your input",
+  "errorTitleSystem": "Something went wrong",
+  "errorAuthInvalidCredentials": "Email or password is incorrect. Please try again.",
+  "errorAuthTokenExpired": "Your session has expired. Please log in again.",
+  "errorAuthTokenInvalid": "Your session is invalid. Please log in again.",
+  "errorAuthUnauthorized": "You don't have permission to access this.",
+  "errorValidationFailed": "Please check your input and try again.",
+  "errorValidationEmailInvalid": "Please enter a valid email address.",
+  "errorValidationRequiredField": "This field is required.",
+  "errorUserNotFound": "User not found.",
+  "errorUserEmailExists": "This email is already registered. Try logging in instead.",
+  "errorContactNotFound": "Contact not found.",
+  "errorContactLimitReached": "You can add up to 5 emergency contacts. Please remove one to add another.",
+  "errorContactEmailExists": "This email is already in your contacts.",
+  "errorCheckinAlreadyToday": "You've already checked in today. Great job!",
+  "errorCheckinSettingsNotFound": "Please set up your check-in settings first.",
+  "errorPreferencesNotFound": "Preferences not found. Let's set them up!",
+  "errorPreferencesInvalidFeature": "Invalid feature name.",
+  "errorNetworkFailed": "Unable to connect. Please check your internet connection.",
+  "errorSystemInternal": "We're sorry, something went wrong on our end. Please try again later.",
+  "errorSystemUnavailable": "Service is temporarily unavailable. Please try again in a few minutes.",
+  "errorSystemRateLimited": "Too many requests. Please wait a moment and try again.",
+  "errorUnknown": "An unexpected error occurred. Please try again.",
+
+  "statusPending": "Pending",
+  "statusPendingSubtitle": "Tap the button below to check in",
+  "statusOverdue": "Overdue",
+  "statusOverdueTitle": "Check-in Overdue!",
+  "statusOverdueSubtitle": "Your contacts may be notified soon",
+  "statusTimeRemaining": "{time} remaining",
+  "@statusTimeRemaining": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+
+  "checkInNow": "Check In Now!",
+  "checkInSuccessTitle": "Check-in Complete!",
+  "checkInSuccessMessage": "Great job! Your contacts have been notified that you're safe.",
+  "checkInSuccessSubtitle": "Your contacts know you're safe",
+
+  "errorTipCheckConnection": "Please check your internet connection and try again.",
+
+  "tipPendingTitle": "Daily Check-in",
+  "tipPendingContent": "Check in before your deadline to let your contacts know you're safe.",
+  "tipOverdueTitle": "Don't worry!",
+  "tipOverdueContent": "You can still check in now. Your contacts will be notified you're okay.",
+  "tipCheckedInTitle": "All done for today!",
+  "tipCheckedInContent": "Come back tomorrow for your next check-in. Stay safe!"
+}

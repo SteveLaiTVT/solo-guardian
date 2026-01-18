@@ -252,6 +252,17 @@ export function createHooks(client: AxiosInstance) {
       })
     },
 
+    useUploadAvatar: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (file: File) =>
+          api.preferences.uploadAvatar(file).then((r: AxiosResponse<User>) => r.data),
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["profile"] })
+        },
+      })
+    },
+
     // OAuth hooks
     useOAuthProviders: () =>
       useQuery({
