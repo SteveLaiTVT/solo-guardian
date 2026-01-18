@@ -1,0 +1,11 @@
+apps/backend
+apps/admin-web
+apps/mobile
+e2e
+.git
+.github
+node_modules
+*.log
+.env
+.env.local
+.DS_Store
