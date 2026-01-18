@@ -39,7 +39,7 @@ export class InvitationDetailsDto {
   inviter: {
     id: string;
     name: string;
-    email: string;
+    email: string | null;
   };
   expiresAt: Date;
   isExpired: boolean;

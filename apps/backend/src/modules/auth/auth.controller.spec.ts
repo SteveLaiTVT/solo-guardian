@@ -11,6 +11,8 @@ describe('AuthController', () => {
     user: {
       id: 'user-1',
       email: 'test@example.com',
+      username: null,
+      phone: null,
       name: 'Test User',
       role: 'user',
       createdAt: new Date('2025-01-01'),
@@ -58,7 +60,7 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should login user', async () => {
       const dto: LoginDto = {
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'password123',
       };
       authService.login.mockResolvedValue(mockAuthResult);

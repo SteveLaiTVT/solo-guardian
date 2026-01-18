@@ -16,7 +16,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserPreferencesService } from './user-preferences.service';
-import { UpdatePreferencesDto, PreferencesResponseDto } from './dto';
+import { UpdatePreferencesDto, PreferencesResponseDto, UpdateProfileDto, ProfileResponseDto } from './dto';
 
 @Controller('api/v1/preferences')
 @UseGuards(JwtAuthGuard)
@@ -52,5 +52,20 @@ export class UserPreferencesController {
     @CurrentUser() userId: string,
   ): Promise<PreferencesResponseDto> {
     return this.preferencesService.completeOnboarding(userId);
+  }
+
+  @Get('profile')
+  async getProfile(
+    @CurrentUser() userId: string,
+  ): Promise<ProfileResponseDto> {
+    return this.preferencesService.getProfile(userId);
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @CurrentUser() userId: string,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<ProfileResponseDto> {
+    return this.preferencesService.updateProfile(userId, dto);
   }
 }

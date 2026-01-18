@@ -7,7 +7,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserPreferences } from '@prisma/client';
 import { UserPreferencesRepository } from './user-preferences.repository';
-import { UpdatePreferencesDto, PreferencesResponseDto } from './dto';
+import { UpdatePreferencesDto, PreferencesResponseDto, UpdateProfileDto, ProfileResponseDto } from './dto';
 import { BusinessException } from '../../common/exceptions';
 
 @Injectable()
@@ -39,6 +39,7 @@ export class UserPreferencesService {
 
     const preferences = await this.repository.update(userId, {
       preferFeaturesOn: dto.preferFeaturesOn,
+      theme: dto.theme,
       fontSize: dto.fontSize,
       highContrast: dto.highContrast,
       reducedMotion: dto.reducedMotion,
@@ -96,11 +97,45 @@ export class UserPreferencesService {
     return this.mapToResponse(preferences);
   }
 
+  async getProfile(userId: string): Promise<ProfileResponseDto> {
+    const user = await this.repository.findUserById(userId);
+    if (!user) {
+      throw new BusinessException('USER_NOT_FOUND', { details: { userId } });
+    }
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      phone: user.phone,
+      birthYear: user.birthYear,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<ProfileResponseDto> {
+    const user = await this.repository.updateUser(userId, {
+      name: dto.name,
+      birthYear: dto.birthYear,
+    });
+    this.logger.log(`Updated profile for user: ${userId}`);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      phone: user.phone,
+      birthYear: user.birthYear,
+      createdAt: user.createdAt,
+    };
+  }
+
   private mapToResponse(preferences: UserPreferences): PreferencesResponseDto {
     return {
       id: preferences.id,
       userId: preferences.userId,
       preferFeaturesOn: preferences.preferFeaturesOn,
+      theme: preferences.theme,
       fontSize: preferences.fontSize,
       highContrast: preferences.highContrast,
       reducedMotion: preferences.reducedMotion,

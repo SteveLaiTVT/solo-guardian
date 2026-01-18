@@ -14,7 +14,7 @@ type RelationshipType = 'caregiver' | 'family' | 'caretaker';
 interface ElderWithRelations {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   checkIns: Array<{ checkInDate: string }>;
   checkInSettings: {
     deadlineTime: string;
@@ -129,7 +129,7 @@ export class CaregiverRepository {
   }
 
   async getCaregivers(elderId: string): Promise<Array<{
-    caregiver: { id: string; name: string; email: string };
+    caregiver: { id: string; name: string; email: string | null };
     isAccepted: boolean;
   }>> {
     const relations = await this.prisma.caregiverRelation.findMany({
@@ -195,7 +195,7 @@ export class CaregiverRepository {
   async findUserByEmail(email: string): Promise<{
     id: string;
     name: string;
-    email: string;
+    email: string | null;
   } | null> {
     return this.prisma.user.findUnique({
       where: { email },
@@ -249,7 +249,7 @@ export class CaregiverRepository {
     relationshipType: RelationshipType;
     expiresAt: Date;
     acceptedAt: Date | null;
-    inviter: { id: string; name: string; email: string };
+    inviter: { id: string; name: string; email: string | null };
   } | null> {
     const invitation = await this.prisma.caregiverInvitation.findUnique({
       where: { token },

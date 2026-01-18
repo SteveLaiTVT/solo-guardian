@@ -7,7 +7,7 @@
 
 export class AtRiskUserDto {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   consecutiveMisses: number;
   lastCheckIn: string | null;

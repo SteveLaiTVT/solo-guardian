@@ -4,12 +4,18 @@
  * @task TASK-021
  * @design_state_version 1.6.0
  */
-import { IsBoolean, IsInt, IsOptional, Min, Max } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, Min, Max, IsIn } from 'class-validator';
+
+const VALID_THEMES = ['standard', 'warm', 'nature', 'ocean'] as const;
 
 export class UpdatePreferencesDto {
   @IsOptional()
   @IsBoolean()
   preferFeaturesOn?: boolean;
+
+  @IsOptional()
+  @IsIn(VALID_THEMES)
+  theme?: (typeof VALID_THEMES)[number];
 
   @IsOptional()
   @IsInt()

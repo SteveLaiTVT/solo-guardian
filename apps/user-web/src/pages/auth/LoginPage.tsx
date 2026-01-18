@@ -1,8 +1,7 @@
 /**
  * @file LoginPage.tsx
- * @description Login page with email/password and OAuth authentication
- * @task TASK-013, TASK-041
- * @design_state_version 3.6.0
+ * @description Login page with flexible identifier authentication
+ * @task TASK-013, TASK-041, TASK-085
  */
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -14,11 +13,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
 import { OAuthButtons } from '@/components/auth'
 
-// DONE(B): Added i18n support - TASK-013
 export function LoginPage(): JSX.Element {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
@@ -26,7 +25,7 @@ export function LoginPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null)
 
   const loginSchema = z.object({
-    email: z.string().email(t('validation.emailInvalid')),
+    identifier: z.string().min(1, t('validation.identifierRequired')),
     password: z.string().min(1, t('validation.passwordRequired')),
   })
 
@@ -58,6 +57,9 @@ export function LoginPage(): JSX.Element {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">{t('login.title')}</CardTitle>
@@ -71,15 +73,15 @@ export function LoginPage(): JSX.Element {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">{t('fields.email')}</Label>
+              <Label htmlFor="identifier">{t('fields.identifier')}</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder={t('fields.emailPlaceholder')}
-                {...register('email')}
+                id="identifier"
+                type="text"
+                placeholder={t('fields.identifierPlaceholder')}
+                {...register('identifier')}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+              {errors.identifier && (
+                <p className="text-sm text-red-500">{errors.identifier.message}</p>
               )}
             </div>
             <div className="space-y-2">

@@ -4,6 +4,27 @@
     "subtitle": "您的安全守护伙伴",
     "getStarted": "开始使用"
   },
+  "profile": {
+    "title": "关于您",
+    "subtitle": "帮助我们为您个性化体验",
+    "birthYear": "出生年份",
+    "selectYear": "选择您的出生年份",
+    "birthYearHint": "这有助于我们为您定制适合年龄段的内容"
+  },
+  "theme": {
+    "title": "选择主题",
+    "subtitle": "选择一个让您感觉舒适的配色方案",
+    "options": {
+      "standard": "标准",
+      "warm": "温暖",
+      "nature": "自然",
+      "ocean": "海洋"
+    }
+  },
+  "common": {
+    "skip": "跳过",
+    "continue": "继续"
+  },
   "preference": {
     "title": "新功能设置",
     "subtitle": "当我们推出新功能时，您希望如何处理？",
@@ -33,6 +54,42 @@
     "highContrast": "高对比度",
     "reducedMotion": "减少动画",
     "warmColors": "暖色调"
+  },
+  "tutorial": {
+    "checkIn": {
+      "title": "每日打卡",
+      "subtitle": "通过每日打卡让亲人知道您一切安好",
+      "howTo": "如何打卡",
+      "howToDesc": "只需每天点击首页的打卡按钮。您还可以添加关于近况的备注。",
+      "deadline": "打卡截止时间",
+      "deadlineDesc": "在设置中设定每日截止时间。如果您未按时打卡，您的紧急联系人将收到通知。",
+      "reminder": "获取提醒",
+      "reminderDesc": "开启每日提醒帮助您记得打卡。您可以自定义提醒时间。"
+    },
+    "contacts": {
+      "title": "紧急联系人",
+      "subtitle": "添加在您错过打卡时会收到通知的联系人",
+      "add": "添加联系人",
+      "addDesc": "添加最多5位紧急联系人，包括他们的邮箱和手机号码。",
+      "verify": "验证联系人",
+      "verifyDesc": "联系人需要验证邮箱才能收到通知。他们会收到确认链接。",
+      "alert": "警报通知",
+      "alertDesc": "如果您错过打卡截止时间，您的联系人将通过邮件或短信收到通知。",
+      "privacy": "您的隐私",
+      "privacyDesc": "联系人只能看到您是否打卡 - 无法看到您的备注或其他详情。"
+    },
+    "caregiver": {
+      "title": "家人与护理者",
+      "subtitle": "让家人监控您的打卡状态",
+      "invite": "邀请家人",
+      "inviteDesc": "邀请家人或护理者查看您的打卡状态，帮助关注您的健康状况。",
+      "qr": "快速二维码邀请",
+      "qrDesc": "分享二维码轻松邀请。他们只需扫码即可加入，无需输入任何内容。",
+      "monitor": "状态监控",
+      "monitorDesc": "受邀的家人可以查看您的每日打卡状态，并在需要时收到提醒。",
+      "checkIn": "代为打卡",
+      "checkInDesc": "护理者可以在您无法亲自打卡时代为打卡。"
+    }
   },
   "back": "返回",
   "next": "下一步",

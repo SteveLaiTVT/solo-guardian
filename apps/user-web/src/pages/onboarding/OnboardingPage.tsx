@@ -1,22 +1,39 @@
 /**
  * @file OnboardingPage.tsx
- * @description Onboarding flow page for new users
- * @task TASK-022
- * @design_state_version 1.6.0
+ * @description Onboarding flow page for new users with tutorials
+ * @task TASK-022, TASK-087
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hooks } from '@/lib/api';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import type { ThemeType } from '@solo-guardian/api-client';
 import {
   WelcomeStep,
+  ProfileStep,
+  ThemeStep,
   PreferenceStep,
   FeaturesStep,
   VisualStep,
+  CheckInTutorialStep,
+  ContactsTutorialStep,
+  CaregiverTutorialStep,
 } from '@/components/onboarding';
 
-type OnboardingStep = 'welcome' | 'preference' | 'features' | 'visual';
+type OnboardingStep =
+  | 'welcome'
+  | 'profile'
+  | 'theme'
+  | 'preference'
+  | 'features'
+  | 'visual'
+  | 'checkInTutorial'
+  | 'contactsTutorial'
+  | 'caregiverTutorial';
 
 interface OnboardingState {
+  birthYear: number | null;
+  theme: ThemeType;
   preferFeaturesOn: boolean;
   hobbyCheckIn: boolean;
   familyAccess: boolean;
@@ -29,10 +46,13 @@ interface OnboardingState {
 export function OnboardingPage(): JSX.Element {
   const navigate = useNavigate();
   const updatePreferences = hooks.useUpdatePreferences();
+  const updateProfile = hooks.useUpdateProfile();
   const completeOnboarding = hooks.useCompleteOnboarding();
 
   const [step, setStep] = useState<OnboardingStep>('welcome');
   const [state, setState] = useState<OnboardingState>({
+    birthYear: null,
+    theme: 'standard',
     preferFeaturesOn: false,
     hobbyCheckIn: false,
     familyAccess: false,
@@ -43,7 +63,14 @@ export function OnboardingPage(): JSX.Element {
   });
 
   const handleFinish = async (): Promise<void> => {
+    // Update profile if birth year was set
+    if (state.birthYear !== null) {
+      await updateProfile.mutateAsync({ birthYear: state.birthYear });
+    }
+
+    // Update preferences
     await updatePreferences.mutateAsync({
+      theme: state.theme,
       preferFeaturesOn: state.preferFeaturesOn,
       hobbyCheckIn: state.hobbyCheckIn,
       familyAccess: state.familyAccess,
@@ -57,18 +84,48 @@ export function OnboardingPage(): JSX.Element {
     navigate('/');
   };
 
-  const stepIndicators = ['welcome', 'preference', 'features', 'visual'] as const;
+  // Apply theme preview when theme changes during onboarding
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Remove all theme classes first
+    root.classList.remove('theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean');
+
+    // Apply the selected theme class for preview
+    root.classList.add(`theme-${state.theme}`);
+
+    return () => {
+      // Clean up theme class when component unmounts
+      root.classList.remove('theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean');
+    };
+  }, [state.theme]);
+
+  const stepIndicators = [
+    'welcome',
+    'profile',
+    'theme',
+    'preference',
+    'features',
+    'visual',
+    'checkInTutorial',
+    'contactsTutorial',
+    'caregiverTutorial',
+  ] as const;
   const currentStepIndex = stepIndicators.indexOf(step);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      {/* Language switcher */}
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-8">
         {/* Step indicator */}
         <div className="mb-8 flex justify-center space-x-2">
           {stepIndicators.map((s, index) => (
             <div
               key={s}
-              className={`h-2 w-8 rounded-full transition-colors ${
+              className={`h-2 w-6 rounded-full transition-colors ${
                 index <= currentStepIndex ? 'bg-primary' : 'bg-muted'
               }`}
             />
@@ -78,7 +135,25 @@ export function OnboardingPage(): JSX.Element {
         {/* Step content */}
         <div className="flex-1">
           {step === 'welcome' && (
-            <WelcomeStep onNext={() => setStep('preference')} />
+            <WelcomeStep onNext={() => setStep('profile')} />
+          )}
+
+          {step === 'profile' && (
+            <ProfileStep
+              birthYear={state.birthYear}
+              onBirthYearChange={(year) => setState((s) => ({ ...s, birthYear: year }))}
+              onNext={() => setStep('theme')}
+              onSkip={() => setStep('theme')}
+            />
+          )}
+
+          {step === 'theme' && (
+            <ThemeStep
+              theme={state.theme}
+              onThemeChange={(theme) => setState((s) => ({ ...s, theme }))}
+              onNext={() => setStep('preference')}
+              onSkip={() => setStep('preference')}
+            />
           )}
 
           {step === 'preference' && (
@@ -86,7 +161,7 @@ export function OnboardingPage(): JSX.Element {
               value={state.preferFeaturesOn}
               onChange={(value) => setState((s) => ({ ...s, preferFeaturesOn: value }))}
               onNext={() => setStep('features')}
-              onBack={() => setStep('welcome')}
+              onBack={() => setStep('theme')}
             />
           )}
 
@@ -125,9 +200,30 @@ export function OnboardingPage(): JSX.Element {
                   warmColors: value.warmColors,
                 }))
               }
-              onFinish={() => void handleFinish()}
+              onFinish={() => setStep('checkInTutorial')}
               onBack={() => setStep('features')}
-              isLoading={updatePreferences.isPending || completeOnboarding.isPending}
+              isLoading={false}
+            />
+          )}
+
+          {step === 'checkInTutorial' && (
+            <CheckInTutorialStep
+              onNext={() => setStep('contactsTutorial')}
+              onBack={() => setStep('visual')}
+            />
+          )}
+
+          {step === 'contactsTutorial' && (
+            <ContactsTutorialStep
+              onNext={() => setStep('caregiverTutorial')}
+              onBack={() => setStep('checkInTutorial')}
+            />
+          )}
+
+          {step === 'caregiverTutorial' && (
+            <CaregiverTutorialStep
+              onNext={() => void handleFinish()}
+              onBack={() => setStep('contactsTutorial')}
             />
           )}
         </div>

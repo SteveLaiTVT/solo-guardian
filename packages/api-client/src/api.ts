@@ -15,6 +15,7 @@ import type {
   ReorderContactsRequest,
   UserPreferences,
   UpdatePreferencesRequest,
+  UpdateProfileRequest,
   ToggleFeatureRequest,
   VerifyContactResult,
   VerifyPhoneRequest,
@@ -34,6 +35,7 @@ import type {
   PendingContactInvitation,
   ContactLinkInvitationDetails,
   AcceptContactLinkResult,
+  User,
 } from "./types"
 
 export function createApi(client: AxiosInstance) {
@@ -138,6 +140,12 @@ export function createApi(client: AxiosInstance) {
 
       completeOnboarding: () =>
         client.post<UserPreferences>("/api/v1/preferences/onboarding/complete"),
+
+      getProfile: () =>
+        client.get<User>("/api/v1/preferences/profile"),
+
+      updateProfile: (data: UpdateProfileRequest) =>
+        client.patch<User>("/api/v1/preferences/profile", data),
     },
 
     // OAuth endpoints

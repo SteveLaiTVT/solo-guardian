@@ -44,4 +44,54 @@ export class UserPreferencesRepository {
       create: { userId, ...data } as Prisma.UserPreferencesCreateInput,
     });
   }
+
+  async findUserById(userId: string): Promise<{
+    id: string;
+    name: string;
+    email: string | null;
+    username: string | null;
+    phone: string | null;
+    birthYear: number | null;
+    createdAt: Date;
+  } | null> {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        phone: true,
+        birthYear: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateUser(
+    userId: string,
+    data: { name?: string; birthYear?: number | null },
+  ): Promise<{
+    id: string;
+    name: string;
+    email: string | null;
+    username: string | null;
+    phone: string | null;
+    birthYear: number | null;
+    createdAt: Date;
+  }> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        phone: true,
+        birthYear: true,
+        createdAt: true,
+      },
+    });
+  }
 }

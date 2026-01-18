@@ -4,6 +4,27 @@
     "subtitle": "Your safety companion for peace of mind",
     "getStarted": "Get Started"
   },
+  "profile": {
+    "title": "About You",
+    "subtitle": "Help us personalize your experience",
+    "birthYear": "Year of Birth",
+    "selectYear": "Select your birth year",
+    "birthYearHint": "This helps us customize content for your age group"
+  },
+  "theme": {
+    "title": "Choose Your Theme",
+    "subtitle": "Select a color scheme that feels right for you",
+    "options": {
+      "standard": "Standard",
+      "warm": "Warm",
+      "nature": "Nature",
+      "ocean": "Ocean"
+    }
+  },
+  "common": {
+    "skip": "Skip",
+    "continue": "Continue"
+  },
   "preference": {
     "title": "New Features",
     "subtitle": "When we add new features, how would you like us to handle them?",
@@ -33,6 +54,42 @@
     "highContrast": "High Contrast",
     "reducedMotion": "Reduce Animations",
     "warmColors": "Warm Colors"
+  },
+  "tutorial": {
+    "checkIn": {
+      "title": "Daily Check-in",
+      "subtitle": "Let your loved ones know you're safe with a daily check-in",
+      "howTo": "How to Check In",
+      "howToDesc": "Simply tap the check-in button on the home screen once a day. You can also add a note about how you're doing.",
+      "deadline": "Check-in Deadline",
+      "deadlineDesc": "Set your daily deadline in Settings. If you don't check in by then, your contacts will be notified.",
+      "reminder": "Get Reminders",
+      "reminderDesc": "Enable daily reminders to help you remember to check in. You can customize the reminder time."
+    },
+    "contacts": {
+      "title": "Emergency Contacts",
+      "subtitle": "Add people who will be notified if you miss a check-in",
+      "add": "Add Contacts",
+      "addDesc": "Add up to 5 emergency contacts with their email and phone number.",
+      "verify": "Verify Contacts",
+      "verifyDesc": "Contacts need to verify their email to receive notifications. They'll get a confirmation link.",
+      "alert": "Alert Notifications",
+      "alertDesc": "If you miss your check-in deadline, your contacts will be notified by email or SMS.",
+      "privacy": "Your Privacy",
+      "privacyDesc": "Contacts can only see if you checked in - they cannot see your notes or other details."
+    },
+    "caregiver": {
+      "title": "Family & Caregivers",
+      "subtitle": "Let family members monitor your check-in status",
+      "invite": "Invite Family",
+      "inviteDesc": "Invite family members or caregivers to view your check-in status and help monitor your well-being.",
+      "qr": "Quick QR Invite",
+      "qrDesc": "Share a QR code for easy invitation. They can scan it to join without typing anything.",
+      "monitor": "Status Monitoring",
+      "monitorDesc": "Invited family members can see your daily check-in status and receive alerts if needed.",
+      "checkIn": "Caregiver Check-in",
+      "checkInDesc": "Caregivers can check in on your behalf if you're unable to do it yourself."
+    }
   },
   "back": "Back",
   "next": "Next",

@@ -1,8 +1,11 @@
 // User types
 export interface User {
   id: string
-  email: string
+  email: string | null
+  username: string | null
+  phone: string | null
   name: string
+  birthYear: number | null
   createdAt: string
 }
 
@@ -19,14 +22,16 @@ export interface AuthResult {
 }
 
 export interface LoginRequest {
-  email: string
+  identifier: string
   password: string
 }
 
 export interface RegisterRequest {
-  email: string
-  password: string
   name: string
+  password: string
+  username?: string
+  email?: string
+  phone?: string
 }
 
 export interface RefreshRequest {
@@ -123,11 +128,15 @@ export interface ReorderContactsRequest {
   contactIds: string[]
 }
 
+// Theme type
+export type ThemeType = 'standard' | 'warm' | 'nature' | 'ocean'
+
 // User Preferences types
 export interface UserPreferences {
   id: string
   userId: string
   preferFeaturesOn: boolean
+  theme: ThemeType
   fontSize: number
   highContrast: boolean
   reducedMotion: boolean
@@ -142,12 +151,18 @@ export interface UserPreferences {
 
 export interface UpdatePreferencesRequest {
   preferFeaturesOn?: boolean
+  theme?: ThemeType
   fontSize?: number
   highContrast?: boolean
   reducedMotion?: boolean
   warmColors?: boolean
   hobbyCheckIn?: boolean
   familyAccess?: boolean
+}
+
+export interface UpdateProfileRequest {
+  name?: string
+  birthYear?: number | null
 }
 
 export interface ToggleFeatureRequest {

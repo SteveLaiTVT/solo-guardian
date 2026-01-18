@@ -197,7 +197,7 @@ export class ContactLinkController {
   @Get(':token')
   async getInvitationDetails(
     @Param('token') token: string,
-  ): Promise<{ contactId: string; elderName: string; elderEmail: string; contactName: string } | null> {
+  ): Promise<{ contactId: string; elderName: string; elderEmail: string | null; contactName: string } | null> {
     const details = await this.contactsService.getInvitationDetails(token);
     if (!details) {
       throw new BadRequestException('Invalid or expired invitation');

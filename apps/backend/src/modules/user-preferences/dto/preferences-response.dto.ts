@@ -9,6 +9,7 @@ export class PreferencesResponseDto {
   id: string;
   userId: string;
   preferFeaturesOn: boolean;
+  theme: string;
   fontSize: number;
   highContrast: boolean;
   reducedMotion: boolean;

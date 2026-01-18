@@ -17,6 +17,8 @@ import type {
   ReorderContactsRequest,
   UserPreferences,
   UpdatePreferencesRequest,
+  UpdateProfileRequest,
+  User,
   SendPhoneVerificationResult,
   VerifyPhoneResult,
   ElderSummary,
@@ -222,8 +224,28 @@ export function createHooks(client: AxiosInstance) {
       return useMutation({
         mutationFn: () =>
           api.preferences.completeOnboarding().then((r: AxiosResponse<UserPreferences>) => r.data),
+        onSuccess: (data) => {
+          // Immediately update cache with new data to prevent redirect loop
+          queryClient.setQueryData(["preferences"], data)
+        },
+      })
+    },
+
+    // Profile hooks
+    useProfile: () =>
+      useQuery({
+        queryKey: ["profile"],
+        queryFn: () =>
+          api.preferences.getProfile().then((r: AxiosResponse<User>) => r.data),
+      }),
+
+    useUpdateProfile: () => {
+      const queryClient = useQueryClient()
+      return useMutation({
+        mutationFn: (data: UpdateProfileRequest) =>
+          api.preferences.updateProfile(data).then((r: AxiosResponse<User>) => r.data),
         onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
+          void queryClient.invalidateQueries({ queryKey: ["profile"] })
         },
       })
     },

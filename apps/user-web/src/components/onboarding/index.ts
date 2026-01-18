@@ -1,4 +1,9 @@
 export { WelcomeStep } from './WelcomeStep';
+export { ProfileStep } from './ProfileStep';
+export { ThemeStep } from './ThemeStep';
 export { PreferenceStep } from './PreferenceStep';
 export { FeaturesStep } from './FeaturesStep';
 export { VisualStep } from './VisualStep';
+export { CheckInTutorialStep } from './CheckInTutorialStep';
+export { ContactsTutorialStep } from './ContactsTutorialStep';
+export { CaregiverTutorialStep } from './CaregiverTutorialStep';

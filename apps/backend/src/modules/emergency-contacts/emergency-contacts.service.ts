@@ -31,7 +31,7 @@ type EmergencyContactWithLinkedUser = EmergencyContact & {
 export interface LinkedContactInfo {
   id: string;
   elderName: string;
-  elderEmail: string;
+  elderEmail: string | null;
   contactName: string;
   relationshipSince: Date;
   hasActiveAlerts: boolean;
@@ -40,7 +40,7 @@ export interface LinkedContactInfo {
 export interface PendingInvitationInfo {
   id: string;
   elderName: string;
-  elderEmail: string;
+  elderEmail: string | null;
   contactName: string;
   invitedAt: Date;
 }
@@ -279,7 +279,7 @@ export class EmergencyContactsService {
 
   async getInvitationDetails(
     token: string,
-  ): Promise<{ contactId: string; elderName: string; elderEmail: string; contactName: string } | null> {
+  ): Promise<{ contactId: string; elderName: string; elderEmail: string | null; contactName: string } | null> {
     const contact = await this.contactsRepository.findByInvitationToken(token);
 
     if (!contact) {

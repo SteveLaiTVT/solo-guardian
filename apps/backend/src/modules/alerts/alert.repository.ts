@@ -76,7 +76,7 @@ export class AlertRepository {
    */
   async findById(
     id: string,
-  ): Promise<(Alert & { user: { id: string; name: string; email: string } }) | null> {
+  ): Promise<(Alert & { user: { id: string; name: string; email: string | null } }) | null> {
     return this.prisma.alert.findUnique({
       where: { id },
       include: {

@@ -27,6 +27,8 @@ describe('AuthService', () => {
 
     const mockAuthRepository = {
       findByEmail: jest.fn(),
+      findByIdentifier: jest.fn(),
+      checkDuplicates: jest.fn(),
       createUser: jest.fn(),
       saveRefreshToken: jest.fn(),
       consumeRefreshToken: jest.fn(),
@@ -111,13 +113,17 @@ describe('AuthService', () => {
       });
       const { passwordHash: _, ...userWithoutPassword } = mockUser;
 
-      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.checkDuplicates.mockResolvedValue({
+        hasDuplicateEmail: false,
+        hasDuplicateUsername: false,
+        hasDuplicatePhone: false,
+      });
       authRepository.createUser.mockResolvedValue(userWithoutPassword);
       authRepository.saveRefreshToken.mockResolvedValue(undefined);
 
       const result = await service.register(registerDto);
 
-      expect(authRepository.findByEmail).toHaveBeenCalledWith(registerDto.email);
+      expect(authRepository.checkDuplicates).toHaveBeenCalled();
       expect(authRepository.createUser).toHaveBeenCalled();
       expect(authRepository.saveRefreshToken).toHaveBeenCalled();
       expect(analyticsService.trackRegister).toHaveBeenCalledWith(mockUser.id);
@@ -126,15 +132,22 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException when email already exists', async () => {
-      const existingUser = createMockUser({ email: registerDto.email });
-      authRepository.findByEmail.mockResolvedValue(existingUser);
+      authRepository.checkDuplicates.mockResolvedValue({
+        hasDuplicateEmail: true,
+        hasDuplicateUsername: false,
+        hasDuplicatePhone: false,
+      });
 
       await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
       expect(authRepository.createUser).not.toHaveBeenCalled();
     });
 
     it('should handle race condition with unique constraint error', async () => {
-      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.checkDuplicates.mockResolvedValue({
+        hasDuplicateEmail: false,
+        hasDuplicateUsername: false,
+        hasDuplicatePhone: false,
+      });
       authRepository.createUser.mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('Unique constraint', {
           code: 'P2002',
@@ -146,7 +159,11 @@ describe('AuthService', () => {
     });
 
     it('should rethrow non-unique constraint errors', async () => {
-      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.checkDuplicates.mockResolvedValue({
+        hasDuplicateEmail: false,
+        hasDuplicateUsername: false,
+        hasDuplicatePhone: false,
+      });
       authRepository.createUser.mockRejectedValue(new Error('Database error'));
 
       await expect(service.register(registerDto)).rejects.toThrow('Database error');
@@ -155,34 +172,34 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const loginDto = {
-      email: 'test@example.com',
+      identifier: 'test@example.com',
       password: 'password123',
     };
 
     it('should login user successfully', async () => {
-      const mockUser = createMockUser({ email: loginDto.email });
-      authRepository.findByEmail.mockResolvedValue(mockUser);
+      const mockUser = createMockUser({ email: loginDto.identifier });
+      authRepository.findByIdentifier.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       authRepository.saveRefreshToken.mockResolvedValue(undefined);
 
       const result = await service.login(loginDto);
 
-      expect(authRepository.findByEmail).toHaveBeenCalledWith(loginDto.email);
+      expect(authRepository.findByIdentifier).toHaveBeenCalledWith(loginDto.identifier);
       expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.passwordHash);
       expect(analyticsService.trackLogin).toHaveBeenCalledWith(mockUser.id);
-      expect(result.user.email).toBe(loginDto.email);
+      expect(result.user.email).toBe(loginDto.identifier);
       expect(result.tokens).toBeDefined();
     });
 
     it('should throw UnauthorizedException when user not found', async () => {
-      authRepository.findByEmail.mockResolvedValue(null);
+      authRepository.findByIdentifier.mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
-      const mockUser = createMockUser({ email: loginDto.email });
-      authRepository.findByEmail.mockResolvedValue(mockUser);
+      const mockUser = createMockUser({ email: loginDto.identifier });
+      authRepository.findByIdentifier.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);

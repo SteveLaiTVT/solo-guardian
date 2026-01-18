@@ -39,11 +39,11 @@ export function LanguageSwitcher(): JSX.Element {
 
   return (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-auto min-w-[100px] h-8 text-sm">
+      <SelectTrigger className="w-auto min-w-[120px] h-8 text-sm">
         <SelectValue>
           <span className="flex items-center gap-1.5">
             <span>{currentLanguage.flag}</span>
-            <span className="hidden sm:inline">{currentLanguage.name}</span>
+            <span>{currentLanguage.name}</span>
           </span>
         </SelectValue>
       </SelectTrigger>

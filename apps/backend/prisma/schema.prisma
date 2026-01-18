@@ -41,13 +41,16 @@ enum UserStatus {
 
 // ============================================================
 // User Model
-// @task TASK-065
+// @task TASK-065, TASK-075
 // ============================================================
 model User {
   id           String     @id @default(uuid())
-  email        String     @unique
+  email        String?    @unique
+  username     String?    @unique
+  phone        String?    @unique
   passwordHash String     @map("password_hash")
   name         String
+  birthYear    Int?       @map("birth_year") // Year of birth for age calculation
   role         UserRole   @default(user)
   status       UserStatus @default(active)
   createdAt    DateTime   @default(now()) @map("created_at")
@@ -58,20 +61,17 @@ model User {
   checkInSettings   CheckInSettings?
   emergencyContacts EmergencyContact[]    @relation("UserContacts")
   preferences       UserPreferences?
-  // DONE(B): Add alerts relation - TASK-023
   alerts            Alert[]
-  // DONE(B): Add caregiver relations - TASK-046
   caregivingFor     CaregiverRelation[]   @relation("CaregiverUser")
   caredByUsers      CaregiverRelation[]   @relation("ElderUser")
-  // DONE(B): Add caretaker check-ins relation - TASK-060
   caretakerCheckIns CheckIn[]             @relation("CaretakerCheckIns")
-  // DONE(B): Add caregiver invitations relation - TASK-057
   invitations       CaregiverInvitation[]
-  // DONE(B): Add linked contacts relation - TASK-065
   linkedAsContact   EmergencyContact[]    @relation("LinkedContacts")
 
   @@index([role])
   @@index([status])
+  @@index([username])
+  @@index([phone])
   @@map("users")
 }
 
@@ -203,6 +203,7 @@ model UserPreferences {
   preferFeaturesOn Boolean @default(false) @map("prefer_features_on")
 
   // Visual preferences
+  theme         String  @default("standard") // "standard" | "warm" | "nature" | "ocean"
   fontSize      Int     @default(16) @map("font_size")
   highContrast  Boolean @default(false) @map("high_contrast")
   reducedMotion Boolean @default(false) @map("reduced_motion")

@@ -58,14 +58,22 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
     // Apply font size
     root.style.fontSize = `${preferences.fontSize}px`;
 
-    // Apply theme classes
+    // Apply accessibility classes
     root.classList.toggle('high-contrast', preferences.highContrast);
     root.classList.toggle('warm-colors', preferences.warmColors && !preferences.highContrast);
     root.classList.toggle('reduced-motion', preferences.reducedMotion);
 
+    // Apply theme class (if not in onboarding, which handles its own preview)
+    const themeClasses = ['theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean'];
+    themeClasses.forEach((cls) => root.classList.remove(cls));
+    if (preferences.theme) {
+      root.classList.add(`theme-${preferences.theme}`);
+    }
+
     return () => {
       root.style.fontSize = '';
       root.classList.remove('high-contrast', 'warm-colors', 'reduced-motion');
+      themeClasses.forEach((cls) => root.classList.remove(cls));
     };
   }, [preferences]);
 

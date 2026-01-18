@@ -55,7 +55,7 @@ export class AdminRepository {
   async getUserList(params: UserListParams): Promise<{
     users: Array<{
       id: string;
-      email: string;
+      email: string | null;
       name: string;
       role: UserRoleType;
       status: UserStatusType;
@@ -109,7 +109,7 @@ export class AdminRepository {
 
   async getUserDetail(userId: string): Promise<{
     id: string;
-    email: string;
+    email: string | null;
     name: string;
     role: UserRoleType;
     status: UserStatusType;
@@ -182,7 +182,7 @@ export class AdminRepository {
       status: AlertStatus;
       triggeredAt: Date;
       resolvedAt: Date | null;
-      user: { name: string; email: string };
+      user: { name: string; email: string | null };
     }>;
     total: number;
   }> {
@@ -241,7 +241,7 @@ export class AdminRepository {
   // DONE(B): Get at-risk users with consecutive missed check-ins - TASK-055
   async getAtRiskUsers(minConsecutiveMisses: number = 2): Promise<Array<{
     id: string;
-    email: string;
+    email: string | null;
     name: string;
     consecutiveMisses: number;
     lastCheckIn: string | null;
@@ -272,7 +272,7 @@ export class AdminRepository {
 
     const atRiskUsers: Array<{
       id: string;
-      email: string;
+      email: string | null;
       name: string;
       consecutiveMisses: number;
       lastCheckIn: string | null;

@@ -6,3 +6,4 @@
 
 export { UpdatePreferencesDto } from './update-preferences.dto';
 export { PreferencesResponseDto } from './preferences-response.dto';
+export { UpdateProfileDto, ProfileResponseDto } from './update-profile.dto';

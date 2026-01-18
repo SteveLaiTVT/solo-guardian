@@ -1,8 +1,7 @@
 /**
  * @file auth.service.ts
  * @description Authentication service - handles login/register logic
- * @task TASK-001-C, TASK-003, TASK-004, TASK-046, TASK-054
- * @design_state_version 3.8.0
+ * @task TASK-001-C, TASK-003, TASK-004, TASK-046, TASK-054, TASK-081
  */
 import {
   Injectable,
@@ -19,6 +18,7 @@ import { Prisma } from '@prisma/client';
 import { AuthRepository } from './auth.repository';
 import { RegisterDto, LoginDto, AuthResult, AuthTokens } from './dto';
 import { AnalyticsService } from '../analytics';
+import { detectIdentifierType, IdentifierType } from './utils';
 
 const PRISMA_UNIQUE_CONSTRAINT_ERROR = 'P2002';
 
@@ -28,12 +28,10 @@ const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 const REFRESH_TOKEN_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Role type for auth (matches schema when migration runs)
 type UserRoleType = 'user' | 'caregiver' | 'admin' | 'super_admin';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  // DONE(B): Add NestJS Logger - TASK-003
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
@@ -43,16 +41,32 @@ export class AuthService implements OnModuleInit {
     private readonly analyticsService: AnalyticsService,
   ) {}
 
-  // DONE(B): Validate JWT secrets on startup - TASK-004
   onModuleInit(): void {
     this.validateJwtSecrets();
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
-    const existingUser = await this.authRepository.findByEmail(dto.email);
-    if (existingUser) {
+    const duplicates = await this.authRepository.checkDuplicates({
+      email: dto.email,
+      username: dto.username,
+      phone: dto.phone,
+    });
+
+    if (duplicates.hasDuplicateEmail) {
       this.logger.warn(`Registration attempt with existing email: ${dto.email}`);
       throw new ConflictException('Email already registered');
+    }
+
+    if (duplicates.hasDuplicateUsername) {
+      this.logger.warn(
+        `Registration attempt with existing username: ${dto.username}`,
+      );
+      throw new ConflictException('Username already taken');
+    }
+
+    if (duplicates.hasDuplicatePhone) {
+      this.logger.warn(`Registration attempt with existing phone: ${dto.phone}`);
+      throw new ConflictException('Phone number already registered');
     }
 
     const passwordHash = await this.hashPassword(dto.password);
@@ -60,7 +74,9 @@ export class AuthService implements OnModuleInit {
     let user;
     try {
       user = await this.authRepository.createUser({
-        email: dto.email.toLowerCase(),
+        email: dto.email,
+        username: dto.username,
+        phone: dto.phone,
         passwordHash,
         name: dto.name,
       });
@@ -69,14 +85,12 @@ export class AuthService implements OnModuleInit {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === PRISMA_UNIQUE_CONSTRAINT_ERROR
       ) {
-        this.logger.warn(`Registration race condition - duplicate email: ${dto.email}`);
-        throw new ConflictException('Email already registered');
+        this.logger.warn('Registration race condition - duplicate identifier');
+        throw new ConflictException('Identifier already registered');
       }
       throw error;
     }
 
-    // DONE(B): Include role in token generation - TASK-046
-    // Use default role until migration runs
     const role: UserRoleType = 'user';
     const tokens = await this.generateTokens(user.id, role);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
@@ -87,15 +101,17 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    this.logger.log(`User registered: ${user.email} (role: ${role})`);
+    const identifier = dto.email ?? dto.username ?? dto.phone;
+    this.logger.log(`User registered: ${identifier} (role: ${role})`);
 
-    // DONE(B): Track registration event - TASK-054
     await this.analyticsService.trackRegister(user.id);
 
     return {
       user: {
         id: user.id,
         email: user.email,
+        username: user.username,
+        phone: user.phone,
         name: user.name,
         role: role,
         createdAt: user.createdAt,
@@ -105,9 +121,13 @@ export class AuthService implements OnModuleInit {
   }
 
   async login(dto: LoginDto): Promise<AuthResult> {
-    const user = await this.authRepository.findByEmail(dto.email);
+    const identifierType = detectIdentifierType(dto.identifier);
+    const user = await this.authRepository.findByIdentifier(dto.identifier);
+
     if (!user) {
-      this.logger.warn(`Login failed - user not found: ${dto.email}`);
+      this.logger.warn(
+        `Login failed - user not found: ${dto.identifier} (type: ${identifierType})`,
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -116,11 +136,12 @@ export class AuthService implements OnModuleInit {
       user.passwordHash,
     );
     if (!isPasswordValid) {
-      this.logger.warn(`Login failed - invalid password: ${dto.email}`);
+      this.logger.warn(
+        `Login failed - invalid password: ${dto.identifier} (type: ${identifierType})`,
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // DONE(B): Include role in token generation - TASK-046
     const role = user.role as UserRoleType;
     const tokens = await this.generateTokens(user.id, role);
     const refreshTokenHash = this.hashRefreshToken(tokens.refreshToken);
@@ -131,15 +152,19 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    this.logger.log(`User logged in: ${user.email} (role: ${role})`);
+    const logIdentifier = user.email ?? user.username ?? user.phone ?? user.id;
+    this.logger.log(
+      `User logged in: ${logIdentifier} (type: ${identifierType}, role: ${role})`,
+    );
 
-    // DONE(B): Track login event - TASK-054
     await this.analyticsService.trackLogin(user.id);
 
     return {
       user: {
         id: user.id,
         email: user.email,
+        username: user.username,
+        phone: user.phone,
         name: user.name,
         role: role,
         createdAt: user.createdAt,
@@ -159,7 +184,6 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    // DONE(B): Include role in token generation - TASK-046
     const role = consumedToken.user.role as UserRoleType;
     const tokens = await this.generateTokens(consumedToken.user.id, role);
     const newTokenHash = this.hashRefreshToken(tokens.refreshToken);
@@ -170,12 +194,19 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    this.logger.log(`Token refreshed for user: ${consumedToken.user.email}`);
+    const logIdentifier =
+      consumedToken.user.email ??
+      consumedToken.user.username ??
+      consumedToken.user.phone ??
+      consumedToken.user.id;
+    this.logger.log(`Token refreshed for user: ${logIdentifier}`);
 
     return {
       user: {
         id: consumedToken.user.id,
         email: consumedToken.user.email,
+        username: consumedToken.user.username,
+        phone: consumedToken.user.phone,
         name: consumedToken.user.name,
         role: role,
         createdAt: consumedToken.user.createdAt,
@@ -189,7 +220,6 @@ export class AuthService implements OnModuleInit {
     await this.authRepository.deleteRefreshToken(tokenHash);
   }
 
-  // DONE(B): Validate JWT secrets on module init - TASK-004
   private validateJwtSecrets(): void {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
@@ -222,7 +252,6 @@ export class AuthService implements OnModuleInit {
     return bcrypt.compare(password, hash);
   }
 
-  // DONE(B): Updated to include role in JWT - TASK-046
   private async generateTokens(
     userId: string,
     role: UserRoleType = 'user',
@@ -230,7 +259,6 @@ export class AuthService implements OnModuleInit {
     const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
 
-    // Add unique jti to ensure tokens are unique even if generated in same second
     const jti = crypto.randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([

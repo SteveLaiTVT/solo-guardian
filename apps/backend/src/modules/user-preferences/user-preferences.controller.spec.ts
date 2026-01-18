@@ -10,6 +10,7 @@ describe('UserPreferencesController', () => {
     id: 'pref-1',
     userId: 'user-1',
     preferFeaturesOn: true,
+    theme: 'standard',
     fontSize: 16,
     highContrast: false,
     reducedMotion: false,

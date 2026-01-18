@@ -109,6 +109,11 @@ export class MissedCheckInDetector implements OnModuleInit {
 
           if (this.wasReminderSentToday(lastReminderSentAt, timezone)) continue;
 
+          if (!userEmail) {
+            this.logger.debug(`Skipping reminder for user ${userId}: no email address`);
+            continue;
+          }
+
           const success = await this.emailService.sendReminderEmail(
             userEmail, userName, deadlineTime, timezone,
           );

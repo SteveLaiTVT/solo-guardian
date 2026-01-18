@@ -26,7 +26,7 @@ const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
 interface OAuthUser {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   createdAt: Date;
 }
@@ -180,7 +180,7 @@ export class OAuthService {
    */
   private async findOrCreateUser(
     profile: OAuthUserProfile,
-  ): Promise<{ user: { id: string; email: string; name: string; createdAt: Date }; isNewUser: boolean }> {
+  ): Promise<{ user: { id: string; email: string | null; name: string; createdAt: Date }; isNewUser: boolean }> {
     if (!profile.email) {
       throw new UnauthorizedException('OAuth provider did not return an email address');
     }

@@ -331,7 +331,7 @@ export class EmergencyContactsRepository {
 
   async findByInvitationToken(
     token: string,
-  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } }) | null> {
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string | null } }) | null> {
     return this.prisma.emergencyContact.findUnique({
       where: { invitationToken: token },
       include: {
@@ -354,7 +354,7 @@ export class EmergencyContactsRepository {
 
   async findContactsWhereUserIsLinked(
     linkedUserId: string,
-  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } })[]> {
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string | null } })[]> {
     return this.prisma.emergencyContact.findMany({
       where: {
         linkedUserId,
@@ -374,7 +374,7 @@ export class EmergencyContactsRepository {
 
   async findPendingInvitationsForUser(
     linkedUserId: string,
-  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string } })[]> {
+  ): Promise<(EmergencyContact & { user: { id: string; name: string; email: string | null } })[]> {
     return this.prisma.emergencyContact.findMany({
       where: {
         linkedUserId,

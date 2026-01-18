@@ -7,8 +7,11 @@ export function createMockUser(overrides: Partial<User> = {}): User {
   return {
     id,
     email: `test${userIdCounter}@example.com`,
+    username: null,
+    phone: null,
     passwordHash: '$2a$12$hashedpassword',
     name: 'Test User',
+    birthYear: null,
     role: 'user' as UserRole,
     status: 'active' as UserStatus,
     createdAt: new Date('2025-01-01'),

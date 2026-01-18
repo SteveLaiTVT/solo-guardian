@@ -30,7 +30,7 @@ export interface AlertSummaryResponse {
   id: string;
   userId: string;
   userName: string;
-  userEmail: string;
+  userEmail: string | null;
   status: AlertStatus;
   triggeredAt: Date;
   resolvedAt: Date | null;

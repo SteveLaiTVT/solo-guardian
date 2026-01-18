@@ -7,7 +7,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import { ProtectedRoute, GuestRoute } from '@/components/auth'
+import { ProtectedRoute, GuestRoute, OnboardingGuard } from '@/components/auth'
 import { Layout } from '@/components/layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -51,14 +51,19 @@ function App(): JSX.Element {
 
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
+                {/* Onboarding page - accessible even if onboarding not completed */}
                 <Route path="/onboarding" element={<OnboardingPage />} />
-                <Route element={<Layout />}>
-                  <Route path="/" element={<DashboardPage />} />
-                  <Route path="/history" element={<HistoryPage />} />
-                  <Route path="/contacts" element={<ContactsPage />} />
-                  <Route path="/contacts/linked" element={<LinkedContactsPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/caregiver" element={<CaregiverPage />} />
+
+                {/* Main app routes - require onboarding to be completed */}
+                <Route element={<OnboardingGuard />}>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route path="/contacts" element={<ContactsPage />} />
+                    <Route path="/contacts/linked" element={<LinkedContactsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/caregiver" element={<CaregiverPage />} />
+                  </Route>
                 </Route>
               </Route>
 

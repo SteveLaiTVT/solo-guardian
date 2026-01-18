@@ -138,3 +138,77 @@
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/* Theme: Standard (default warm teal - no changes needed, uses :root) */
+.theme-standard {
+  /* Uses default :root values */
+}
+
+/* Theme: Warm - amber/orange tones */
+.theme-warm {
+  --background: 35 40% 98%;
+  --foreground: 25 30% 18%;
+  --card: 35 40% 99%;
+  --card-foreground: 25 30% 18%;
+  --popover: 35 40% 99%;
+  --popover-foreground: 25 30% 18%;
+  --primary: 25 95% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 35 45% 92%;
+  --secondary-foreground: 25 30% 20%;
+  --muted: 35 30% 92%;
+  --muted-foreground: 25 15% 45%;
+  --accent: 30 50% 92%;
+  --accent-foreground: 25 30% 18%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 35 25% 86%;
+  --input: 35 25% 86%;
+  --ring: 25 95% 53%;
+}
+
+/* Theme: Nature - green/forest tones */
+.theme-nature {
+  --background: 120 25% 98%;
+  --foreground: 120 20% 18%;
+  --card: 120 30% 99%;
+  --card-foreground: 120 20% 18%;
+  --popover: 120 30% 99%;
+  --popover-foreground: 120 20% 18%;
+  --primary: 142 70% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 120 30% 92%;
+  --secondary-foreground: 120 20% 20%;
+  --muted: 120 20% 92%;
+  --muted-foreground: 120 10% 45%;
+  --accent: 80 40% 92%;
+  --accent-foreground: 120 20% 18%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 120 20% 86%;
+  --input: 120 20% 86%;
+  --ring: 142 70% 40%;
+}
+
+/* Theme: Ocean - blue/teal tones */
+.theme-ocean {
+  --background: 200 35% 98%;
+  --foreground: 210 25% 18%;
+  --card: 200 40% 99%;
+  --card-foreground: 210 25% 18%;
+  --popover: 200 40% 99%;
+  --popover-foreground: 210 25% 18%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 200 35% 92%;
+  --secondary-foreground: 210 25% 20%;
+  --muted: 200 25% 92%;
+  --muted-foreground: 210 15% 45%;
+  --accent: 185 40% 92%;
+  --accent-foreground: 210 25% 18%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 200 25% 86%;
+  --input: 200 25% 86%;
+  --ring: 199 89% 48%;
+}

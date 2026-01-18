@@ -1,8 +1,7 @@
 /**
  * @file RegisterPage.tsx
- * @description Registration page with email/password signup
- * @task TASK-013
- * @design_state_version 1.2.2
+ * @description Registration page with flexible identifiers (email, username, phone)
+ * @task TASK-013, TASK-084
  */
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -14,29 +13,69 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
 
-// DONE(B): Added i18n support - TASK-013
+interface RegisterFormData {
+  name: string
+  password: string
+  confirmPassword: string
+  username?: string
+  email?: string
+  phone?: string
+}
+
 export function RegisterPage(): JSX.Element {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const setTokens = useAuthStore((s) => s.setTokens)
   const [error, setError] = useState<string | null>(null)
+  const [showNoIdentifierDialog, setShowNoIdentifierDialog] = useState(false)
+  const [pendingData, setPendingData] = useState<RegisterFormData | null>(null)
+
+  const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*$/
+  const phoneRegex = /^\+?[0-9]{7,15}$/
 
   const registerSchema = z
     .object({
       name: z.string().min(1, t('validation.nameRequired')),
-      email: z.string().email(t('validation.emailInvalid')),
       password: z.string().min(8, t('validation.passwordMinLength')),
       confirmPassword: z.string().min(1, t('validation.confirmRequired')),
+      username: z
+        .string()
+        .optional()
+        .refine(
+          (val) => !val || (val.length >= 3 && val.length <= 30 && usernameRegex.test(val)),
+          { message: t('validation.usernameInvalid') }
+        ),
+      email: z
+        .string()
+        .optional()
+        .refine((val) => !val || z.string().email().safeParse(val).success, {
+          message: t('validation.emailInvalid'),
+        }),
+      phone: z
+        .string()
+        .optional()
+        .refine((val) => !val || phoneRegex.test(val), {
+          message: t('validation.phoneInvalid'),
+        }),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: t('validation.passwordMismatch'),
       path: ['confirmPassword'],
     })
-
-  type RegisterFormData = z.infer<typeof registerSchema>
 
   const {
     register,
@@ -48,14 +87,27 @@ export function RegisterPage(): JSX.Element {
 
   const registerMutation = hooks.useRegister()
 
-  const onSubmit = (data: RegisterFormData): void => {
+  const hasAnyIdentifier = (data: RegisterFormData): boolean => {
+    const hasUsername = data.username && data.username.trim().length > 0
+    const hasEmail = data.email && data.email.trim().length > 0
+    const hasPhone = data.phone && data.phone.trim().length > 0
+    return !!(hasUsername || hasEmail || hasPhone)
+  }
+
+  const doRegister = (data: RegisterFormData): void => {
     setError(null)
     registerMutation.mutate(
-      { name: data.name, email: data.email, password: data.password },
+      {
+        name: data.name,
+        password: data.password,
+        username: data.username || undefined,
+        email: data.email || undefined,
+        phone: data.phone || undefined,
+      },
       {
         onSuccess: (result) => {
           setTokens(result.tokens.accessToken, result.tokens.refreshToken)
-          navigate('/')
+          navigate('/onboarding')
         },
         onError: (err) => {
           const message = err instanceof Error ? err.message : t('register.failed')
@@ -65,8 +117,33 @@ export function RegisterPage(): JSX.Element {
     )
   }
 
+  const onSubmit = (data: RegisterFormData): void => {
+    if (!hasAnyIdentifier(data)) {
+      setPendingData(data)
+      setShowNoIdentifierDialog(true)
+      return
+    }
+    doRegister(data)
+  }
+
+  const handleConfirmNoIdentifier = (): void => {
+    setShowNoIdentifierDialog(false)
+    if (pendingData) {
+      doRegister(pendingData)
+      setPendingData(null)
+    }
+  }
+
+  const handleCancelNoIdentifier = (): void => {
+    setShowNoIdentifierDialog(false)
+    setPendingData(null)
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">{t('register.title')}</CardTitle>
@@ -91,18 +168,52 @@ export function RegisterPage(): JSX.Element {
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('fields.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t('fields.emailPlaceholder')}
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+
+            <div className="rounded-md border p-3 space-y-3">
+              <div className="text-sm font-medium text-muted-foreground">
+                {t('register.identifiersSection')}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('register.identifiersHintOptional')}
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="username">{t('fields.username')}</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder={t('fields.usernamePlaceholder')}
+                  {...register('username')}
+                />
+                {errors.username && (
+                  <p className="text-sm text-red-500">{errors.username.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">{t('fields.email')}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder={t('fields.emailPlaceholder')}
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">{t('fields.phone')}</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder={t('fields.phonePlaceholder')}
+                  {...register('phone')}
+                />
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone.message}</p>
+                )}
+              </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">{t('fields.password')}</Label>
               <Input
@@ -146,6 +257,25 @@ export function RegisterPage(): JSX.Element {
           </p>
         </CardContent>
       </Card>
+
+      <AlertDialog open={showNoIdentifierDialog} onOpenChange={setShowNoIdentifierDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('register.noIdentifierTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('register.noIdentifierDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelNoIdentifier}>
+              {t('register.noIdentifierCancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmNoIdentifier}>
+              {t('register.noIdentifierConfirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -29,7 +29,7 @@ export class UpdateCaregiverRelationDto {
 export interface ElderSummary {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   lastCheckIn: string | null;
   todayStatus: 'checked_in' | 'pending' | 'overdue';
   isAccepted: boolean;
@@ -38,7 +38,7 @@ export interface ElderSummary {
 export interface CaregiverSummary {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   isAccepted: boolean;
 }
 

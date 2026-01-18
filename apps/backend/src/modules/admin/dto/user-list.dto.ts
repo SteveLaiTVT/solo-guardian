@@ -32,7 +32,7 @@ export class UserListQueryDto {
 
 export interface UserSummaryResponse {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   role: UserRoleType;
   status: UserStatusType;
