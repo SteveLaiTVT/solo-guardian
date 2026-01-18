@@ -135,6 +135,21 @@
   "settingsLogout": "ログアウト",
   "settingsLogoutTitle": "ログアウト",
   "settingsLogoutConfirm": "ログアウトしてもよろしいですか？",
+  "settingsEditProfile": "プロフィールを編集",
+  "settingsProfileUpdated": "プロフィールが更新されました",
+  "settingsEditProfileTitle": "プロフィールを編集",
+  "settingsBirthYear": "生年（オプション）",
+  "settingsBirthYearHint": "例：1960",
+  "settingsBirthYearInvalid": "生年の形式が正しくありません",
+  "settingsBirthYearRange": "生年は1900から{year}の間である必要があります",
+  "@settingsBirthYearRange": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "save": "保存",
 
   "caregiverElders": "お年寄り",
   "caregiverCaregivers": "私の介護者",

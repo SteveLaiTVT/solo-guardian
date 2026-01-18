@@ -54,12 +54,12 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     if (birthYearText.isNotEmpty) {
       birthYear = int.tryParse(birthYearText);
       if (birthYear == null) {
-        setState(() => _error = '出生年份格式不正确');
+        setState(() => _error = l10n.settingsBirthYearInvalid);
         return;
       }
       final currentYear = DateTime.now().year;
       if (birthYear < 1900 || birthYear > currentYear) {
-        setState(() => _error = '出生年份应在 1900 到 $currentYear 之间');
+        setState(() => _error = l10n.settingsBirthYearRange(currentYear.toString()));
         return;
       }
     }
@@ -100,7 +100,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
           children: [
             // Title
             Text(
-              '编辑个人资料',
+              l10n.settingsEditProfileTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -131,7 +131,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
             TextField(
               controller: _birthYearController,
               decoration: InputDecoration(
-                labelText: '出生年份（选填）',
+                labelText: l10n.settingsBirthYear,
                 labelStyle: theme.textTheme.titleMedium,
                 prefixIcon: const Icon(Icons.cake_outlined, size: 28),
                 border: OutlineInputBorder(
@@ -141,7 +141,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                   horizontal: 16,
                   vertical: 16,
                 ),
-                hintText: '例如：1960',
+                hintText: l10n.settingsBirthYearHint,
               ),
               style: theme.textTheme.titleMedium,
               keyboardType: TextInputType.number,
@@ -212,7 +212,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                             ),
                           )
                         : Text(
-                            '保存',
+                            l10n.save,
                             style: theme.textTheme.titleMedium,
                           ),
                   ),

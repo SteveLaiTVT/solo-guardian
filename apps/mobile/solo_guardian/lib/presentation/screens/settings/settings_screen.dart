@@ -170,10 +170,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (result == true && mounted) {
+      final l10n = AppLocalizations.of(context);
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('个人资料已更新', style: theme.textTheme.bodyLarge),
+          content: Text(l10n.settingsProfileUpdated, style: theme.textTheme.bodyLarge),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -223,7 +224,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
 
                 // Check-in Settings Section
-                _buildSectionTitle('打卡设置', Icons.schedule, theme),
+                _buildSectionTitle(l10n.settingsCheckIn, Icons.schedule, theme),
                 _buildCheckInSettings(l10n, theme),
 
                 const SizedBox(height: 16),
@@ -231,7 +232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
 
                 // Appearance Section
-                _buildSectionTitle('外观设置', Icons.palette_outlined, theme),
+                _buildSectionTitle(l10n.settingsVisual, Icons.palette_outlined, theme),
                 _buildAppearanceSettings(l10n, theme),
 
                 const SizedBox(height: 16),
@@ -247,7 +248,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
 
                 // Account Section
-                _buildSectionTitle('账户设置', Icons.person_outline, theme),
+                _buildSectionTitle(l10n.settingsAccountTitle, Icons.person_outline, theme),
                 _buildAccountSettings(l10n, theme),
 
                 const SizedBox(height: 32),
@@ -424,7 +425,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               OutlinedButton.icon(
                 onPressed: _showProfileEditDialog,
                 icon: const Icon(Icons.edit, size: 20),
-                label: Text('编辑个人资料', style: theme.textTheme.bodyLarge),
+                label: Text(l10n.settingsEditProfile, style: theme.textTheme.bodyLarge),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(

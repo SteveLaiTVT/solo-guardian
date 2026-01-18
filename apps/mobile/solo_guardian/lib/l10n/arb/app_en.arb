@@ -135,6 +135,21 @@
   "settingsLogout": "Sign Out",
   "settingsLogoutTitle": "Sign Out",
   "settingsLogoutConfirm": "Are you sure you want to sign out?",
+  "settingsEditProfile": "Edit Profile",
+  "settingsProfileUpdated": "Profile updated successfully",
+  "settingsEditProfileTitle": "Edit Profile",
+  "settingsBirthYear": "Birth Year (Optional)",
+  "settingsBirthYearHint": "e.g. 1960",
+  "settingsBirthYearInvalid": "Invalid birth year format",
+  "settingsBirthYearRange": "Birth year must be between 1900 and {year}",
+  "@settingsBirthYearRange": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "save": "Save",
 
   "caregiverElders": "Elders",
   "caregiverCaregivers": "My Caregivers",
