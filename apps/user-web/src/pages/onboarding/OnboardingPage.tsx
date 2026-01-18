@@ -84,21 +84,30 @@ export function OnboardingPage(): JSX.Element {
     navigate('/');
   };
 
-  // Apply theme preview when theme changes during onboarding
+  // Apply visual preferences preview during onboarding
   useEffect(() => {
     const root = document.documentElement;
 
-    // Remove all theme classes first
-    root.classList.remove('theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean');
-
-    // Apply the selected theme class for preview
+    // Apply theme class
+    const themeClasses = ['theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean'];
+    themeClasses.forEach((cls) => root.classList.remove(cls));
     root.classList.add(`theme-${state.theme}`);
 
+    // Apply font size
+    root.style.fontSize = `${state.fontSize}px`;
+
+    // Apply accessibility classes
+    root.classList.toggle('high-contrast', state.highContrast);
+    root.classList.toggle('warm-colors', state.warmColors && !state.highContrast);
+    root.classList.toggle('reduced-motion', state.reducedMotion);
+
     return () => {
-      // Clean up theme class when component unmounts
-      root.classList.remove('theme-standard', 'theme-warm', 'theme-nature', 'theme-ocean');
+      // Clean up when component unmounts
+      themeClasses.forEach((cls) => root.classList.remove(cls));
+      root.style.fontSize = '';
+      root.classList.remove('high-contrast', 'warm-colors', 'reduced-motion');
     };
-  }, [state.theme]);
+  }, [state.theme, state.fontSize, state.highContrast, state.warmColors, state.reducedMotion]);
 
   const stepIndicators = [
     'welcome',

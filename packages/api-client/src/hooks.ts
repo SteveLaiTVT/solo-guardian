@@ -200,8 +200,10 @@ export function createHooks(client: AxiosInstance) {
       return useMutation({
         mutationFn: (data: UpdatePreferencesRequest) =>
           api.preferences.update(data).then((r: AxiosResponse<UserPreferences>) => r.data),
-        onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
+        onSuccess: (data) => {
+          // Use setQueryData instead of invalidateQueries to prevent race conditions
+          // during onboarding flow where multiple mutations happen sequentially
+          queryClient.setQueryData(["preferences"], data)
         },
       })
     },
@@ -213,8 +215,8 @@ export function createHooks(client: AxiosInstance) {
           api.preferences
             .toggleFeature(featureName, { enabled })
             .then((r: AxiosResponse<UserPreferences>) => r.data),
-        onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: ["preferences"] })
+        onSuccess: (data) => {
+          queryClient.setQueryData(["preferences"], data)
         },
       })
     },
