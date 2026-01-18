@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.9.0"
-  updated_at: "2026-01-17"
+  version: "3.10.0"
+  updated_at: "2026-01-18"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Linked Emergency Contacts Complete"
+  milestone: "Flutter Mobile App Support"
 
 # ============================================================
 # 1. Technical Architecture
@@ -55,13 +55,21 @@ architecture:
       desktop: "> 1024px"
 
   mobile:
-    android:
+    flutter:
+      status: "in_progress"
+      language: "Dart"
+      ui: "Flutter"
+      architecture: "Clean Architecture + Riverpod"
+      networking: "Dio"
+      platforms: ["Android", "iOS"]
+    android_native:
+      status: "planned"
       language: "Kotlin"
       ui: "Jetpack Compose"
       architecture: "MVVM + Clean Architecture"
       di: "Hilt"
       networking: "Retrofit + OkHttp"
-    ios:
+    ios_native:
       status: "planned"
       language: "Swift"
       ui: "SwiftUI"
@@ -608,6 +616,53 @@ modules:
         description: "caregiver.spec.ts placeholder tests"
         completed_task: "TASK-046"
 
+  storage:
+    status: "done"
+    owner: "B Session"
+    description: "File storage service for avatars and uploads"
+    started_iteration: "iter-015"
+    completed_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.10.0"
+    features:
+      - name: "Aliyun OSS Integration"
+        priority: "P0"
+        status: "done"
+        description: "Aliyun OSS client for file uploads"
+      - name: "Avatar Upload"
+        priority: "P0"
+        status: "done"
+        description: "Upload user avatar to OSS with unique filename"
+      - name: "CDN Support"
+        priority: "P1"
+        status: "done"
+        description: "Optional CDN domain for production use"
+
+  mobile_app:
+    status: "in_progress"
+    owner: "B Session"
+    description: "Flutter mobile application"
+    started_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.10.0"
+    features:
+      - name: "Project Setup"
+        priority: "P0"
+        status: "done"
+        description: "Flutter project with clean architecture"
+      - name: "Authentication"
+        priority: "P0"
+        status: "in_progress"
+        description: "Login/Register with JWT tokens"
+      - name: "Check-in"
+        priority: "P0"
+        status: "pending"
+        description: "Daily check-in functionality"
+      - name: "Profile"
+        priority: "P1"
+        status: "pending"
+        description: "User profile with avatar upload"
+
 # ============================================================
 # 3. API Design Constraints
 # ============================================================
@@ -673,13 +728,38 @@ code_constraints:
 # ============================================================
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
-current_iterations: []
-  # No active iterations - ready for next phase planning
+current_iterations:
+  - id: "iter-015"
+    goal: "Flutter Mobile App Support"
+    started_at: "2026-01-18"
+    status: "in_progress"
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-015"
+    goal: "Flutter Mobile App Support"
+    started_at: "2026-01-18"
+    status: "in_progress"
+    summary: |
+      Flutter mobile app backend support:
+      - Fix migration order for caregiver_relations table
+      - Add Aliyun OSS storage service for file uploads
+      - Add user avatar upload functionality
+      - Update CORS for mobile app development
+    tasks_completed:
+      - id: "TASK-075"
+        title: "Fix migration order for caregiver_relations"
+        review_verdict: "pass"
+      - id: "TASK-076"
+        title: "Add Aliyun OSS storage service"
+        review_verdict: "pass"
+      - id: "TASK-077"
+        title: "Add user avatar upload endpoint"
+        review_verdict: "pass"
+    milestone: "Flutter Mobile App Support"
+
   - id: "iter-014"
     goal: "Linked Emergency Contacts (Phase D)"
     started_at: "2026-01-17"
