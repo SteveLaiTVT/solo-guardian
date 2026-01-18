@@ -12,7 +12,11 @@ import {
   Body,
   Param,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserPreferencesService } from './user-preferences.service';
@@ -67,5 +71,31 @@ export class UserPreferencesController {
     @Body() dto: UpdateProfileDto,
   ): Promise<ProfileResponseDto> {
     return this.preferencesService.updateProfile(userId, dto);
+  }
+
+  @Post('profile/avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB max
+      },
+      fileFilter: (_req, file, callback) => {
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedMimes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(new BadRequestException('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'), false);
+        }
+      },
+    }),
+  )
+  async uploadAvatar(
+    @CurrentUser() userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ProfileResponseDto> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    return this.preferencesService.uploadAvatar(userId, file);
   }
 }

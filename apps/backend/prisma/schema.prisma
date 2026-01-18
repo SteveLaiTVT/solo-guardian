@@ -50,6 +50,7 @@ model User {
   phone        String?    @unique
   passwordHash String     @map("password_hash")
   name         String
+  avatar       String?    // URL to avatar image stored in OSS
   birthYear    Int?       @map("birth_year") // Year of birth for age calculation
   role         UserRole   @default(user)
   status       UserStatus @default(active)

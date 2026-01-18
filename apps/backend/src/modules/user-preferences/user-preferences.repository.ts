@@ -51,6 +51,7 @@ export class UserPreferencesRepository {
     email: string | null;
     username: string | null;
     phone: string | null;
+    avatar: string | null;
     birthYear: number | null;
     createdAt: Date;
   } | null> {
@@ -62,6 +63,7 @@ export class UserPreferencesRepository {
         email: true,
         username: true,
         phone: true,
+        avatar: true,
         birthYear: true,
         createdAt: true,
       },
@@ -70,13 +72,14 @@ export class UserPreferencesRepository {
 
   async updateUser(
     userId: string,
-    data: { name?: string; birthYear?: number | null },
+    data: { name?: string; birthYear?: number | null; avatar?: string },
   ): Promise<{
     id: string;
     name: string;
     email: string | null;
     username: string | null;
     phone: string | null;
+    avatar: string | null;
     birthYear: number | null;
     createdAt: Date;
   }> {
@@ -89,6 +92,7 @@ export class UserPreferencesRepository {
         email: true,
         username: true,
         phone: true,
+        avatar: true,
         birthYear: true,
         createdAt: true,
       },

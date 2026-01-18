@@ -9,12 +9,16 @@ import { UserPreferences } from '@prisma/client';
 import { UserPreferencesRepository } from './user-preferences.repository';
 import { UpdatePreferencesDto, PreferencesResponseDto, UpdateProfileDto, ProfileResponseDto } from './dto';
 import { BusinessException } from '../../common/exceptions';
+import { StorageService } from '../storage';
 
 @Injectable()
 export class UserPreferencesService {
   private readonly logger = new Logger(UserPreferencesService.name);
 
-  constructor(private readonly repository: UserPreferencesRepository) {}
+  constructor(
+    private readonly repository: UserPreferencesRepository,
+    private readonly storageService: StorageService,
+  ) {}
 
   async getOrCreate(userId: string): Promise<PreferencesResponseDto> {
     let preferences = await this.repository.findByUserId(userId);
@@ -108,6 +112,7 @@ export class UserPreferencesService {
       email: user.email,
       username: user.username,
       phone: user.phone,
+      avatar: user.avatar,
       birthYear: user.birthYear,
       createdAt: user.createdAt,
     };
@@ -125,6 +130,43 @@ export class UserPreferencesService {
       email: user.email,
       username: user.username,
       phone: user.phone,
+      avatar: user.avatar,
+      birthYear: user.birthYear,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async uploadAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<ProfileResponseDto> {
+    if (!this.storageService.isConfigured()) {
+      throw new BusinessException('SYSTEM_INTERNAL', {
+        details: { message: 'Storage service not configured' },
+      });
+    }
+
+    // Upload to OSS
+    const result = await this.storageService.uploadAvatar(
+      userId,
+      file.buffer,
+      file.originalname,
+    );
+
+    // Update user avatar URL
+    const user = await this.repository.updateUser(userId, {
+      avatar: result.url,
+    });
+
+    this.logger.log(`Updated avatar for user: ${userId}`);
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      phone: user.phone,
+      avatar: user.avatar,
       birthYear: user.birthYear,
       createdAt: user.createdAt,
     };

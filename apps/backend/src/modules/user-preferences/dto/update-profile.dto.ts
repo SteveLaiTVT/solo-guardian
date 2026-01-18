@@ -24,6 +24,7 @@ export class ProfileResponseDto {
   email: string | null;
   username: string | null;
   phone: string | null;
+  avatar: string | null;
   birthYear: number | null;
   createdAt: Date;
 }
