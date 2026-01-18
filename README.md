@@ -95,6 +95,14 @@ pnpm dev
 - Admin Web: http://localhost:3001
 - User Web: http://localhost:3002
 
+## 🚢 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+**Quick Start:**
+- Frontend (user-web): Deploy to Vercel
+- Backend: Deploy to Railway or Render
+
 ## 💰 Monetization
 
 **Freemium Model**

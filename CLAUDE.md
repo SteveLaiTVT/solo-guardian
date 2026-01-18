@@ -77,10 +77,9 @@ Controller → Service → Repository → Prisma
 Backend requires `.env` file (see `apps/backend/.env.example`):
 ```
 DATABASE_URL="postgresql://user:password@localhost:5432/solo_guardian"
+REDIS_URL="redis://localhost:6379"
 JWT_ACCESS_SECRET="min-32-char-secret"
 JWT_REFRESH_SECRET="min-32-char-secret"
-REDIS_HOST=localhost
-REDIS_PORT=6379
 SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS  # For email
 TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER  # For SMS
 ```
