@@ -114,16 +114,21 @@ Railway provides managed PostgreSQL + Redis and easy NestJS deployment.
    TWILIO_AUTH_TOKEN=<your-twilio-token>
    TWILIO_PHONE_NUMBER=<your-twilio-number>
 
-   GOOGLE_CLIENT_ID=<your-google-oauth-client-id>
-   GOOGLE_CLIENT_SECRET=<your-google-oauth-secret>
-   GOOGLE_CALLBACK_URL=https://your-backend-url/api/v1/auth/google/callback
+   # OAuth (Optional - Not fully implemented yet)
+   GOOGLE_OAUTH_ENABLED=false
+   GOOGLE_OAUTH_CLIENT_ID=<your-google-oauth-client-id>
+   GOOGLE_OAUTH_CLIENT_SECRET=<your-google-oauth-secret>
+   GOOGLE_OAUTH_CALLBACK_URL=https://your-backend-url/api/auth/oauth/google/callback
 
-   APPLE_CLIENT_ID=<your-apple-service-id>
-   APPLE_TEAM_ID=<your-apple-team-id>
-   APPLE_KEY_ID=<your-apple-key-id>
-   APPLE_PRIVATE_KEY=<your-apple-private-key>
-   APPLE_CALLBACK_URL=https://your-backend-url/api/v1/auth/apple/callback
+   APPLE_OAUTH_ENABLED=false
+   APPLE_OAUTH_CLIENT_ID=<your-apple-service-id>
+   APPLE_OAUTH_TEAM_ID=<your-apple-team-id>
+   APPLE_OAUTH_KEY_ID=<your-apple-key-id>
+   APPLE_OAUTH_PRIVATE_KEY=<your-apple-private-key>
+   APPLE_OAUTH_CALLBACK_URL=https://your-backend-url/api/auth/oauth/apple/callback
    ```
+
+   **Note**: OAuth providers (Google/Apple) are not fully implemented yet. You can leave them disabled (`ENABLED=false`) for initial deployment.
 
 6. **Deploy**
    - Railway auto-deploys on git push
@@ -152,6 +157,7 @@ pnpm install
 # Build and run
 cd apps/backend
 pnpm run build
+pnpm run prisma:migrate  # Run database migrations
 pnpm run start:prod
 ```
 
@@ -166,9 +172,9 @@ Use PM2 or systemd to keep the process running.
 - [ ] All environment variables configured
 - [ ] `VITE_API_URL` in Vercel points to backend URL
 - [ ] CORS configured in backend to allow frontend domain
-- [ ] OAuth callback URLs updated in Google/Apple consoles
 - [ ] SMTP/Twilio configured and tested
 - [ ] Database backups enabled
+- [ ] (Optional) OAuth callback URLs updated in Google/Apple consoles if enabled
 
 ## Continuous Deployment
 
@@ -221,7 +227,7 @@ Consider adding:
 **Solution**:
 1. Verify `DATABASE_URL` is correct
 2. Check database allows connections from backend IP
-3. Run migrations: `pnpm run prisma:migrate`
+3. Run migrations from backend directory: `cd apps/backend && pnpm run prisma:migrate`
 
 ## Scaling Considerations
 

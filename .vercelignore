@@ -1,6 +1,5 @@
 apps/backend
 apps/admin-web
-apps/mobile
 e2e
 .git
 .github
