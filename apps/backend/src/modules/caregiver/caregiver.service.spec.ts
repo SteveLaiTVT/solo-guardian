@@ -315,7 +315,7 @@ describe('CaregiverService', () => {
 
   describe('checkInOnBehalf', () => {
     it('should check in on behalf of elder', async () => {
-      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caretaker' });
+      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caretaker', isAccepted: true });
       repository.createCaretakerCheckIn.mockResolvedValue({
         id: 'checkin-1',
         checkInDate: '2025-01-15',
@@ -329,6 +329,21 @@ describe('CaregiverService', () => {
       expect(result).toHaveProperty('checkedInAt');
     });
 
+    it('should allow any accepted caregiver to check in on behalf', async () => {
+      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver', isAccepted: true });
+      repository.createCaretakerCheckIn.mockResolvedValue({
+        id: 'checkin-1',
+        checkInDate: '2025-01-15',
+        checkedInAt: new Date(),
+        note: null,
+      });
+
+      const result = await service.checkInOnBehalf('caregiver-1', 'elder-1');
+
+      expect(result).toHaveProperty('checkInDate');
+      expect(result).toHaveProperty('checkedInAt');
+    });
+
     it('should throw NotFoundException when relation not found', async () => {
       repository.getRelationByUsers.mockResolvedValue(null);
 
@@ -337,8 +352,8 @@ describe('CaregiverService', () => {
       );
     });
 
-    it('should throw BadRequestException when not caretaker', async () => {
-      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver' });
+    it('should throw BadRequestException when relation not accepted', async () => {
+      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver', isAccepted: false });
 
       await expect(service.checkInOnBehalf('caregiver-1', 'elder-1')).rejects.toThrow(
         BadRequestException,
@@ -348,7 +363,7 @@ describe('CaregiverService', () => {
 
   describe('addNote', () => {
     it('should add note for elder', async () => {
-      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver' });
+      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver', isAccepted: true });
       repository.createNote.mockResolvedValue({
         id: 'note-1',
         content: 'Test note',
@@ -376,7 +391,7 @@ describe('CaregiverService', () => {
 
   describe('getNotes', () => {
     it('should return notes for elder', async () => {
-      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver' });
+      repository.getRelationByUsers.mockResolvedValue({ id: 'relation-1', relationshipType: 'caregiver', isAccepted: true });
       repository.getNotes.mockResolvedValue([
         { id: 'note-1', content: 'Test', noteDate: '2025-01-15', createdAt: new Date(), updatedAt: new Date() },
       ]);

@@ -231,20 +231,21 @@ export class CaregiverService {
     this.logger.log(`User ${userId} accepted invitation from ${invitation.inviter.id}`);
   }
 
-  // DONE(B): Caretaker check-in on behalf - TASK-060
+  // DONE(B): Caregiver check-in on behalf - TASK-060
+  // Updated: Allow any accepted caregiver to check in on behalf, not just caretakers
   async checkInOnBehalf(
-    caretakerId: string,
+    caregiverId: string,
     elderId: string,
     note?: string,
   ): Promise<{ checkInDate: string; checkedInAt: Date }> {
-    const relation = await this.caregiverRepository.getRelationByUsers(caretakerId, elderId);
+    const relation = await this.caregiverRepository.getRelationByUsers(caregiverId, elderId);
 
     if (!relation) {
       throw new NotFoundException('Elder not found or access not granted');
     }
 
-    if (relation.relationshipType !== 'caretaker') {
-      throw new BadRequestException('Only caretakers can check in on behalf of elders');
+    if (!relation.isAccepted) {
+      throw new BadRequestException('Relationship must be accepted before checking in on behalf');
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -253,10 +254,10 @@ export class CaregiverService {
       userId: elderId,
       checkInDate: today,
       note,
-      caretakerId,
+      caretakerId: caregiverId,
     });
 
-    this.logger.log(`Caretaker ${caretakerId} checked in for elder ${elderId}`);
+    this.logger.log(`Caregiver ${caregiverId} checked in for elder ${elderId}`);
 
     return {
       checkInDate: checkIn.checkInDate,

@@ -358,10 +358,11 @@ export class CaregiverRepository {
   async getRelationByUsers(caregiverId: string, elderId: string): Promise<{
     id: string;
     relationshipType: RelationshipType;
+    isAccepted: boolean;
   } | null> {
     const relation = await this.prisma.caregiverRelation.findUnique({
       where: { caregiverId_elderId: { caregiverId, elderId } },
-      select: { id: true, relationshipType: true },
+      select: { id: true, relationshipType: true, isAccepted: true },
     });
 
     if (!relation) return null;
@@ -369,6 +370,7 @@ export class CaregiverRepository {
     return {
       id: relation.id,
       relationshipType: relation.relationshipType as RelationshipType,
+      isAccepted: relation.isAccepted,
     };
   }
 
