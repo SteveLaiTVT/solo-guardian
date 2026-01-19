@@ -1,14 +1,24 @@
 /**
  * @file OAuthCallback.tsx
- * @description OAuth callback handler page
- * @task TASK-041
- * @design_state_version 3.6.0
+ * @description OAuth callback handler page - exchanges code for tokens securely
+ * @task TASK-041, TASK-095
+ * @design_state_version 3.12.0
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth.store'
+import { config } from '@/lib/config'
+
+interface ExchangeResponse {
+  success: boolean
+  data: {
+    accessToken: string
+    refreshToken: string
+    isNewUser: boolean
+  }
+}
 
 export function OAuthCallback(): JSX.Element {
   const { t } = useTranslation('auth')
@@ -16,12 +26,12 @@ export function OAuthCallback(): JSX.Element {
   const [searchParams] = useSearchParams()
   const setTokens = useAuthStore((s) => s.setTokens)
   const [error, setError] = useState<string | null>(null)
+  const exchangeAttempted = useRef(false)
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token')
-    const refreshToken = searchParams.get('refresh_token')
     const errorParam = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
+    const code = searchParams.get('code')
     const isNewUser = searchParams.get('is_new_user') === 'true'
 
     if (errorParam) {
@@ -29,22 +39,50 @@ export function OAuthCallback(): JSX.Element {
       return
     }
 
-    if (accessToken && refreshToken) {
-      // Store tokens
-      setTokens(accessToken, refreshToken)
-
-      // Clear OAuth return URL from session storage
-      sessionStorage.removeItem('oauth_return_url')
-
-      // Redirect based on whether this is a new user
-      if (isNewUser) {
-        navigate('/onboarding', { replace: true })
-      } else {
-        navigate('/', { replace: true })
-      }
-    } else {
-      setError(t('oauth.missingTokens'))
+    if (!code) {
+      setError(t('oauth.missingCode'))
+      return
     }
+
+    if (exchangeAttempted.current) {
+      return
+    }
+    exchangeAttempted.current = true
+
+    const exchangeCode = async (): Promise<void> => {
+      try {
+        const response = await fetch(`${config.apiUrl}/api/v1/auth/oauth/exchange`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || t('oauth.exchangeFailed'))
+        }
+
+        const result: ExchangeResponse = await response.json()
+
+        if (!result.success || !result.data.accessToken) {
+          throw new Error(t('oauth.invalidResponse'))
+        }
+
+        setTokens(result.data.accessToken, result.data.refreshToken)
+        sessionStorage.removeItem('oauth_return_url')
+
+        if (isNewUser || result.data.isNewUser) {
+          navigate('/onboarding', { replace: true })
+        } else {
+          navigate('/', { replace: true })
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t('oauth.exchangeFailed')
+        setError(message)
+      }
+    }
+
+    exchangeCode()
   }, [searchParams, setTokens, navigate, t])
 
   if (error) {

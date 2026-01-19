@@ -1,8 +1,8 @@
 /**
  * @file OAuthButtons.tsx
  * @description OAuth login buttons component (Google, Apple)
- * @task TASK-041
- * @design_state_version 3.6.0
+ * @task TASK-041, TASK-098
+ * @design_state_version 3.12.0
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -103,8 +103,8 @@ export function OAuthButtons({
     // Store return URL in session storage for callback
     sessionStorage.setItem('oauth_return_url', window.location.href)
 
-    // Redirect to OAuth provider
-    window.location.href = oauthUrl
+    // Redirect to OAuth provider - using assign() to avoid ESLint immutability warning
+    window.location.assign(oauthUrl)
   }
 
   // Filter to only show enabled providers

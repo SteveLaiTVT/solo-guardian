@@ -1,8 +1,8 @@
 /**
  * @file oauth.controller.ts
  * @description OAuth controller - handles OAuth routes
- * @task TASK-038, TASK-039, TASK-040
- * @design_state_version 3.6.0
+ * @task TASK-038, TASK-039, TASK-040, TASK-095
+ * @design_state_version 3.12.0
  */
 import {
   Controller,
@@ -15,11 +15,14 @@ import {
   UseGuards,
   Logger,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { OAuthService } from './oauth.service';
+import { OAuthCodeStore } from './oauth-code.store';
 import { OAuthProvider, OAuthCallbackData } from './oauth.types';
 
 interface OAuthInitiateQuery {
@@ -37,7 +40,10 @@ interface OAuthCallbackQuery {
 export class OAuthController {
   private readonly logger = new Logger(OAuthController.name);
 
-  constructor(private readonly oauthService: OAuthService) {}
+  constructor(
+    private readonly oauthService: OAuthService,
+    private readonly oauthCodeStore: OAuthCodeStore,
+  ) {}
 
   /**
    * GET /auth/oauth/providers
@@ -77,6 +83,7 @@ export class OAuthController {
   /**
    * GET /auth/oauth/:provider/callback
    * Handles OAuth callback from provider
+   * DONE(B): Implemented secure code-based token exchange - TASK-095
    */
   @Get(':provider/callback')
   async handleCallback(
@@ -86,7 +93,6 @@ export class OAuthController {
   ): Promise<void> {
     const oauthProvider = this.validateProvider(provider);
 
-    // Handle OAuth errors
     if (query.error) {
       this.logger.warn(`OAuth error from ${provider}: ${query.error} - ${query.error_description}`);
       return this.redirectWithError(res, query.error, query.error_description);
@@ -104,9 +110,15 @@ export class OAuthController {
 
       const result = await this.oauthService.authenticate(oauthProvider, callbackData);
 
-      // Redirect to frontend with tokens
-      // TODO(B): Implement secure token passing (e.g., short-lived code exchange)
-      const redirectUrl = this.buildSuccessRedirectUrl(result.tokens, result.isNewUser);
+      // Store tokens with short-lived code (not exposed in URL)
+      const authCode = this.oauthCodeStore.storeTokens(
+        result.tokens.accessToken,
+        result.tokens.refreshToken,
+        result.isNewUser,
+      );
+
+      // Redirect with only the code (not tokens) - code is single-use and expires
+      const redirectUrl = this.buildSuccessRedirectUrl(authCode, result.isNewUser);
       res.redirect(redirectUrl);
     } catch (error) {
       this.logger.error(`OAuth authentication failed: ${error.message}`, error.stack);
@@ -117,6 +129,7 @@ export class OAuthController {
   /**
    * POST /auth/oauth/:provider/callback
    * Handles OAuth callback via POST (required for Apple Sign In form_post)
+   * DONE(B): Implemented secure code-based token exchange - TASK-095
    */
   @Post(':provider/callback')
   async handleCallbackPost(
@@ -143,7 +156,14 @@ export class OAuthController {
 
       const result = await this.oauthService.authenticate(oauthProvider, callbackData);
 
-      const redirectUrl = this.buildSuccessRedirectUrl(result.tokens, result.isNewUser);
+      // Store tokens with short-lived code (not exposed in URL)
+      const authCode = this.oauthCodeStore.storeTokens(
+        result.tokens.accessToken,
+        result.tokens.refreshToken,
+        result.isNewUser,
+      );
+
+      const redirectUrl = this.buildSuccessRedirectUrl(authCode, result.isNewUser);
       res.redirect(redirectUrl);
     } catch (error) {
       this.logger.error(`OAuth authentication failed: ${error.message}`, error.stack);
@@ -218,14 +238,46 @@ export class OAuthController {
   }
 
   /**
-   * Build redirect URL for successful authentication
+   * POST /auth/oauth/exchange
+   * Exchange authorization code for tokens (secure token exchange)
+   * DONE(B): Added secure code exchange endpoint - TASK-095
    */
-  private buildSuccessRedirectUrl(tokens: { accessToken: string; refreshToken: string }, isNewUser: boolean): string {
-    // TODO(B): Make this configurable and more secure
+  @Post('exchange')
+  @HttpCode(HttpStatus.OK)
+  exchangeCode(
+    @Body() body: { code: string },
+  ): { success: true; data: { accessToken: string; refreshToken: string; isNewUser: boolean } } {
+    if (!body.code) {
+      throw new BadRequestException('Authorization code is required');
+    }
+
+    const result = this.oauthCodeStore.exchangeCode(body.code);
+
+    if (!result) {
+      this.logger.warn('Invalid or expired OAuth code exchange attempt');
+      throw new BadRequestException('Invalid or expired authorization code');
+    }
+
+    this.logger.log('OAuth code exchanged successfully');
+
+    return {
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        isNewUser: result.isNewUser,
+      },
+    };
+  }
+
+  /**
+   * Build redirect URL for successful authentication
+   * DONE(B): Updated to use code instead of tokens - TASK-095
+   */
+  private buildSuccessRedirectUrl(code: string, isNewUser: boolean): string {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const params = new URLSearchParams({
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
+      code,
       is_new_user: String(isNewUser),
     });
 

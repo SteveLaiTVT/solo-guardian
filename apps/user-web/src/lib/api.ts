@@ -1,12 +1,12 @@
 /**
  * @file api.ts
  * @description API client setup with auth store integration
- * @task TASK-010, TASK-047
- * @design_state_version 3.8.0
+ * @task TASK-010, TASK-047, TASK-098
+ * @design_state_version 3.12.0
  */
 import { createApiClient, createApi, createHooks } from '@solo-guardian/api-client'
 import { useAuthStore } from '@/stores/auth.store'
-import { queryClient } from '@/App'
+import { queryClient } from './queryClient'
 import { config } from './config'
 
 const client = createApiClient({
