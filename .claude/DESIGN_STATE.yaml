@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.13.0"
-  updated_at: "2026-01-19"
+  version: "3.15.0"
+  updated_at: "2026-01-20"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Offline-First Mobile & Error UX"
+  milestone: "QR Code Sharing & Offline Cache Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -746,6 +746,24 @@ modules:
         status: "done"
         description: "High contrast, reduced motion, responsive font sizes"
         completed_tasks: ["TASK-084"]
+      - name: "QR Code Invitation Sharing"
+        priority: "P1"
+        status: "done"
+        description: "QR code dialog for caregiver invitation with copy/share buttons"
+        added_in: "iter-018"
+        completed_tasks: ["TASK-109"]
+      - name: "Offline Data Cache"
+        priority: "P0"
+        status: "done"
+        description: "SQLite caching for check-in data with 1-hour validity"
+        added_in: "iter-018"
+        completed_tasks: ["TASK-110"]
+      - name: "Offline Status Banner"
+        priority: "P1"
+        status: "done"
+        description: "Visual indicator when offline with retry option"
+        added_in: "iter-018"
+        completed_tasks: ["TASK-111"]
 
   templates:
     status: "done"
@@ -887,71 +905,89 @@ code_constraints:
 # ============================================================
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
-current_iterations:
-  - id: "iter-017"
-    goal: "Offline-First Mobile & Error UX"
-    started_at: "2026-01-19"
-    status: "in_progress"
-    tasks:
-      - id: "TASK-102"
-        title: "Mobile: Local database with SQLite/Isar"
-        priority: "P0"
-        status: "pending"
-        description: "Add local persistence layer for offline data storage"
-        files:
-          - "apps/mobile/solo_guardian/lib/core/database/"
-          - "apps/mobile/solo_guardian/pubspec.yaml"
-      - id: "TASK-103"
-        title: "Mobile: Offline-first repository pattern"
-        priority: "P0"
-        status: "pending"
-        description: "Implement repository chain: Local -> Remote with sync queue"
-        files:
-          - "apps/mobile/solo_guardian/lib/data/repositories/"
-          - "apps/mobile/solo_guardian/lib/core/sync/"
-      - id: "TASK-104"
-        title: "Mobile: Pending operations queue"
-        priority: "P0"
-        status: "pending"
-        description: "Queue pending operations when offline, sync when online"
-        files:
-          - "apps/mobile/solo_guardian/lib/core/sync/sync_queue.dart"
-          - "apps/mobile/solo_guardian/lib/core/sync/sync_manager.dart"
-      - id: "TASK-105"
-        title: "Mobile: Network connectivity monitor"
-        priority: "P0"
-        status: "pending"
-        description: "Monitor network status and trigger sync on reconnect"
-        files:
-          - "apps/mobile/solo_guardian/lib/core/network/connectivity_service.dart"
-      - id: "TASK-106"
-        title: "Mobile: Friendly error messages and offline tips"
-        priority: "P1"
-        status: "pending"
-        description: "User-friendly error UI with offline mode indicators"
-        files:
-          - "apps/mobile/solo_guardian/lib/core/errors/"
-          - "apps/mobile/solo_guardian/lib/shared/widgets/"
-      - id: "TASK-107"
-        title: "Mobile: Token refresh resilience"
-        priority: "P0"
-        status: "pending"
-        description: "Ensure refresh token works offline with proper retry"
-        files:
-          - "apps/mobile/solo_guardian/lib/core/network/auth_interceptor.dart"
-      - id: "TASK-108"
-        title: "Web: Friendly error messages"
-        priority: "P1"
-        status: "pending"
-        description: "User-friendly error toasts and network status indicators"
-        files:
-          - "apps/user-web/src/hooks/useErrorHandler.ts"
-          - "apps/user-web/src/components/ui/"
+current_iterations: []
+  # No active iterations - iter-018 complete
+  # Future: iter-019 - Push notifications and background sync
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-018"
+    goal: "QR Code Sharing & Offline Data Cache"
+    started_at: "2026-01-20"
+    completed_at: "2026-01-20"
+    status: "completed"
+    summary: |
+      QR code invitation sharing and offline data caching:
+      - TASK-109: QR code invitation sharing dialog with copy/share buttons
+      - TASK-110: Check-in data caching with SQLite for offline access
+      - TASK-111: Offline status banner with network connectivity monitoring
+      - TASK-112: Error handling improvements for DioException messages
+      - TASK-113: Comprehensive unit tests for new features
+      - TASK-114: E2E tests for caregiver invitation flow
+    tasks_completed:
+      - id: "TASK-109"
+        title: "Mobile: QR code invitation sharing dialog"
+        review_verdict: "pass"
+      - id: "TASK-110"
+        title: "Mobile: Check-in data caching service"
+        review_verdict: "pass"
+      - id: "TASK-111"
+        title: "Mobile: Offline status banner"
+        review_verdict: "pass"
+      - id: "TASK-112"
+        title: "Mobile: Error handling improvements"
+        review_verdict: "pass"
+      - id: "TASK-113"
+        title: "Mobile: Unit tests for new features"
+        review_verdict: "pass"
+      - id: "TASK-114"
+        title: "E2E: Caregiver invitation tests"
+        review_verdict: "pass"
+    deferred_items: []
+    milestone: "QR Code Sharing & Offline Cache Complete"
+
+  - id: "iter-017"
+    goal: "Offline-First Mobile & Error UX"
+    started_at: "2026-01-19"
+    completed_at: "2026-01-20"
+    status: "completed"
+    summary: |
+      Offline-first mobile architecture implemented:
+      - TASK-102: Local database with Isar for offline persistence
+      - TASK-103: Offline-first repository pattern (Local -> Remote)
+      - TASK-104: Pending operations queue with sync manager
+      - TASK-105: Network connectivity monitoring with auto-sync
+      - TASK-106: User-friendly error messages and offline indicators
+      - TASK-107: Token refresh resilience for weak networks
+      - TASK-108: Web friendly error messages and network status
+    tasks_completed:
+      - id: "TASK-102"
+        title: "Mobile: Local database with Isar"
+        review_verdict: "pass"
+      - id: "TASK-103"
+        title: "Mobile: Offline-first repository pattern"
+        review_verdict: "pass"
+      - id: "TASK-104"
+        title: "Mobile: Pending operations queue"
+        review_verdict: "pass"
+      - id: "TASK-105"
+        title: "Mobile: Network connectivity monitor"
+        review_verdict: "pass"
+      - id: "TASK-106"
+        title: "Mobile: Friendly error messages"
+        review_verdict: "pass"
+      - id: "TASK-107"
+        title: "Mobile: Token refresh resilience"
+        review_verdict: "pass"
+      - id: "TASK-108"
+        title: "Web: Friendly error messages"
+        review_verdict: "pass"
+    deferred_items:
+      - "Integrate offline providers into mobile screens (iter-018)"
+    milestone: "Offline-First Architecture Complete"
+
   - id: "iter-016"
     goal: "Security Hardening & Code Quality"
     started_at: "2026-01-19"
