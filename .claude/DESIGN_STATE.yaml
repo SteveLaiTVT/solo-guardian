@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.10.0"
-  updated_at: "2026-01-18"
+  version: "3.11.0"
+  updated_at: "2026-01-19"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Flutter Mobile App Support"
+  milestone: "Flutter Mobile App Complete"
 
 # ============================================================
 # 1. Technical Architecture
@@ -83,8 +83,8 @@ modules:
     owner: "B Session"
     description: "User authentication and authorization"
     skeleton_created: true
-    skeleton_version: "0.2.0"
-    completed_iteration: "iter-004"
+    skeleton_version: "3.11.0"
+    completed_iteration: "iter-015"
     hardened: true
     features:
       - name: "Email/Password Login"
@@ -117,6 +117,18 @@ modules:
         started_iteration: "iter-013"
         completed_iteration: "iter-013"
         description: "UserRole enum, RolesGuard, AdminOnly decorator"
+      - name: "Flexible Authentication"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-015"
+        description: "Login with username/email/phone/UID, optional identifiers on register"
+        completed_task: "TASK-093"
+      - name: "Auth Response Envelope"
+        priority: "P0"
+        status: "done"
+        added_in: "iter-015"
+        description: "Consistent response envelope format across all platforms"
+        completed_task: "TASK-078"
 
   user:
     status: "pending"
@@ -209,7 +221,7 @@ modules:
     owner: "B Session"
     description: "User-facing web application"
     started_iteration: "iter-005"
-    completed_iteration: "iter-006"
+    completed_iteration: "iter-015"
     features:
       - name: "Login/Register"
         priority: "P0"
@@ -241,13 +253,31 @@ modules:
         status: "done"
         description: "Manage emergency contacts in user-web"
         completed_task: "TASK-016"
+      - name: "Desktop Navigation"
+        priority: "P1"
+        status: "done"
+        description: "Header navigation for desktop screens"
+        completed_task: "TASK-092"
+        added_in: "iter-015"
+      - name: "Theme Redesign"
+        priority: "P1"
+        status: "done"
+        description: "Warm, caring color theme with shield-heart logo"
+        completed_task: "TASK-092"
+        added_in: "iter-015"
+      - name: "Auth Flow Alignment"
+        priority: "P0"
+        status: "done"
+        description: "Refresh/logout flows aligned with backend envelope"
+        completed_task: "TASK-091"
+        added_in: "iter-015"
 
   user_preferences:
     status: "done"
     owner: "B Session"
     description: "User preferences and feature toggles"
     started_iteration: "iter-007"
-    completed_iteration: "iter-007"
+    completed_iteration: "iter-015"
     features:
       - name: "Feature Toggle System"
         priority: "P0"
@@ -269,6 +299,18 @@ modules:
         status: "done"
         description: "Features and visual preferences sections"
         completed_task: "TASK-022"
+      - name: "Enhanced Onboarding"
+        priority: "P0"
+        status: "done"
+        description: "Birth year, theme selection, language switcher, tutorials"
+        added_in: "iter-015"
+        completed_task: "TASK-093"
+      - name: "Color Themes"
+        priority: "P1"
+        status: "done"
+        description: "4 themes: standard, warm, nature, ocean with live preview"
+        added_in: "iter-015"
+        completed_task: "TASK-093"
 
   error_handling:
     status: "done"
@@ -531,9 +573,9 @@ modules:
     owner: "B Session"
     description: "Admin web application for system management"
     started_iteration: "iter-013"
-    completed_iteration: "iter-013"
+    completed_iteration: "iter-015"
     skeleton_created: true
-    skeleton_version: "3.8.0"
+    skeleton_version: "3.11.0"
     features:
       - name: "Admin Login"
         priority: "P0"
@@ -560,6 +602,18 @@ modules:
         status: "done"
         description: "Sidebar navigation, responsive layout"
         completed_task: "TASK-046"
+      - name: "Settings Page"
+        priority: "P1"
+        status: "done"
+        description: "Admin settings configuration"
+        completed_task: "TASK-086"
+        added_in: "iter-015"
+      - name: "Templates Page"
+        priority: "P0"
+        status: "done"
+        description: "Email/SMS template management with WYSIWYG editor"
+        completed_task: "TASK-086"
+        added_in: "iter-015"
 
   elder_mode:
     status: "done"
@@ -591,9 +645,9 @@ modules:
     owner: "B Session"
     description: "Caregiver-elder relationship management"
     started_iteration: "iter-013"
-    completed_iteration: "iter-013"
+    completed_iteration: "iter-015"
     skeleton_created: true
-    skeleton_version: "3.8.0"
+    skeleton_version: "3.11.0"
     features:
       - name: "Caregiver Relation Schema"
         priority: "P0"
@@ -615,6 +669,12 @@ modules:
         status: "done"
         description: "caregiver.spec.ts placeholder tests"
         completed_task: "TASK-046"
+      - name: "Check-in On Behalf"
+        priority: "P0"
+        status: "done"
+        description: "Any accepted caregiver can check in on behalf of elder"
+        added_in: "iter-015"
+        completed_task: "TASK-094"
 
   storage:
     status: "done"
@@ -639,29 +699,128 @@ modules:
         description: "Optional CDN domain for production use"
 
   mobile_app:
-    status: "in_progress"
+    status: "done"
     owner: "B Session"
     description: "Flutter mobile application"
     started_iteration: "iter-015"
+    completed_iteration: "iter-015"
     skeleton_created: true
-    skeleton_version: "3.10.0"
+    skeleton_version: "3.11.0"
     features:
       - name: "Project Setup"
         priority: "P0"
         status: "done"
-        description: "Flutter project with clean architecture"
+        description: "Flutter project with clean architecture + Riverpod"
       - name: "Authentication"
         priority: "P0"
-        status: "in_progress"
-        description: "Login/Register with JWT tokens"
+        status: "done"
+        description: "Login/Register with JWT tokens, auth response envelope"
+        completed_tasks: ["TASK-078"]
       - name: "Check-in"
         priority: "P0"
-        status: "pending"
-        description: "Daily check-in functionality"
+        status: "done"
+        description: "Dashboard with countdown, history with detail dialog"
+        completed_tasks: ["TASK-079"]
       - name: "Profile"
         priority: "P1"
-        status: "pending"
-        description: "User profile with avatar upload"
+        status: "done"
+        description: "User profile with avatar upload (Aliyun OSS)"
+        completed_tasks: ["TASK-077", "TASK-080"]
+      - name: "Settings"
+        priority: "P0"
+        status: "done"
+        description: "Check-in settings, preferences, theme, language"
+        completed_tasks: ["TASK-081"]
+      - name: "Contacts"
+        priority: "P0"
+        status: "done"
+        description: "Emergency contacts CRUD, linked contacts"
+        completed_tasks: ["TASK-082"]
+      - name: "i18n"
+        priority: "P0"
+        status: "done"
+        description: "Localization for en/zh/ja"
+        completed_tasks: ["TASK-083"]
+      - name: "Accessibility"
+        priority: "P1"
+        status: "done"
+        description: "High contrast, reduced motion, responsive font sizes"
+        completed_tasks: ["TASK-084"]
+
+  templates:
+    status: "done"
+    owner: "B Session"
+    description: "Email and SMS template management"
+    started_iteration: "iter-015"
+    completed_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.11.0"
+    features:
+      - name: "Backend Module"
+        priority: "P0"
+        status: "done"
+        description: "templates.module.ts with service, repository, controller"
+        completed_tasks: ["TASK-085"]
+      - name: "Admin Templates Page"
+        priority: "P0"
+        status: "done"
+        description: "WYSIWYG editor with split view live preview"
+        completed_tasks: ["TASK-086"]
+      - name: "Template Trigger Rules"
+        priority: "P1"
+        status: "done"
+        description: "Automated template triggering rules"
+        completed_tasks: ["TASK-087"]
+
+  analytics:
+    status: "done"
+    owner: "B Session"
+    description: "Analytics and metrics tracking"
+    started_iteration: "iter-015"
+    completed_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.11.0"
+    features:
+      - name: "Analytics Module"
+        priority: "P1"
+        status: "done"
+        description: "Console analytics provider for development"
+        completed_tasks: ["TASK-088"]
+
+  unit_testing:
+    status: "done"
+    owner: "B Session"
+    description: "Backend unit testing infrastructure"
+    started_iteration: "iter-015"
+    completed_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.11.0"
+    features:
+      - name: "Jest Setup"
+        priority: "P0"
+        status: "done"
+        description: "Jest testing framework configuration"
+        completed_tasks: ["TASK-089"]
+      - name: "Module Tests"
+        priority: "P0"
+        status: "done"
+        description: "407 tests across 37 suites covering all modules"
+        completed_tasks: ["TASK-089"]
+
+  deployment:
+    status: "done"
+    owner: "B Session"
+    description: "Deployment configuration and infrastructure"
+    started_iteration: "iter-015"
+    completed_iteration: "iter-015"
+    skeleton_created: true
+    skeleton_version: "3.11.0"
+    features:
+      - name: "Vercel Deployment"
+        priority: "P0"
+        status: "done"
+        description: "Vercel configuration for user-web"
+        completed_tasks: ["TASK-090"]
 
 # ============================================================
 # 3. API Design Constraints
@@ -728,26 +887,36 @@ code_constraints:
 # ============================================================
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
-current_iterations:
-  - id: "iter-015"
-    goal: "Flutter Mobile App Support"
-    started_at: "2026-01-18"
-    status: "in_progress"
+current_iterations: []
+  # No active iterations - iter-015 complete
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
   - id: "iter-015"
-    goal: "Flutter Mobile App Support"
+    goal: "Flutter Mobile App Complete"
     started_at: "2026-01-18"
-    status: "in_progress"
+    completed_at: "2026-01-19"
+    status: "completed"
     summary: |
-      Flutter mobile app backend support:
-      - Fix migration order for caregiver_relations table
-      - Add Aliyun OSS storage service for file uploads
-      - Add user avatar upload functionality
-      - Update CORS for mobile app development
+      Flutter mobile app fully functional with all features:
+      - Mobile: Complete Flutter app with Clean Architecture + Riverpod
+      - Mobile: Authentication with JWT tokens, auth response envelope handling
+      - Mobile: Check-in dashboard with countdown timer, history with detail dialog
+      - Mobile: Settings screen with check-in times, preferences, theme, language
+      - Mobile: Emergency contacts with linked contacts support
+      - Mobile: Profile with avatar upload (Aliyun OSS)
+      - Mobile: i18n for en/zh/ja, accessibility (high contrast, reduced motion)
+      - Backend: Aliyun OSS storage service for file uploads
+      - Backend: User avatar upload endpoint
+      - Backend: Auth response envelope format aligned across platforms
+      - Backend: Templates module with WYSIWYG editor in admin
+      - Backend: Analytics module for metrics
+      - Backend: 407 unit tests across 37 test suites
+      - Web: Auth flows aligned with refresh/logout
+      - Web: Desktop navigation, theme redesign
+      - Deploy: Vercel deployment configuration
     tasks_completed:
       - id: "TASK-075"
         title: "Fix migration order for caregiver_relations"
@@ -758,7 +927,73 @@ iteration_history:
       - id: "TASK-077"
         title: "Add user avatar upload endpoint"
         review_verdict: "pass"
-    milestone: "Flutter Mobile App Support"
+      - id: "TASK-078"
+        title: "Mobile: Authentication with JWT tokens"
+        review_verdict: "pass"
+        commits: ["1c4d017", "60b0f95", "98884ce"]
+      - id: "TASK-079"
+        title: "Mobile: Check-in dashboard and history"
+        review_verdict: "pass"
+        commits: ["693cda7"]
+      - id: "TASK-080"
+        title: "Mobile: Avatar support and Android SSL fix"
+        review_verdict: "pass"
+        commits: ["053e6c0"]
+      - id: "TASK-081"
+        title: "Mobile: Settings screen redesign"
+        review_verdict: "pass"
+        commits: ["088be9f", "3d22fc8", "65ec35d", "4046fc1"]
+      - id: "TASK-082"
+        title: "Mobile: Contacts and linked contacts"
+        review_verdict: "pass"
+      - id: "TASK-083"
+        title: "Mobile: i18n completion for settings and history"
+        review_verdict: "pass"
+        commits: ["1c2b91b", "693cda7"]
+      - id: "TASK-084"
+        title: "Mobile: Accessibility improvements"
+        review_verdict: "pass"
+        commits: ["95796ce", "eebfb9c", "fdf9aa9"]
+      - id: "TASK-085"
+        title: "Backend: Templates module"
+        review_verdict: "pass"
+      - id: "TASK-086"
+        title: "Admin: Templates page with WYSIWYG editor"
+        review_verdict: "pass"
+        commits: ["4c0ced4", "a55778b", "b2347d3", "e8cf072"]
+      - id: "TASK-087"
+        title: "Admin: Template trigger rules"
+        review_verdict: "pass"
+        commits: ["83811ef"]
+      - id: "TASK-088"
+        title: "Backend: Analytics module"
+        review_verdict: "pass"
+      - id: "TASK-089"
+        title: "Backend: Comprehensive unit tests (407 tests)"
+        review_verdict: "pass"
+        commits: ["12f6ec9"]
+      - id: "TASK-090"
+        title: "Deploy: Vercel configuration"
+        review_verdict: "pass"
+        commits: ["38bd9cc", "5809f57", "3bb6598", "74d259b"]
+      - id: "TASK-091"
+        title: "Web: Auth flows alignment and E2E selectors"
+        review_verdict: "pass"
+        commits: ["1fbe5d9", "96d70d9"]
+      - id: "TASK-092"
+        title: "Web: Desktop navigation and theme redesign"
+        review_verdict: "pass"
+        commits: ["614f82a", "5463ec7", "e48fe19"]
+      - id: "TASK-093"
+        title: "Auth: Flexible authentication and enhanced onboarding"
+        review_verdict: "pass"
+        commits: ["e5740b7", "b28db85"]
+      - id: "TASK-094"
+        title: "Caregiver: Check-in on behalf of elder"
+        review_verdict: "pass"
+        commits: ["4f53748"]
+    deferred_items: []
+    milestone: "Flutter Mobile App Complete"
 
   - id: "iter-014"
     goal: "Linked Emergency Contacts (Phase D)"
