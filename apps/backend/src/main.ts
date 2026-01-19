@@ -13,12 +13,14 @@ import { GlobalExceptionFilter } from './common/filters';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+  const corsOrigins = configService.get<string>('CORS_ORIGINS');
+  const origins = corsOrigins
+    ? corsOrigins.split(',').map((o) => o.trim())
+    : ['http://localhost:5173', 'http://localhost:5174'];
+
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://192.168.1.105:5173',
-    ],
+    origin: origins,
     credentials: true,
   });
 
@@ -34,7 +36,6 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
 
   await app.listen(port);
