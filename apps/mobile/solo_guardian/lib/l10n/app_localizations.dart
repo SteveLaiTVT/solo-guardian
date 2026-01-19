@@ -898,6 +898,42 @@ abstract class AppLocalizations {
   /// **'Share this link:'**
   String get caregiverShareLink;
 
+  /// No description provided for @caregiverScanQrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this QR code with your phone to accept the invitation'**
+  String get caregiverScanQrCode;
+
+  /// No description provided for @caregiverShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been invited to be a caregiver on Solo Guardian. Click this link to accept: {url}'**
+  String caregiverShareMessage(String url);
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get or;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get copiedToClipboard;
+
   /// No description provided for @onboardingNext.
   ///
   /// In en, this message translates to:
@@ -1611,6 +1647,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Come back tomorrow for your next check-in. Stay safe!'**
   String get tipCheckedInContent;
+
+  /// No description provided for @offlineModeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Showing cached data.'**
+  String get offlineModeMessage;
+
+  /// No description provided for @offlineCheckInNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in is not available offline. Please connect to the internet.'**
+  String get offlineCheckInNotAvailable;
+
+  /// No description provided for @usingCachedData.
+  ///
+  /// In en, this message translates to:
+  /// **'Using cached data'**
+  String get usingCachedData;
 }
 
 class _AppLocalizationsDelegate

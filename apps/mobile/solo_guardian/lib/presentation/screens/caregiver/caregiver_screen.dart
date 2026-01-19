@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/caregiver.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/caregiver_provider.dart';
+import '../../widgets/invitation_share_dialog.dart';
 
 class CaregiverScreen extends ConsumerStatefulWidget {
   const CaregiverScreen({super.key});
@@ -408,22 +409,11 @@ class _CaregiversTab extends ConsumerWidget {
       if (context.mounted) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(l10n.caregiverInvitationCreated),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l10n.caregiverShareLink),
-                const SizedBox(height: 16),
-                SelectableText(invitation.qrUrl),
-              ],
-            ),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.ok),
-              ),
-            ],
+          builder: (context) => InvitationShareDialog(
+            title: l10n.caregiverInvitationCreated,
+            invitationUrl: invitation.qrUrl,
+            inviterName: invitation.inviterName,
+            relationshipType: type.name,
           ),
         );
       }

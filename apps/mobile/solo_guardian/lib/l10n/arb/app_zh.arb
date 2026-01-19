@@ -193,6 +193,17 @@
   "caregiverTypeCaretaker": "护理员",
   "caregiverInvitationCreated": "邀请已创建",
   "caregiverShareLink": "分享此链接：",
+  "caregiverScanQrCode": "用手机扫描此二维码接受邀请",
+  "caregiverShareMessage": "您已被邀请成为独居守护的看护人。点击此链接接受：{url}",
+  "@caregiverShareMessage": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "or": "或",
+  "copy": "复制",
+  "share": "分享",
+  "copiedToClipboard": "链接已复制到剪贴板",
 
   "onboardingNext": "下一步",
   "onboardingBack": "返回",
@@ -358,5 +369,9 @@
   "tipOverdueTitle": "别担心！",
   "tipOverdueContent": "您仍然可以现在签到，您的联系人会收到您安全的通知。",
   "tipCheckedInTitle": "今天已完成！",
-  "tipCheckedInContent": "明天再来进行下一次签到，保重！"
+  "tipCheckedInContent": "明天再来进行下一次签到，保重！",
+
+  "offlineModeMessage": "您处于离线状态，正在显示缓存数据。",
+  "offlineCheckInNotAvailable": "离线时无法签到，请连接网络。",
+  "usingCachedData": "正在使用缓存数据"
 }

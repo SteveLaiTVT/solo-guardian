@@ -193,6 +193,17 @@
   "caregiverTypeCaretaker": "ケアテイカー",
   "caregiverInvitationCreated": "招待が作成されました",
   "caregiverShareLink": "このリンクを共有：",
+  "caregiverScanQrCode": "スマートフォンでこのQRコードをスキャンして招待を受け入れてください",
+  "caregiverShareMessage": "Solo Guardianの介護者として招待されました。このリンクをクリックして受け入れてください：{url}",
+  "@caregiverShareMessage": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "or": "または",
+  "copy": "コピー",
+  "share": "共有",
+  "copiedToClipboard": "リンクがクリップボードにコピーされました",
 
   "onboardingNext": "次へ",
   "onboardingBack": "戻る",
@@ -358,5 +369,9 @@
   "tipOverdueTitle": "ご心配なく！",
   "tipOverdueContent": "今すぐチェックインできます。連絡先にあなたが無事であることが通知されます。",
   "tipCheckedInTitle": "今日は完了！",
-  "tipCheckedInContent": "次のチェックインは明日です。お気をつけて！"
+  "tipCheckedInContent": "次のチェックインは明日です。お気をつけて！",
+
+  "offlineModeMessage": "オフラインです。キャッシュデータを表示しています。",
+  "offlineCheckInNotAvailable": "オフライン時はチェックインできません。インターネットに接続してください。",
+  "usingCachedData": "キャッシュデータを使用中"
 }

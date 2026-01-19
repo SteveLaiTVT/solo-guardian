@@ -12,66 +12,72 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # State Management
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
+  # State Management (Riverpod 2.x - 3.x has dependency conflicts with freezed)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
 
   # Navigation
-  go_router: ^14.0.0
+  go_router: ^17.0.1
 
   # Network
-  dio: ^5.4.0
-  retrofit: 4.4.2
+  dio: ^5.7.0
+  retrofit: ^4.4.1
 
   # Code Generation Annotations
-  freezed_annotation: ^2.4.1
-  json_annotation: ^4.8.1
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
 
   # Storage
-  flutter_secure_storage: ^9.0.0
-  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^10.0.0
+  shared_preferences: ^2.5.3
 
   # Local Database (Offline-first)
-  sqflite: ^2.3.2
-  path_provider: ^2.1.2
-  path: ^1.9.0
+  sqflite: ^2.4.2
+  path_provider: ^2.1.5
+  path: ^1.9.1
 
-  # Network Connectivity
-  connectivity_plus: ^6.1.4
+  # Network Connectivity (v7)
+  connectivity_plus: ^7.0.0
 
   # Environment
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^6.0.0
 
   # i18n
   intl: any
 
   # OAuth
-  google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.0.0
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^7.0.1
 
   # UI
   cupertino_icons: ^1.0.8
 
+  # QR Code generation
+  qr_flutter: ^4.1.0
+
+  # Share & Clipboard
+  share_plus: ^10.1.4
+
   # Image picker for avatar
-  image_picker: ^1.0.7
+  image_picker: ^1.1.2
 
   # Cached network images with better SSL handling
-  cached_network_image: ^3.3.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
   # Code Generation
-  build_runner: ^2.4.8
-  freezed: ^2.4.7
-  json_serializable: ^6.7.1
-  retrofit_generator: 9.1.8
-  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.9.0
+  retrofit_generator: ^9.1.7
+  riverpod_generator: ^2.6.3
 
   # Testing
-  mocktail: ^1.0.3
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

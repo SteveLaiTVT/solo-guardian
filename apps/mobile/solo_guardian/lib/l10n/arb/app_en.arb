@@ -193,6 +193,17 @@
   "caregiverTypeCaretaker": "Caretaker",
   "caregiverInvitationCreated": "Invitation Created",
   "caregiverShareLink": "Share this link:",
+  "caregiverScanQrCode": "Scan this QR code with your phone to accept the invitation",
+  "caregiverShareMessage": "You've been invited to be a caregiver on Solo Guardian. Click this link to accept: {url}",
+  "@caregiverShareMessage": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "or": "or",
+  "copy": "Copy",
+  "share": "Share",
+  "copiedToClipboard": "Link copied to clipboard",
 
   "onboardingNext": "Next",
   "onboardingBack": "Back",
@@ -341,5 +352,9 @@
   "tipOverdueTitle": "Don't worry!",
   "tipOverdueContent": "You can still check in now. Your contacts will be notified you're okay.",
   "tipCheckedInTitle": "All done for today!",
-  "tipCheckedInContent": "Come back tomorrow for your next check-in. Stay safe!"
+  "tipCheckedInContent": "Come back tomorrow for your next check-in. Stay safe!",
+
+  "offlineModeMessage": "You're offline. Showing cached data.",
+  "offlineCheckInNotAvailable": "Check-in is not available offline. Please connect to the internet.",
+  "usingCachedData": "Using cached data"
 }

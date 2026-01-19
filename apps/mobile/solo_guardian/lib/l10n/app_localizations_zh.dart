@@ -426,6 +426,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get caregiverShareLink => '分享此链接：';
 
   @override
+  String get caregiverScanQrCode => '用手机扫描此二维码接受邀请';
+
+  @override
+  String caregiverShareMessage(String url) {
+    return '您已被邀请成为独居守护的看护人。点击此链接接受：$url';
+  }
+
+  @override
+  String get or => '或';
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get share => '分享';
+
+  @override
+  String get copiedToClipboard => '链接已复制到剪贴板';
+
+  @override
   String get onboardingNext => '下一步';
 
   @override
@@ -790,4 +810,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tipCheckedInContent => '明天再来进行下一次签到，保重！';
+
+  @override
+  String get offlineModeMessage => '您处于离线状态，正在显示缓存数据。';
+
+  @override
+  String get offlineCheckInNotAvailable => '离线时无法签到，请连接网络。';
+
+  @override
+  String get usingCachedData => '正在使用缓存数据';
 }

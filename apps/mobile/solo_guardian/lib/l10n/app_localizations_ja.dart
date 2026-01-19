@@ -427,6 +427,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get caregiverShareLink => 'このリンクを共有：';
 
   @override
+  String get caregiverScanQrCode => 'スマートフォンでこのQRコードをスキャンして招待を受け入れてください';
+
+  @override
+  String caregiverShareMessage(String url) {
+    return 'Solo Guardianの介護者として招待されました。このリンクをクリックして受け入れてください：$url';
+  }
+
+  @override
+  String get or => 'または';
+
+  @override
+  String get copy => 'コピー';
+
+  @override
+  String get share => '共有';
+
+  @override
+  String get copiedToClipboard => 'リンクがクリップボードにコピーされました';
+
+  @override
   String get onboardingNext => '次へ';
 
   @override
@@ -803,4 +823,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tipCheckedInContent => '次のチェックインは明日です。お気をつけて！';
+
+  @override
+  String get offlineModeMessage => 'オフラインです。キャッシュデータを表示しています。';
+
+  @override
+  String get offlineCheckInNotAvailable =>
+      'オフライン時はチェックインできません。インターネットに接続してください。';
+
+  @override
+  String get usingCachedData => 'キャッシュデータを使用中';
 }

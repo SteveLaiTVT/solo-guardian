@@ -434,6 +434,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get caregiverShareLink => 'Share this link:';
 
   @override
+  String get caregiverScanQrCode =>
+      'Scan this QR code with your phone to accept the invitation';
+
+  @override
+  String caregiverShareMessage(String url) {
+    return 'You\'ve been invited to be a caregiver on Solo Guardian. Click this link to accept: $url';
+  }
+
+  @override
+  String get or => 'or';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get copiedToClipboard => 'Link copied to clipboard';
+
+  @override
   String get onboardingNext => 'Next';
 
   @override
@@ -841,4 +862,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tipCheckedInContent =>
       'Come back tomorrow for your next check-in. Stay safe!';
+
+  @override
+  String get offlineModeMessage => 'You\'re offline. Showing cached data.';
+
+  @override
+  String get offlineCheckInNotAvailable =>
+      'Check-in is not available offline. Please connect to the internet.';
+
+  @override
+  String get usingCachedData => 'Using cached data';
 }
