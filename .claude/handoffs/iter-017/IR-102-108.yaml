@@ -1,0 +1,356 @@
+# ============================================================
+# IMPLEMENTATION REPORT - IR-102-108
+# ============================================================
+# From: B Session (Implementer)
+# To: C Session (Reviewer)
+# Iteration: iter-017
+# Date: 2026-01-19
+# ============================================================
+
+meta:
+  iteration_id: "iter-017"
+  handoff_id: "HO-102-108"
+  tasks: ["TASK-102", "TASK-103", "TASK-104", "TASK-105", "TASK-106", "TASK-107", "TASK-108"]
+  status: "complete"
+  design_state_version: "3.13.0"
+
+# ============================================================
+# 1. Implementation Summary
+# ============================================================
+summary: |
+  All 7 tasks in iter-017 (Offline-First Mobile & Error UX) have been implemented:
+
+  TASK-102: Local Database with Data Models
+  - Initially attempted Isar database, encountered dependency conflict with retrofit_generator
+  - Solution: Switched to SQLite (sqflite) - no code generation required
+  - Created DatabaseService with SQLite schema (local_check_ins, local_contacts, local_settings, pending_operations)
+  - Created sync enums (SyncStatus, OperationType, EntityType, OperationStatus)
+  - Created local models (LocalCheckIn, LocalContact, LocalSettings, PendingOperation)
+  - Created model converters for API<->Local transformation
+
+  TASK-103: Offline-First Repository Pattern
+  - Created OfflineFirstCheckInRepository with local-first reads
+  - Created OfflineFirstContactsRepository with optimistic writes
+  - Created OfflineFirstSettingsRepository with sync queue integration
+  - Pattern: Read local first, sync from remote when online, queue operations when offline
+
+  TASK-104: Pending Operations Sync Queue
+  - Created SyncManager with exponential backoff retry logic
+  - Retry delays: [1, 2, 4, 8, 16] seconds
+  - Max retries: 5 per operation
+  - Auto-sync on network reconnection
+
+  TASK-105: Network Connectivity Monitor
+  - Created ConnectivityService using connectivity_plus package
+  - Singleton pattern with connection state tracking
+  - Callbacks for connection/disconnection events
+
+  TASK-106: Friendly Error Messages & Offline UI (Mobile)
+  - Created OfflineException and SyncException classes
+  - Created FriendlyErrorMessages helper with i18n keys
+  - Created UI widgets: OfflineBanner, SyncStatusIndicator, PendingSyncBadge, OfflineAwareButton
+
+  TASK-107: Token Refresh Resilience
+  - Created ResilientAuthInterceptor extending existing AuthInterceptor
+  - Added offline request queue with auto-retry on reconnection
+  - Graceful handling when offline (queue instead of fail)
+
+  TASK-108: Web Friendly Error Messages
+  - Added network error messages to en/zh/ja locales
+  - Created useNetworkStatus hook for connection monitoring
+  - Created NetworkStatusIndicator component for offline banner
+
+# ============================================================
+# 2. Technical Decisions
+# ============================================================
+technical_decisions:
+  - id: "TD-001"
+    decision: "Switched from Isar to SQLite (sqflite)"
+    reason: |
+      Isar requires isar_generator which depends on analyzer <6.0.0,
+      but retrofit_generator (already in project) requires analyzer >=6.9.0.
+      These are incompatible. SQLite (sqflite) doesn't require code generation.
+    impact: "None - sqflite is widely used and stable"
+
+  - id: "TD-002"
+    decision: "Used plain Dart classes instead of code-generated models"
+    reason: "Avoids additional code generation dependencies"
+    pattern: "toMap() and fromMap() for SQLite serialization"
+
+  - id: "TD-003"
+    decision: "Exponential backoff with 5 retries"
+    reason: "Balances retry persistence with network resource conservation"
+    config: "[1, 2, 4, 8, 16] seconds"
+
+# ============================================================
+# 3. Files Created/Modified
+# ============================================================
+files_modified:
+  mobile_core:
+    - path: "apps/mobile/solo_guardian/lib/core/database/database_service.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "SQLite database initialization and schema creation"
+
+    - path: "apps/mobile/solo_guardian/lib/core/database/database.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "Database barrel export"
+
+    - path: "apps/mobile/solo_guardian/lib/core/database/models/sync_enums.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "SyncStatus, OperationType, EntityType, OperationStatus enums"
+
+    - path: "apps/mobile/solo_guardian/lib/core/database/models/local_models.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "LocalCheckIn, LocalContact, LocalSettings, PendingOperation classes"
+
+    - path: "apps/mobile/solo_guardian/lib/core/database/converters/model_converters.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "Converters between API models and local models"
+
+    - path: "apps/mobile/solo_guardian/lib/core/sync/sync_manager.dart"
+      action: "created"
+      task: "TASK-104"
+      description: "Sync queue manager with retry logic"
+
+    - path: "apps/mobile/solo_guardian/lib/core/network/connectivity_service.dart"
+      action: "created"
+      task: "TASK-105"
+      description: "Network connectivity monitoring service"
+
+    - path: "apps/mobile/solo_guardian/lib/core/network/resilient_auth_interceptor.dart"
+      action: "created"
+      task: "TASK-107"
+      description: "Auth interceptor with offline queue support"
+
+    - path: "apps/mobile/solo_guardian/lib/core/errors/offline_errors.dart"
+      action: "created"
+      task: "TASK-106"
+      description: "OfflineException, SyncException, FriendlyErrorMessages"
+
+  mobile_datasources:
+    - path: "apps/mobile/solo_guardian/lib/data/datasources/local/local_datasources.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "Barrel export for local datasources"
+
+    - path: "apps/mobile/solo_guardian/lib/data/datasources/local/check_in_local_datasource.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "SQLite datasource for check-ins"
+
+    - path: "apps/mobile/solo_guardian/lib/data/datasources/local/contacts_local_datasource.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "SQLite datasource for contacts"
+
+    - path: "apps/mobile/solo_guardian/lib/data/datasources/local/settings_local_datasource.dart"
+      action: "created"
+      task: "TASK-102"
+      description: "SQLite datasource for settings"
+
+    - path: "apps/mobile/solo_guardian/lib/data/datasources/local/pending_operations_local_datasource.dart"
+      action: "created"
+      task: "TASK-104"
+      description: "SQLite datasource for pending operations queue"
+
+  mobile_repositories:
+    - path: "apps/mobile/solo_guardian/lib/data/repositories/offline_first_check_in_repository.dart"
+      action: "created"
+      task: "TASK-103"
+      description: "Offline-first repository for check-ins"
+
+    - path: "apps/mobile/solo_guardian/lib/data/repositories/offline_first_contacts_repository.dart"
+      action: "created"
+      task: "TASK-103"
+      description: "Offline-first repository for contacts"
+
+    - path: "apps/mobile/solo_guardian/lib/data/repositories/offline_first_settings_repository.dart"
+      action: "created"
+      task: "TASK-103"
+      description: "Offline-first repository for settings"
+
+  mobile_presentation:
+    - path: "apps/mobile/solo_guardian/lib/presentation/widgets/offline_indicator.dart"
+      action: "created"
+      task: "TASK-106"
+      description: "OfflineBanner, SyncStatusIndicator, PendingSyncBadge, OfflineAwareButton"
+
+    - path: "apps/mobile/solo_guardian/lib/presentation/providers/offline_providers.dart"
+      action: "created"
+      task: "TASK-103"
+      description: "Riverpod providers for offline-first state management"
+
+  mobile_config:
+    - path: "apps/mobile/solo_guardian/pubspec.yaml"
+      action: "modified"
+      task: "TASK-102, TASK-105"
+      description: "Added sqflite, path_provider, path, connectivity_plus"
+
+    - path: "apps/mobile/solo_guardian/pubspec.lock"
+      action: "modified"
+      task: "TASK-102, TASK-105"
+      description: "Updated lock file with new dependencies"
+
+  web_i18n:
+    - path: "apps/user-web/src/i18n/locales/en/error.json"
+      action: "modified"
+      task: "TASK-108"
+      description: "Added network.offline, offlineHint, reconnected, reconnecting"
+
+    - path: "apps/user-web/src/i18n/locales/zh/error.json"
+      action: "modified"
+      task: "TASK-108"
+      description: "Added Chinese translations for network errors"
+
+    - path: "apps/user-web/src/i18n/locales/ja/error.json"
+      action: "modified"
+      task: "TASK-108"
+      description: "Added Japanese translations for network errors"
+
+  web_components:
+    - path: "apps/user-web/src/hooks/useNetworkStatus.ts"
+      action: "created"
+      task: "TASK-108"
+      description: "React hook for network status monitoring"
+
+    - path: "apps/user-web/src/components/ui/NetworkStatusIndicator.tsx"
+      action: "created"
+      task: "TASK-108"
+      description: "Offline banner component for web"
+
+# ============================================================
+# 4. Test Results
+# ============================================================
+test_results:
+  mobile:
+    flutter_analyze:
+      command: "flutter analyze"
+      status: "pass"
+      errors: 0
+      warnings: 8
+      info: 50
+      notes: |
+        - Warnings are in generated .g.dart files (unused errorLogger params)
+        - 1 unused element warning in settings_screen.dart (pre-existing)
+        - Info messages are doc comment style suggestions
+
+    flutter_pub_get:
+      command: "flutter pub get"
+      status: "pass"
+
+# ============================================================
+# 5. Dependencies Added
+# ============================================================
+dependencies_added:
+  mobile:
+    - package: "sqflite"
+      version: "^2.3.2"
+      purpose: "SQLite database for offline storage"
+
+    - package: "path_provider"
+      version: "^2.1.2"
+      purpose: "Access to device file system for database path"
+
+    - package: "path"
+      version: "^1.9.0"
+      purpose: "Path manipulation for database file"
+
+    - package: "connectivity_plus"
+      version: "^6.1.4"
+      purpose: "Network connectivity monitoring"
+
+# ============================================================
+# 6. Architecture Notes
+# ============================================================
+architecture_notes:
+  offline_first_pattern: |
+    Read Operations:
+    1. Read from local SQLite first
+    2. If online, fetch from server
+    3. Update local cache with server data
+    4. Return server data (or local if fetch fails)
+
+    Write Operations:
+    1. Save to local SQLite immediately (optimistic)
+    2. If online, attempt server sync
+    3. If offline or sync fails, queue operation
+    4. SyncManager retries queued operations when online
+
+  sync_queue: |
+    - PendingOperation stores: entityType, entityId, operationType, data, retryCount
+    - SyncManager processes queue on connectivity change
+    - Exponential backoff: 1, 2, 4, 8, 16 seconds
+    - Max 5 retries before marking as failed
+
+  database_schema: |
+    Tables:
+    - local_check_ins: id, user_id, note, checked_in_at, sync_status, local_created_at
+    - local_contacts: id, user_id, name, email, phone, priority, is_verified, sync_status...
+    - local_settings: user_id, deadline_time, reminder_time, reminder_enabled, sync_status...
+    - pending_operations: id, entity_type, entity_id, operation_type, data, retry_count, status...
+
+# ============================================================
+# 7. Known Issues / Deferred Items
+# ============================================================
+deferred_items:
+  - id: "DEF-001"
+    description: "Offline providers not yet integrated into main app"
+    details: |
+      The offline_providers.dart creates all necessary Riverpod providers,
+      but they need to be integrated into the main app's provider scope
+      and connected to existing screens. This is intentional - screens
+      should be updated incrementally to use offline-first repositories.
+
+  - id: "DEF-002"
+    description: "Web NetworkStatusIndicator not integrated"
+    details: |
+      The component is created but not yet added to the main layout.
+      Should be added to App.tsx or a layout component.
+
+# ============================================================
+# 8. Review Checklist
+# ============================================================
+review_checklist:
+  - "[ ] SQLite schema creates all required tables"
+  - "[ ] Local models have proper toMap/fromMap serialization"
+  - "[ ] Model converters handle all fields correctly"
+  - "[ ] Offline-first repositories follow local-first pattern"
+  - "[ ] SyncManager has proper retry logic"
+  - "[ ] ConnectivityService handles all connection states"
+  - "[ ] ResilientAuthInterceptor queues requests when offline"
+  - "[ ] Offline UI widgets provide good user feedback"
+  - "[ ] Web i18n messages are consistent across locales"
+  - "[ ] No breaking changes to existing functionality"
+  - "[ ] flutter analyze passes with no errors"
+
+# ============================================================
+# 9. Git Commit
+# ============================================================
+git_commit:
+  hash: "e615ced"
+  message: |
+    feat(mobile,web): implement offline-first architecture (iter-017)
+
+    Mobile (Flutter):
+    - Add SQLite database with local models for check-ins, contacts, settings
+    - Implement offline-first repository pattern with local-first reads
+    - Create pending operations sync queue with retry logic
+    - Add network connectivity monitoring service
+    - Add resilient auth interceptor with offline queue support
+    - Create offline UI widgets (OfflineBanner, SyncStatusIndicator)
+    - Add Riverpod providers for offline-first state management
+
+    Web (React):
+    - Add friendly network error messages (en/zh/ja)
+    - Create useNetworkStatus hook for connection monitoring
+    - Add NetworkStatusIndicator component for offline banner
+
+    TASK-102 through TASK-108
+  files_changed: 26
+  insertions: 3614
+  deletions: 6
