@@ -34,7 +34,9 @@ async function seedUser(
   return { id: user.id };
 }
 
-describe('Auth integration', () => {
+const describeFn = process.env.DATABASE_URL ? describe : describe.skip;
+
+describeFn('Auth integration', () => {
   let moduleRef: TestingModule;
   let authService: AuthService;
   let prisma: PrismaService;

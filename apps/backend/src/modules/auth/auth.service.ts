@@ -23,10 +23,10 @@ import { detectIdentifierType, IdentifierType } from './utils';
 const PRISMA_UNIQUE_CONSTRAINT_ERROR = 'P2002';
 
 const BCRYPT_COST_FACTOR = 12;
-const ACCESS_TOKEN_EXPIRES_IN = '15m';
-const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
-const REFRESH_TOKEN_EXPIRES_IN = '7d';
-const REFRESH_TOKEN_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_EXPIRES_IN = '7d';
+const ACCESS_TOKEN_EXPIRES_SECONDS = 7 * 24 * 60 * 60;
+const REFRESH_TOKEN_EXPIRES_IN = '30d';
+const REFRESH_TOKEN_EXPIRES_MS = 30 * 24 * 60 * 60 * 1000;
 
 type UserRoleType = 'user' | 'caregiver' | 'admin' | 'super_admin';
 

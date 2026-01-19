@@ -43,22 +43,24 @@ import { StorageModule } from './modules/storage';
     // DONE(B): Add ScheduleModule.forRoot() for cron jobs - TASK-028
     ScheduleModule.forRoot(),
     // DONE(B): Add ThrottlerModule for rate limiting - TASK-096
-    // Global default: 100 requests per minute
+    // Global default: 300 requests per minute (increased for mobile app startup)
+    // Short: 10 requests per minute (for sensitive auth operations)
+    // Long: 5 requests per 10 minutes (for password reset, etc.)
     ThrottlerModule.forRoot([
       {
         name: 'default',
         ttl: 60000,
-        limit: 100,
+        limit: 300,
       },
       {
         name: 'short',
         ttl: 60000,
-        limit: 5,
+        limit: 10,
       },
       {
         name: 'long',
         ttl: 600000,
-        limit: 3,
+        limit: 5,
       },
     ]),
     PrismaModule,
