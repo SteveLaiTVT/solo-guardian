@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@solo-guardian)/)',
+    'node_modules/(?!(@solo-guardian|uuid)/)',
   ],
   collectCoverageFrom: ['**/*.(t|j)s', '!**/*.module.ts', '!**/main.ts', '!**/index.ts'],
   coverageDirectory: '../coverage',

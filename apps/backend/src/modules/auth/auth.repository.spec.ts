@@ -81,6 +81,10 @@ describe('AuthRepository', () => {
           id: true,
           email: true,
           name: true,
+          username: true,
+          phone: true,
+          avatar: true,
+          birthYear: true,
           role: true,
           status: true,
           createdAt: true,
@@ -118,6 +122,8 @@ describe('AuthRepository', () => {
           email: 'new@example.com',
           passwordHash: 'hashedpassword',
           name: 'New User',
+          username: null,
+          phone: null,
         },
       });
       expect(result).toEqual(mockUser);
@@ -139,6 +145,8 @@ describe('AuthRepository', () => {
           email: 'new@example.com',
           passwordHash: 'hashedpassword',
           name: 'New User',
+          username: null,
+          phone: null,
         },
       });
     });
@@ -246,6 +254,8 @@ describe('AuthRepository', () => {
               id: true,
               email: true,
               name: true,
+              username: true,
+              phone: true,
               role: true,
               status: true,
               createdAt: true,

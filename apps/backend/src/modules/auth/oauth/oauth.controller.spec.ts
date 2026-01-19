@@ -3,11 +3,13 @@ import { BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { OAuthController } from './oauth.controller';
 import { OAuthService } from './oauth.service';
+import { OAuthCodeStore } from './oauth-code.store';
 import { OAuthProvider } from './oauth.types';
 
 describe('OAuthController', () => {
   let controller: OAuthController;
   let oauthService: jest.Mocked<OAuthService>;
+  let oauthCodeStore: jest.Mocked<OAuthCodeStore>;
 
   beforeEach(async () => {
     const mockOAuthService = {
@@ -19,13 +21,26 @@ describe('OAuthController', () => {
       unlinkAccount: jest.fn(),
     };
 
+    const mockOAuthCodeStore = {
+      storeTokens: jest.fn().mockReturnValue('test-auth-code'),
+      exchangeCode: jest.fn().mockReturnValue({
+        accessToken: 'test-access-token',
+        refreshToken: 'test-refresh-token',
+        isNewUser: false,
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OAuthController],
-      providers: [{ provide: OAuthService, useValue: mockOAuthService }],
+      providers: [
+        { provide: OAuthService, useValue: mockOAuthService },
+        { provide: OAuthCodeStore, useValue: mockOAuthCodeStore },
+      ],
     }).compile();
 
     controller = module.get<OAuthController>(OAuthController);
     oauthService = module.get(OAuthService);
+    oauthCodeStore = module.get(OAuthCodeStore);
   });
 
   function createMockResponse(): jest.Mocked<Response> {

@@ -99,11 +99,10 @@ describe('Auth integration', () => {
 
     await authService.logout(refreshResult.tokens.refreshToken);
 
-    const tokensRemaining = await prisma.refreshToken.count({
-      where: { userId: loginResult.user.id },
-    });
-
-    expect(tokensRemaining).toBe(0);
+    // Verify the logged-out token can no longer be used
+    await expect(
+      authService.refreshTokens(refreshResult.tokens.refreshToken),
+    ).rejects.toThrow();
   });
 
   it('rejects refresh after token is consumed', async () => {

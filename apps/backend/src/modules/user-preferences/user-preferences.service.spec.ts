@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserPreferencesService } from './user-preferences.service';
 import { UserPreferencesRepository } from './user-preferences.repository';
+import { StorageService } from '../storage';
 import { BusinessException } from '../../common/exceptions';
 
 describe('UserPreferencesService', () => {
@@ -31,10 +32,16 @@ describe('UserPreferencesService', () => {
       update: jest.fn(),
     };
 
+    const mockStorageService = {
+      uploadAvatar: jest.fn(),
+      deleteFile: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserPreferencesService,
         { provide: UserPreferencesRepository, useValue: mockRepository },
+        { provide: StorageService, useValue: mockStorageService },
       ],
     }).compile();
 
