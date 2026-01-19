@@ -42,16 +42,28 @@ export function createApi(client: AxiosInstance) {
   return {
     auth: {
       login: (data: LoginRequest) =>
-        client.post<AuthResult>("/api/v1/auth/login", data),
+        client.post<{ success: true; data: AuthResult }>(
+          "/api/v1/auth/login",
+          data
+        ),
 
       register: (data: RegisterRequest) =>
-        client.post<AuthResult>("/api/v1/auth/register", data),
+        client.post<{ success: true; data: AuthResult }>(
+          "/api/v1/auth/register",
+          data
+        ),
 
       refresh: (refreshToken: string) =>
-        client.post<AuthResult>("/api/v1/auth/refresh", { refreshToken }),
+        client.post<{ success: true; data: AuthResult }>(
+          "/api/v1/auth/refresh",
+          { refreshToken }
+        ),
 
       logout: (refreshToken: string) =>
-        client.post("/api/v1/auth/logout", { refreshToken }),
+        client.post<{ success: true; data: null }>(
+          "/api/v1/auth/logout",
+          { refreshToken }
+        ),
     },
 
     checkIn: {

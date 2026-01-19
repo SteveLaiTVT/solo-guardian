@@ -45,11 +45,11 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
         }
 
         try {
-          const response = await axios.post<{ tokens: AuthTokens }>(
+          const response = await axios.post<{ success: true; data: AuthTokens }>(
             `${config.baseUrl}/api/v1/auth/refresh`,
             { refreshToken }
           )
-          const tokens = response.data.tokens
+          const tokens = response.data.data
           config.onTokenRefresh(tokens)
 
           // Retry original request with new token

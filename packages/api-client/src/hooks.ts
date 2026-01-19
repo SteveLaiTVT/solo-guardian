@@ -94,13 +94,40 @@ export function createHooks(client: AxiosInstance) {
     useLogin: () =>
       useMutation({
         mutationFn: (data: LoginRequest) =>
-          api.auth.login(data).then((r: AxiosResponse<AuthResult>) => r.data),
+          api.auth
+            .login(data)
+            .then(
+              (r: AxiosResponse<{ success: true; data: AuthResult }>) =>
+                r.data.data
+            ),
       }),
 
     useRegister: () =>
       useMutation({
         mutationFn: (data: RegisterRequest) =>
-          api.auth.register(data).then((r: AxiosResponse<AuthResult>) => r.data),
+          api.auth
+            .register(data)
+            .then(
+              (r: AxiosResponse<{ success: true; data: AuthResult }>) =>
+                r.data.data
+            ),
+      }),
+
+    useRefresh: () =>
+      useMutation({
+        mutationFn: (refreshToken: string) =>
+          api.auth
+            .refresh(refreshToken)
+            .then(
+              (r: AxiosResponse<{ success: true; data: AuthResult }>) =>
+                r.data.data
+            ),
+      }),
+
+    useLogout: () =>
+      useMutation({
+        mutationFn: (refreshToken: string) =>
+          api.auth.logout(refreshToken).then(() => undefined),
       }),
 
     // Emergency Contacts hooks
