@@ -113,3 +113,6 @@ generated/
 # !.claude/**
 # The .claude directory contains essential AI workflow files
 # and should be committed to the repository
+
+# Local Claude settings (user-specific)
+.claude/settings.local.json
