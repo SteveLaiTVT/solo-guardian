@@ -353,6 +353,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get close => '閉じる';
+
+  @override
+  String get checkInNote => 'メモ';
+
+  @override
   String get caregiverElders => 'お年寄り';
 
   @override

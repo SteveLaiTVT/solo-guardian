@@ -360,6 +360,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get close => 'Close';
+
+  @override
+  String get checkInNote => 'Note';
+
+  @override
   String get caregiverElders => 'Elders';
 
   @override

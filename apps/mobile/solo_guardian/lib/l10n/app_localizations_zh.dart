@@ -352,6 +352,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get close => '关闭';
+
+  @override
+  String get checkInNote => '备注';
+
+  @override
   String get caregiverElders => '长辈';
 
   @override

@@ -766,6 +766,18 @@ abstract class AppLocalizations {
   /// **'Birth year must be between 1900 and {year}'**
   String settingsBirthYearRange(String year);
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @checkInNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get checkInNote;
+
   /// No description provided for @caregiverElders.
   ///
   /// In en, this message translates to:
