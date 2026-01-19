@@ -31,6 +31,9 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
 
+  # Environment
+  flutter_dotenv: ^5.1.0
+
   # i18n
   intl: any
 
@@ -65,3 +68,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - .env
