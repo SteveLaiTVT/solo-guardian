@@ -24,7 +24,9 @@ abstract class AuthDatasource {
 extension AuthDatasourceExtension on AuthDatasource {
   AuthResult parseAuthResult(dynamic response) {
     final map = response as Map<String, dynamic>;
-    // API returns data directly, not wrapped in 'data' field
+    if (map['success'] == true && map['data'] is Map<String, dynamic>) {
+      return AuthResult.fromJson(map['data'] as Map<String, dynamic>);
+    }
     return AuthResult.fromJson(map);
   }
 

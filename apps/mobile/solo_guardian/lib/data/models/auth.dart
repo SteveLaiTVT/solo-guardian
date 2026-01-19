@@ -18,24 +18,11 @@ class AuthTokens with _$AuthTokens {
 
 @freezed
 class AuthResult with _$AuthResult {
-  const factory AuthResult({
-    required User user,
-    required AuthTokens tokens,
-  }) = _AuthResult;
+  const factory AuthResult({required User user, required AuthTokens tokens}) =
+      _AuthResult;
 
   factory AuthResult.fromJson(Map<String, dynamic> json) =>
       _$AuthResultFromJson(json);
-}
-
-@freezed
-class LoginRequest with _$LoginRequest {
-  const factory LoginRequest({
-    required String identifier,
-    required String password,
-  }) = _LoginRequest;
-
-  factory LoginRequest.fromJson(Map<String, dynamic> json) =>
-      _$LoginRequestFromJson(json);
 }
 
 @freezed
@@ -53,10 +40,20 @@ class RegisterRequest with _$RegisterRequest {
 }
 
 @freezed
+class LoginRequest with _$LoginRequest {
+  const factory LoginRequest({
+    required String identifier,
+    required String password,
+  }) = _LoginRequest;
+
+  factory LoginRequest.fromJson(Map<String, dynamic> json) =>
+      _$LoginRequestFromJson(json);
+}
+
+@freezed
 class RefreshRequest with _$RefreshRequest {
-  const factory RefreshRequest({
-    required String refreshToken,
-  }) = _RefreshRequest;
+  const factory RefreshRequest({required String refreshToken}) =
+      _RefreshRequest;
 
   factory RefreshRequest.fromJson(Map<String, dynamic> json) =>
       _$RefreshRequestFromJson(json);

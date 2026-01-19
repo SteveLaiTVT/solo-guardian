@@ -11,17 +11,9 @@ class AuthState {
   final User? user;
   final String? error;
 
-  const AuthState({
-    this.status = AuthStatus.initial,
-    this.user,
-    this.error,
-  });
+  const AuthState({this.status = AuthStatus.initial, this.user, this.error});
 
-  AuthState copyWith({
-    AuthStatus? status,
-    User? user,
-    String? error,
-  }) {
+  AuthState copyWith({AuthStatus? status, User? user, String? error}) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
@@ -56,10 +48,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         debugPrint('AuthProvider: Getting current user...');
         final user = await authRepo.getCurrentUser();
         debugPrint('AuthProvider: Got user: ${user?.name}');
-        state = AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = AuthState(status: AuthStatus.authenticated, user: user);
         // Load preferences after successful auth
         _ref.read(preferencesProvider.notifier).loadPreferences();
       } else {
@@ -81,10 +70,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final authRepo = _ref.read(authRepositoryProvider);
       final result = await authRepo.login(identifier, password);
-      state = AuthState(
-        status: AuthStatus.authenticated,
-        user: result.user,
-      );
+      state = AuthState(status: AuthStatus.authenticated, user: result.user);
+      try {
+        final refreshed = await authRepo.refresh(result.tokens.refreshToken);
+        state = AuthState(
+          status: AuthStatus.authenticated,
+          user: refreshed.user,
+        );
+      } catch (_) {
+        // Ignore refresh errors during login
+      }
       // Load preferences after successful login
       _ref.read(preferencesProvider.notifier).loadPreferences();
     } catch (e) {
@@ -115,10 +110,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email,
         phone: phone,
       );
-      state = AuthState(
-        status: AuthStatus.authenticated,
-        user: result.user,
-      );
+      state = AuthState(status: AuthStatus.authenticated, user: result.user);
+      try {
+        final refreshed = await authRepo.refresh(result.tokens.refreshToken);
+        state = AuthState(
+          status: AuthStatus.authenticated,
+          user: refreshed.user,
+        );
+      } catch (_) {
+        // Ignore refresh errors during registration
+      }
       // Load preferences after successful registration
       _ref.read(preferencesProvider.notifier).loadPreferences();
     } catch (e) {

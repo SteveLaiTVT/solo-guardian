@@ -8,11 +8,9 @@ class AuthInterceptor extends Interceptor {
   bool _isRefreshing = false;
   final List<_RequestRetry> _pendingRequests = [];
 
-  AuthInterceptor({
-    required Dio dio,
-    required SecureStorageService storage,
-  })  : _dio = dio,
-        _storage = storage;
+  AuthInterceptor({required Dio dio, required SecureStorageService storage})
+    : _dio = dio,
+      _storage = storage;
 
   @override
   void onRequest(
@@ -42,10 +40,9 @@ class AuthInterceptor extends Interceptor {
 
     if (_isRefreshing) {
       final completer = Completer<Response>();
-      _pendingRequests.add(_RequestRetry(
-        options: err.requestOptions,
-        completer: completer,
-      ));
+      _pendingRequests.add(
+        _RequestRetry(options: err.requestOptions, completer: completer),
+      );
 
       try {
         final response = await completer.future;
@@ -68,17 +65,20 @@ class AuthInterceptor extends Interceptor {
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final tokens = data['tokens'] as Map<String, dynamic>?;
+        final tokensSource = data['data'] ?? data;
+        if (tokensSource is Map<String, dynamic>) {
+          final tokens = tokensSource['tokens'] as Map<String, dynamic>?;
 
-        if (tokens != null) {
-          await _storage.setTokens(
-            accessToken: tokens['accessToken'] as String,
-            refreshToken: tokens['refreshToken'] as String,
-          );
+          if (tokens != null) {
+            await _storage.setTokens(
+              accessToken: tokens['accessToken'] as String,
+              refreshToken: tokens['refreshToken'] as String,
+            );
 
-          final retryResponse = await _retryRequest(err.requestOptions);
-          _resolvePendingRequests();
-          return handler.resolve(retryResponse);
+            final retryResponse = await _retryRequest(err.requestOptions);
+            _resolvePendingRequests();
+            return handler.resolve(retryResponse);
+          }
         }
       }
 
@@ -106,9 +106,7 @@ class AuthInterceptor extends Interceptor {
     return _dio.post(
       '/api/v1/auth/refresh',
       data: {'refreshToken': refreshToken},
-      options: Options(
-        headers: {'Authorization': null},
-      ),
+      options: Options(headers: {'Authorization': null}),
     );
   }
 
@@ -134,10 +132,7 @@ class AuthInterceptor extends Interceptor {
     await _storage.clearTokens();
     for (final retry in _pendingRequests) {
       retry.completer.completeError(
-        DioException(
-          requestOptions: retry.options,
-          error: 'Session expired',
-        ),
+        DioException(requestOptions: retry.options, error: 'Session expired'),
       );
     }
     _pendingRequests.clear();
@@ -148,8 +143,5 @@ class _RequestRetry {
   final RequestOptions options;
   final Completer<Response> completer;
 
-  _RequestRetry({
-    required this.options,
-    required this.completer,
-  });
+  _RequestRetry({required this.options, required this.completer});
 }
