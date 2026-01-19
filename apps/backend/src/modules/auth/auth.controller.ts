@@ -25,27 +25,39 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto): Promise<AuthResult> {
-    return this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterDto,
+  ): Promise<{ success: true; data: AuthResult }> {
+    const result = await this.authService.register(dto);
+    return { success: true, data: result };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto): Promise<AuthResult> {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+  ): Promise<{ success: true; data: AuthResult }> {
+    const result = await this.authService.login(dto);
+    return { success: true, data: result };
   }
 
   // DONE(B): Add validation for refreshToken - TASK-001-D
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() dto: RefreshDto): Promise<AuthResult> {
-    return this.authService.refreshTokens(dto.refreshToken);
+  async refresh(
+    @Body() dto: RefreshDto,
+  ): Promise<{ success: true; data: AuthResult }> {
+    const result = await this.authService.refreshTokens(dto.refreshToken);
+    return { success: true, data: result };
   }
 
   // DONE(B): Add validation for logout - TASK-001-D
   @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Body() dto: LogoutDto): Promise<void> {
-    return this.authService.logout(dto.refreshToken);
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Body() dto: LogoutDto,
+  ): Promise<{ success: true; data: null }> {
+    await this.authService.logout(dto.refreshToken);
+    return { success: true, data: null };
   }
 }

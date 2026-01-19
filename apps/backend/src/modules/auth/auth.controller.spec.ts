@@ -54,7 +54,7 @@ describe('AuthController', () => {
       const result = await controller.register(dto);
 
       expect(authService.register).toHaveBeenCalledWith(dto);
-      expect(result).toEqual(mockAuthResult);
+      expect(result).toEqual({ success: true, data: mockAuthResult });
     });
   });
 
@@ -69,7 +69,7 @@ describe('AuthController', () => {
       const result = await controller.login(dto);
 
       expect(authService.login).toHaveBeenCalledWith(dto);
-      expect(result).toEqual(mockAuthResult);
+      expect(result).toEqual({ success: true, data: mockAuthResult });
     });
   });
 
@@ -83,7 +83,7 @@ describe('AuthController', () => {
       const result = await controller.refresh(dto);
 
       expect(authService.refreshTokens).toHaveBeenCalledWith(dto.refreshToken);
-      expect(result).toEqual(mockAuthResult);
+      expect(result).toEqual({ success: true, data: mockAuthResult });
     });
   });
 
@@ -94,9 +94,10 @@ describe('AuthController', () => {
       };
       authService.logout.mockResolvedValue(undefined);
 
-      await controller.logout(dto);
+      const result = await controller.logout(dto);
 
       expect(authService.logout).toHaveBeenCalledWith(dto.refreshToken);
+      expect(result).toEqual({ success: true, data: null });
     });
   });
 });

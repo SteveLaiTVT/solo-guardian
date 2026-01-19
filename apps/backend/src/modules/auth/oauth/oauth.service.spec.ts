@@ -159,8 +159,7 @@ describe('OAuthService', () => {
 
       authRepository.findByEmail.mockResolvedValue(null);
       const newUser = createMockUser({ email: mockProfile.email, name: mockProfile.name });
-      const { passwordHash: _, ...userWithoutPassword } = newUser;
-      authRepository.createUser.mockResolvedValue(userWithoutPassword);
+      authRepository.createUser.mockResolvedValue(newUser);
       authRepository.saveRefreshToken.mockResolvedValue(undefined);
 
       const result = await service.authenticate(OAuthProvider.GOOGLE, callbackData);

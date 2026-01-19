@@ -111,14 +111,13 @@ describe('AuthService', () => {
         email: registerDto.email,
         name: registerDto.name,
       });
-      const { passwordHash: _, ...userWithoutPassword } = mockUser;
 
       authRepository.checkDuplicates.mockResolvedValue({
         hasDuplicateEmail: false,
         hasDuplicateUsername: false,
         hasDuplicatePhone: false,
       });
-      authRepository.createUser.mockResolvedValue(userWithoutPassword);
+      authRepository.createUser.mockResolvedValue(mockUser);
       authRepository.saveRefreshToken.mockResolvedValue(undefined);
 
       const result = await service.register(registerDto);

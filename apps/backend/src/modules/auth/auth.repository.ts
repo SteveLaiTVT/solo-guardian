@@ -137,8 +137,8 @@ export class AuthRepository {
     phone?: string;
     passwordHash: string;
     name: string;
-  }): Promise<UserWithoutPassword> {
-    const user = await this.prisma.user.create({
+  }): Promise<UserWithPassword> {
+    return this.prisma.user.create({
       data: {
         email: data.email?.toLowerCase() ?? null,
         username: data.username?.toLowerCase() ?? null,
@@ -147,9 +147,6 @@ export class AuthRepository {
         name: data.name,
       },
     });
-
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
   }
 
   async saveRefreshToken(data: {

@@ -120,7 +120,8 @@ describe('AuthRepository', () => {
           name: 'New User',
         },
       });
-      expect(result).not.toHaveProperty('passwordHash');
+      expect(result).toEqual(mockUser);
+      expect(result.passwordHash).toBeDefined();
     });
 
     it('should normalize email to lowercase', async () => {
