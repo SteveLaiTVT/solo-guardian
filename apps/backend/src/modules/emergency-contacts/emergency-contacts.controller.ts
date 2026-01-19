@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.controller.ts
  * @description Controller for emergency contacts endpoints
- * @task TASK-015, TASK-031, TASK-033, TASK-036, TASK-067, TASK-068, TASK-069
- * @design_state_version 3.9.0
+ * @task TASK-015, TASK-031, TASK-033, TASK-036, TASK-067, TASK-068, TASK-069, TASK-096
+ * @design_state_version 3.12.0
  */
 import {
   Controller,
@@ -20,6 +20,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { EmergencyContactsService, LinkedContactInfo, PendingInvitationInfo } from './emergency-contacts.service';
 import { ContactVerificationService } from './contact-verification.service';
 import { PhoneVerificationService } from './phone-verification.service';
@@ -120,10 +121,12 @@ export class EmergencyContactsController {
   /**
    * Send phone verification OTP
    * DONE(B): Implemented sendPhoneVerification endpoint - TASK-036
-   * @task TASK-036
+   * DONE(B): Added rate limiting - 3 requests per 10 minutes - TASK-096
+   * @task TASK-036, TASK-096
    */
   @Post(':id/send-phone-verification')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ long: { ttl: 600000, limit: 3 } })
   async sendPhoneVerification(
     @Param('id') id: string,
     @CurrentUser() userId: string,
@@ -134,10 +137,12 @@ export class EmergencyContactsController {
   /**
    * Verify phone number with OTP
    * DONE(B): Implemented verifyPhone endpoint - TASK-036
-   * @task TASK-036
+   * DONE(B): Added rate limiting - 3 requests per 10 minutes - TASK-096
+   * @task TASK-036, TASK-096
    */
   @Post(':id/verify-phone')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ long: { ttl: 600000, limit: 3 } })
   async verifyPhone(
     @Param('id') id: string,
     @Body() dto: VerifyPhoneDto,
@@ -149,10 +154,12 @@ export class EmergencyContactsController {
   /**
    * Resend phone verification OTP
    * DONE(B): Implemented resendPhoneVerification endpoint - TASK-036
-   * @task TASK-036
+   * DONE(B): Added rate limiting - 3 requests per 10 minutes - TASK-096
+   * @task TASK-036, TASK-096
    */
   @Post(':id/resend-phone-verification')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ long: { ttl: 600000, limit: 3 } })
   async resendPhoneVerification(
     @Param('id') id: string,
     @CurrentUser() userId: string,

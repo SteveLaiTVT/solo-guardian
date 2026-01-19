@@ -1,8 +1,8 @@
 /**
  * @file auth.controller.ts
  * @description Controller for authentication endpoints
- * @task TASK-001-D
- * @design_state_version 0.2.0
+ * @task TASK-001-D, TASK-096
+ * @design_state_version 3.12.0
  */
 import {
   Controller,
@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import {
   RegisterDto,
@@ -24,7 +25,9 @@ import {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // DONE(B): Add strict rate limiting - 3 requests per 10 minutes - TASK-096
   @Post('register')
+  @Throttle({ long: { ttl: 600000, limit: 3 } })
   async register(
     @Body() dto: RegisterDto,
   ): Promise<{ success: true; data: AuthResult }> {
@@ -32,8 +35,10 @@ export class AuthController {
     return { success: true, data: result };
   }
 
+  // DONE(B): Add strict rate limiting - 5 requests per minute - TASK-096
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ short: { ttl: 60000, limit: 5 } })
   async login(
     @Body() dto: LoginDto,
   ): Promise<{ success: true; data: AuthResult }> {

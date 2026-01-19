@@ -1,13 +1,16 @@
 /**
  * @file app.module.ts
  * @description Root application module
- * @task TASK-000-5, TASK-006, TASK-015, TASK-021, TASK-024, TASK-028, TASK-046
- * @design_state_version 3.7.0
+ * @task TASK-000-5, TASK-006, TASK-015, TASK-021, TASK-024, TASK-028, TASK-046, TASK-096
+ * @design_state_version 3.12.0
  */
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 // DONE(B): Import ScheduleModule for cron jobs - TASK-028
 import { ScheduleModule } from '@nestjs/schedule';
+// DONE(B): Import ThrottlerModule for rate limiting - TASK-096
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CheckInModule } from './modules/check-in/check-in.module';
@@ -39,6 +42,25 @@ import { StorageModule } from './modules/storage';
     }),
     // DONE(B): Add ScheduleModule.forRoot() for cron jobs - TASK-028
     ScheduleModule.forRoot(),
+    // DONE(B): Add ThrottlerModule for rate limiting - TASK-096
+    // Global default: 100 requests per minute
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 100,
+      },
+      {
+        name: 'short',
+        ttl: 60000,
+        limit: 5,
+      },
+      {
+        name: 'long',
+        ttl: 600000,
+        limit: 3,
+      },
+    ]),
     PrismaModule,
     // DONE(B): Add QueueModule for Bull queue infrastructure - TASK-024
     QueueModule,
@@ -63,6 +85,13 @@ import { StorageModule } from './modules/storage';
     AnalyticsModule,
     // Add StorageModule for file uploads (global)
     StorageModule,
+  ],
+  // DONE(B): Add global ThrottlerGuard for rate limiting - TASK-096
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
