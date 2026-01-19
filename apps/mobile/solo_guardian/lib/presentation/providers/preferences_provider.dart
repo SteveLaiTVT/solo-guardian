@@ -1,6 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/errors/app_exception.dart';
+import '../../core/utils/error_utils.dart';
 import '../../data/models/preferences.dart';
 import '../../theme/app_theme.dart';
 import 'core_providers.dart';
@@ -45,7 +44,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       final preferences = await prefsRepo.getPreferences();
       state = PreferencesState(preferences: preferences);
     } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       state = state.copyWith(isLoading: false, error: errorMsg, errorI18nKey: i18nKey);
     }
   }
@@ -101,7 +100,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       // Update with server response
       state = PreferencesState(preferences: preferences);
     } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       // Keep the optimistic update but set error
       state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
@@ -114,7 +113,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       final preferences = await prefsRepo.toggleFeature(featureName, enabled);
       state = state.copyWith(preferences: preferences);
     } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
     }
@@ -126,7 +125,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       final preferences = await prefsRepo.completeOnboarding();
       state = state.copyWith(preferences: preferences);
     } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
     }
@@ -134,17 +133,6 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
 
   void setPreferences(UserPreferences preferences) {
     state = state.copyWith(preferences: preferences);
-  }
-
-  (String, String?) _extractError(dynamic e) {
-    if (e is AppException) {
-      return (e.message, e.i18nKey);
-    }
-    if (e is DioException && e.error is AppException) {
-      final appEx = e.error as AppException;
-      return (appEx.message, appEx.i18nKey);
-    }
-    return (e.toString(), null);
   }
 }
 

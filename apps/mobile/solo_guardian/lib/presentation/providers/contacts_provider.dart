@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/utils/error_utils.dart';
 import '../../data/models/contact.dart';
 import 'core_providers.dart';
 
@@ -34,13 +36,17 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
   ContactsNotifier(this._ref) : super(const ContactsState());
 
   Future<void> loadContacts() async {
+    debugPrint('ContactsNotifier: Starting loadContacts...');
     state = state.copyWith(isLoading: true, error: null);
     try {
       final contactsRepo = _ref.read(contactsRepositoryProvider);
       final contacts = await contactsRepo.getContacts();
-      state = ContactsState(contacts: contacts);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      debugPrint('ContactsNotifier: Got ${contacts.length} contacts');
+      state = ContactsState(contacts: contacts, isLoading: false);
+    } catch (e, stack) {
+      debugPrint('ContactsNotifier: Error: $e');
+      debugPrint('ContactsNotifier: Stack: $stack');
+      state = state.copyWith(isLoading: false, error: ErrorUtils.extractError(e).$1);
     }
   }
 
@@ -55,7 +61,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       await contactsRepo.createContact(name: name, email: email, phone: phone);
       await loadContacts();
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -71,7 +77,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       await contactsRepo.updateContact(id, name: name, email: email, phone: phone);
       await loadContacts();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -84,7 +90,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
         contacts: state.contacts.where((c) => c.id != id).toList(),
       );
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -95,7 +101,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       final contacts = await contactsRepo.reorderContacts(contactIds);
       state = state.copyWith(contacts: contacts);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -106,7 +112,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       await contactsRepo.sendVerification(id);
       await loadContacts();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -116,7 +122,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       final contactsRepo = _ref.read(contactsRepositoryProvider);
       await contactsRepo.sendPhoneVerification(id);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -127,7 +133,7 @@ class ContactsNotifier extends StateNotifier<ContactsState> {
       await contactsRepo.verifyPhone(id, otp);
       await loadContacts();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -172,17 +178,22 @@ class LinkedContactsNotifier extends StateNotifier<LinkedContactsState> {
   LinkedContactsNotifier(this._ref) : super(const LinkedContactsState());
 
   Future<void> loadLinkedContacts() async {
+    debugPrint('LinkedContactsNotifier: Starting loadLinkedContacts...');
     state = state.copyWith(isLoading: true, error: null);
     try {
       final contactsRepo = _ref.read(contactsRepositoryProvider);
       final linkedContacts = await contactsRepo.getLinkedContacts();
       final pendingInvitations = await contactsRepo.getPendingInvitations();
+      debugPrint('LinkedContactsNotifier: Got ${linkedContacts.length} linked, ${pendingInvitations.length} pending');
       state = LinkedContactsState(
         linkedContacts: linkedContacts,
         pendingInvitations: pendingInvitations,
+        isLoading: false,
       );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+    } catch (e, stack) {
+      debugPrint('LinkedContactsNotifier: Error: $e');
+      debugPrint('LinkedContactsNotifier: Stack: $stack');
+      state = state.copyWith(isLoading: false, error: ErrorUtils.extractError(e).$1);
     }
   }
 
@@ -192,7 +203,7 @@ class LinkedContactsNotifier extends StateNotifier<LinkedContactsState> {
       await contactsRepo.acceptContactLink(token);
       await loadLinkedContacts();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }

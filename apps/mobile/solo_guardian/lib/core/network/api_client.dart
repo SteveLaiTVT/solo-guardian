@@ -4,6 +4,7 @@ import '../errors/app_exception.dart';
 import '../storage/secure_storage.dart';
 import 'auth_interceptor.dart';
 import 'error_interceptor.dart';
+import 'retry_interceptor.dart';
 
 class ApiClient {
   final Dio _dio;
@@ -23,6 +24,7 @@ class ApiClient {
         ) {
     _dio.interceptors.addAll([
       AuthInterceptor(dio: _dio, storage: _storage),
+      RetryInterceptor(dio: _dio, maxRetries: 3),
       ErrorInterceptor(),
       LogInterceptor(
         requestBody: true,

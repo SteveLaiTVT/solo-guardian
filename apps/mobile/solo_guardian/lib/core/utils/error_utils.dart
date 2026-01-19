@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../l10n/app_localizations.dart';
 import '../errors/app_exception.dart';
 
@@ -11,7 +12,8 @@ class ErrorUtils {
     String? fallbackMessage,
   ) {
     if (i18nKey == null) {
-      return fallbackMessage ?? l10n.errorUnknown;
+      // Try to detect error type from fallback message
+      return _parseRawErrorMessage(l10n, fallbackMessage);
     }
 
     // Map i18nKey to localized message
@@ -57,8 +59,46 @@ class ErrorUtils {
       'error.timeout' => l10n.errorNetworkFailed,
 
       // Unknown/default
-      _ => fallbackMessage ?? l10n.errorUnknown,
+      _ => _parseRawErrorMessage(l10n, fallbackMessage),
     };
+  }
+
+  /// Parse raw error message string to return friendly message
+  static String _parseRawErrorMessage(AppLocalizations l10n, String? message) {
+    if (message == null || message.isEmpty) {
+      return l10n.errorUnknown;
+    }
+
+    // Check for HTTP status codes and common error patterns
+    if (message.contains('429') || message.contains('Too Many Requests') || message.contains('ThrottlerException')) {
+      return l10n.errorSystemRateLimited;
+    }
+    if (message.contains('503') || message.contains('Service Unavailable')) {
+      return l10n.errorSystemUnavailable;
+    }
+    if (message.contains('500') || message.contains('Internal Server Error')) {
+      return l10n.errorSystemInternal;
+    }
+    if (message.contains('401') || message.contains('Unauthorized')) {
+      return l10n.errorAuthUnauthorized;
+    }
+    if (message.contains('SocketException') ||
+        message.contains('Connection refused') ||
+        message.contains('Network is unreachable') ||
+        message.contains('ConnectionError')) {
+      return l10n.errorNetworkFailed;
+    }
+    if (message.contains('TimeoutException') ||
+        message.contains('Connection timed out') ||
+        message.contains('connectionTimeout') ||
+        message.contains('receiveTimeout')) {
+      return l10n.errorNetworkFailed;
+    }
+    if (message.contains('DioException')) {
+      return l10n.errorNetworkFailed;
+    }
+
+    return l10n.errorUnknown;
   }
 
   /// Get a user-friendly error message from an AppException
@@ -72,13 +112,39 @@ class ErrorUtils {
       return getExceptionMessage(l10n, error);
     }
 
+    // Handle DioException with status codes
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      if (statusCode == 429) {
+        return l10n.errorSystemRateLimited;
+      }
+      if (statusCode == 503) {
+        return l10n.errorSystemUnavailable;
+      }
+      if (statusCode == 500 || statusCode == 502) {
+        return l10n.errorSystemInternal;
+      }
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        return l10n.errorNetworkFailed;
+      }
+      if (error.type == DioExceptionType.connectionError) {
+        return l10n.errorNetworkFailed;
+      }
+      // Check for AppException wrapped in DioException
+      if (error.error is AppException) {
+        return getExceptionMessage(l10n, error.error as AppException);
+      }
+    }
+
     // Check if it's a string that looks like an i18nKey
     final errorStr = error.toString();
     if (errorStr.startsWith('error.')) {
       return getLocalizedMessage(l10n, errorStr, null);
     }
 
-    // Check common error patterns
+    // Check common error patterns in string
     if (errorStr.contains('SocketException') ||
         errorStr.contains('Connection refused') ||
         errorStr.contains('Network is unreachable')) {
@@ -90,6 +156,10 @@ class ErrorUtils {
       return l10n.errorNetworkFailed;
     }
 
+    if (errorStr.contains('429') || errorStr.contains('Too Many Requests')) {
+      return l10n.errorSystemRateLimited;
+    }
+
     return l10n.errorUnknown;
   }
 
@@ -99,5 +169,42 @@ class ErrorUtils {
       return l10n.errorTitleUser;
     }
     return l10n.errorTitleSystem;
+  }
+
+  /// Extract error message and i18nKey from any exception
+  /// Returns (message, i18nKey) tuple for use in provider state
+  static (String, String?) extractError(dynamic e) {
+    if (e is AppException) {
+      return (e.message, e.i18nKey);
+    }
+    if (e is DioException) {
+      // Check for wrapped AppException
+      if (e.error is AppException) {
+        final appEx = e.error as AppException;
+        return (appEx.message, appEx.i18nKey);
+      }
+      // Handle HTTP status codes
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 429) {
+        return ('Too many requests', 'error.system.rateLimited');
+      }
+      if (statusCode == 503) {
+        return ('Service unavailable', 'error.system.unavailable');
+      }
+      if (statusCode == 500 || statusCode == 502) {
+        return ('Internal server error', 'error.system.internal');
+      }
+      if (statusCode == 401) {
+        return ('Unauthorized', 'error.auth.unauthorized');
+      }
+      // Handle connection errors
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        return ('Network error', 'error.network.failed');
+      }
+    }
+    return (e.toString(), null);
   }
 }

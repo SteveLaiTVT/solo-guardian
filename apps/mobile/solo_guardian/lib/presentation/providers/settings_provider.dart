@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/errors/app_exception.dart';
+import '../../core/utils/error_utils.dart';
 import '../../data/models/settings.dart';
 import 'core_providers.dart';
 
@@ -38,15 +38,21 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier(this._ref) : super(const SettingsState());
 
   Future<void> loadSettings() async {
+    debugPrint('SettingsNotifier: Starting loadSettings...');
     state = state.copyWith(isLoading: true, error: null, errorI18nKey: null);
     try {
       final settingsRepo = _ref.read(settingsRepositoryProvider);
+      debugPrint('SettingsNotifier: Calling getSettings...');
       final settings = await settingsRepo.getSettings();
-      state = SettingsState(settings: settings);
-    } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      debugPrint('SettingsNotifier: Got settings: ${settings.deadlineTime}');
+      state = SettingsState(settings: settings, isLoading: false);
+    } catch (e, stack) {
+      debugPrint('SettingsNotifier: Error loading settings: $e');
+      debugPrint('SettingsNotifier: Stack: $stack');
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       state = state.copyWith(isLoading: false, error: errorMsg, errorI18nKey: i18nKey);
     }
+    debugPrint('SettingsNotifier: loadSettings complete, isLoading=${state.isLoading}');
   }
 
   Future<void> updateSettings({
@@ -79,22 +85,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       // Update with server response
       state = SettingsState(settings: settings);
     } catch (e) {
-      final (errorMsg, i18nKey) = _extractError(e);
+      final (errorMsg, i18nKey) = ErrorUtils.extractError(e);
       // Keep the optimistic update but set error
       state = state.copyWith(error: errorMsg, errorI18nKey: i18nKey);
       rethrow;
     }
-  }
-
-  (String, String?) _extractError(dynamic e) {
-    if (e is AppException) {
-      return (e.message, e.i18nKey);
-    }
-    if (e is DioException && e.error is AppException) {
-      final appEx = e.error as AppException;
-      return (appEx.message, appEx.i18nKey);
-    }
-    return (e.toString(), null);
   }
 }
 

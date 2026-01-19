@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/utils/error_utils.dart';
 import '../../data/models/caregiver.dart';
 import 'core_providers.dart';
 
@@ -32,14 +34,20 @@ class EldersNotifier extends StateNotifier<EldersState> {
   EldersNotifier(this._ref) : super(const EldersState());
 
   Future<void> loadElders() async {
+    debugPrint('EldersNotifier: Starting loadElders...');
     state = state.copyWith(isLoading: true, error: null);
     try {
       final caregiverRepo = _ref.read(caregiverRepositoryProvider);
+      debugPrint('EldersNotifier: Calling getElders...');
       final elders = await caregiverRepo.getElders();
-      state = EldersState(elders: elders);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      debugPrint('EldersNotifier: Got ${elders.length} elders');
+      state = EldersState(elders: elders, isLoading: false);
+    } catch (e, stack) {
+      debugPrint('EldersNotifier: Error loading elders: $e');
+      debugPrint('EldersNotifier: Stack: $stack');
+      state = state.copyWith(isLoading: false, error: ErrorUtils.extractError(e).$1);
     }
+    debugPrint('EldersNotifier: loadElders complete, isLoading=${state.isLoading}');
   }
 
   Future<void> checkInOnBehalf(String elderId, {String? note}) async {
@@ -48,7 +56,7 @@ class EldersNotifier extends StateNotifier<EldersState> {
       await caregiverRepo.checkInOnBehalf(elderId, note: note);
       await loadElders();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -89,14 +97,20 @@ class CaregiversNotifier extends StateNotifier<CaregiversState> {
   CaregiversNotifier(this._ref) : super(const CaregiversState());
 
   Future<void> loadCaregivers() async {
+    debugPrint('CaregiversNotifier: Starting loadCaregivers...');
     state = state.copyWith(isLoading: true, error: null);
     try {
       final caregiverRepo = _ref.read(caregiverRepositoryProvider);
+      debugPrint('CaregiversNotifier: Calling getCaregivers...');
       final caregivers = await caregiverRepo.getCaregivers();
-      state = CaregiversState(caregivers: caregivers);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      debugPrint('CaregiversNotifier: Got ${caregivers.length} caregivers');
+      state = CaregiversState(caregivers: caregivers, isLoading: false);
+    } catch (e, stack) {
+      debugPrint('CaregiversNotifier: Error loading caregivers: $e');
+      debugPrint('CaregiversNotifier: Stack: $stack');
+      state = state.copyWith(isLoading: false, error: ErrorUtils.extractError(e).$1);
     }
+    debugPrint('CaregiversNotifier: loadCaregivers complete, isLoading=${state.isLoading}');
   }
 
   Future<InvitationResponse> createInvitation(String relationshipType) async {
@@ -104,7 +118,7 @@ class CaregiversNotifier extends StateNotifier<CaregiversState> {
       final caregiverRepo = _ref.read(caregiverRepositoryProvider);
       return await caregiverRepo.createInvitation(relationshipType);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
@@ -115,7 +129,7 @@ class CaregiversNotifier extends StateNotifier<CaregiversState> {
       await caregiverRepo.acceptInvitation(token);
       await loadCaregivers();
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: ErrorUtils.extractError(e).$1);
       rethrow;
     }
   }
