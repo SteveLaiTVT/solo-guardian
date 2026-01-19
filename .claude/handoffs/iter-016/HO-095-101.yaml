@@ -1,0 +1,333 @@
+# ============================================================
+# HANDOFF: iter-016 Security Hardening & Code Quality
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-19
+# Source: ai/quality_report_2026-01-19.md
+# ============================================================
+
+meta:
+  iteration: "iter-016"
+  handoff_id: "HO-095-101"
+  created_at: "2026-01-19"
+  created_by: "A Session"
+  priority: "CRITICAL"
+
+# ============================================================
+# CONTEXT
+# ============================================================
+context:
+  summary: |
+    Quality audit identified critical security vulnerabilities and code quality issues.
+    This iteration focuses on security hardening and fixing code constraint violations.
+
+  source_report: "ai/quality_report_2026-01-19.md"
+
+  manual_action_required:
+    - issue: "CRITICAL-1: .env file contains real credentials"
+      action: "User must manually rotate all credentials (JWT secrets, SMTP, Twilio, OSS keys)"
+      owner: "User (not B Session)"
+
+# ============================================================
+# TASKS
+# ============================================================
+tasks:
+  # ----------------------------------------------------------
+  # TASK-095: CRITICAL - OAuth Token Exposure
+  # ----------------------------------------------------------
+  - id: "TASK-095"
+    title: "Fix OAuth token exposure in URL"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      OAuth callback returns JWT tokens via URL query parameters.
+      Tokens in URLs are logged in browser history, server logs, and referrer headers.
+      Location: apps/backend/src/modules/auth/oauth/oauth.controller.ts:223-232
+
+    solution: |
+      Option A (Recommended): Use HTTP-only cookies for token transport
+      Option B: POST-based token exchange with short-lived authorization code
+
+      Implementation for Option A:
+      1. After OAuth success, set tokens in HTTP-only, Secure, SameSite cookies
+      2. Redirect to frontend without tokens in URL
+      3. Frontend reads user info from /api/v1/auth/me endpoint
+      4. Update frontend auth flow to handle cookie-based auth
+
+    files:
+      - "apps/backend/src/modules/auth/oauth/oauth.controller.ts"
+      - "apps/backend/src/modules/auth/auth.controller.ts"
+      - "apps/user-web/src/stores/auth.store.ts"
+
+    acceptance_criteria:
+      - "No tokens appear in URL query parameters"
+      - "Tokens are transmitted via HTTP-only cookies OR POST body"
+      - "Browser history does not contain tokens"
+      - "OAuth login flow still works end-to-end"
+
+    testing:
+      - "Manual: Complete OAuth login, verify no tokens in browser URL bar"
+      - "Manual: Check browser history, verify no tokens visible"
+      - "E2E: OAuth flow test still passes"
+
+  # ----------------------------------------------------------
+  # TASK-096: HIGH - Rate Limiting
+  # ----------------------------------------------------------
+  - id: "TASK-096"
+    title: "Add rate limiting with @nestjs/throttler"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      No rate limiting on API endpoints.
+      Vulnerable to brute force attacks on login, registration, and OTP endpoints.
+
+    solution: |
+      1. Install @nestjs/throttler package
+      2. Configure global rate limiting in app.module.ts
+      3. Apply stricter limits to sensitive endpoints:
+         - POST /auth/login: 5 requests per minute
+         - POST /auth/register: 3 requests per minute
+         - POST /emergency-contacts/:id/verify-phone: 3 requests per 10 minutes
+         - POST /emergency-contacts/:id/send-phone-verification: 3 requests per 10 minutes
+
+    files:
+      - "apps/backend/package.json"
+      - "apps/backend/src/app.module.ts"
+      - "apps/backend/src/modules/auth/auth.controller.ts"
+      - "apps/backend/src/modules/emergency-contacts/emergency-contacts.controller.ts"
+
+    acceptance_criteria:
+      - "@nestjs/throttler installed and configured"
+      - "Global default: 100 requests per minute"
+      - "Auth endpoints: 5 login / 3 register per minute"
+      - "OTP endpoints: 3 requests per 10 minutes"
+      - "Rate limit exceeded returns 429 Too Many Requests"
+
+    testing:
+      - "Unit: Mock rapid requests, verify 429 response"
+      - "Manual: Attempt rapid login, verify rate limiting"
+
+  # ----------------------------------------------------------
+  # TASK-097: HIGH - Security Headers
+  # ----------------------------------------------------------
+  - id: "TASK-097"
+    title: "Add security headers with helmet"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      Missing security headers exposes app to XSS, clickjacking, MIME sniffing attacks.
+      No Content-Security-Policy, X-Frame-Options, X-Content-Type-Options headers.
+
+    solution: |
+      1. Install helmet package
+      2. Configure helmet middleware in main.ts
+      3. Set appropriate CSP for the application
+      4. Ensure CORS is properly configured alongside helmet
+
+    files:
+      - "apps/backend/package.json"
+      - "apps/backend/src/main.ts"
+
+    acceptance_criteria:
+      - "helmet middleware installed and enabled"
+      - "X-Frame-Options: DENY"
+      - "X-Content-Type-Options: nosniff"
+      - "Content-Security-Policy configured"
+      - "Strict-Transport-Security enabled for HTTPS"
+      - "CORS still works correctly"
+
+    testing:
+      - "Manual: Check response headers with browser dev tools"
+      - "Manual: Verify CORS preflight still works"
+
+  # ----------------------------------------------------------
+  # TASK-098: MEDIUM - ESLint Errors
+  # ----------------------------------------------------------
+  - id: "TASK-098"
+    title: "Fix ESLint errors (8 errors, 1 warning)"
+    priority: "P1"
+    status: "pending"
+
+    problem: |
+      ESLint reports 8 errors and 1 warning in user-web:
+      - react-refresh/only-export-components violations
+      - react-hooks/rules-of-hooks violations
+      - react-hooks/exhaustive-deps warnings
+
+    solution: |
+      1. Run `cd apps/user-web && pnpm run lint` to identify all errors
+      2. Fix each violation:
+         - Move non-component exports to separate files
+         - Ensure hooks are called at top level only
+         - Add missing dependencies to useEffect/useMemo/useCallback
+      3. Re-run lint to verify all errors resolved
+
+    files:
+      - "apps/user-web/src/**/*.tsx"
+
+    acceptance_criteria:
+      - "pnpm run lint exits with 0 errors"
+      - "No ESLint warnings (or document why warning is acceptable)"
+
+    testing:
+      - "Run: cd apps/user-web && pnpm run lint"
+
+  # ----------------------------------------------------------
+  # TASK-099: MEDIUM - Failing Unit Tests
+  # ----------------------------------------------------------
+  - id: "TASK-099"
+    title: "Fix failing unit tests (5 tests in 4 suites)"
+    priority: "P1"
+    status: "pending"
+
+    problem: |
+      5 unit tests failing across 4 test suites:
+      - auth.repository.spec.ts
+      - check-in-settings.service.spec.ts
+      - (2 other suites - run tests to identify)
+
+    solution: |
+      1. Run `cd apps/backend && pnpm run test` to identify all failures
+      2. Analyze each failure and fix:
+         - Mock mismatches
+         - Outdated test expectations
+         - Missing test setup
+      3. Re-run tests to verify all pass
+
+    files:
+      - "apps/backend/src/modules/auth/auth.repository.spec.ts"
+      - "apps/backend/src/modules/check-in/check-in-settings.service.spec.ts"
+
+    acceptance_criteria:
+      - "All 407+ tests pass"
+      - "No skipped tests without documented reason"
+
+    testing:
+      - "Run: cd apps/backend && pnpm run test"
+
+  # ----------------------------------------------------------
+  # TASK-100: MEDIUM - File Size Violations
+  # ----------------------------------------------------------
+  - id: "TASK-100"
+    title: "Refactor files exceeding 300 lines"
+    priority: "P2"
+    status: "pending"
+
+    problem: |
+      6 files exceed the 300 line limit defined in code_constraints:
+      1. auth.service.ts (322 lines)
+      2. emergency-contacts.service.ts (348 lines)
+      3. SettingsPage.tsx (387 lines)
+      4. ContactsPage.tsx (312 lines)
+      5. TemplatesPage.tsx (456 lines)
+      6. settings_screen.dart (389 lines)
+
+    solution: |
+      Extract logical sections into separate files:
+
+      1. auth.service.ts:
+         - Extract OAuth logic to oauth.service.ts (if not already)
+         - Extract token management to token.service.ts
+
+      2. emergency-contacts.service.ts:
+         - Extract verification logic to contact-verification.service.ts
+         - Extract linked contacts logic to linked-contacts.service.ts
+
+      3. SettingsPage.tsx:
+         - Extract sections into components: AccountSection, PreferencesSection, etc.
+
+      4. ContactsPage.tsx:
+         - Extract ContactForm, ContactList as separate components
+
+      5. TemplatesPage.tsx:
+         - Extract TemplateEditor, TemplateList as separate components
+
+      6. settings_screen.dart:
+         - Extract widgets into separate files in widgets/ folder
+
+    files:
+      - "apps/backend/src/modules/auth/auth.service.ts"
+      - "apps/backend/src/modules/emergency-contacts/emergency-contacts.service.ts"
+      - "apps/user-web/src/pages/SettingsPage.tsx"
+      - "apps/user-web/src/pages/ContactsPage.tsx"
+      - "apps/admin-web/src/pages/TemplatesPage.tsx"
+      - "apps/mobile/solo_guardian/lib/features/settings/presentation/settings_screen.dart"
+
+    acceptance_criteria:
+      - "All files under 300 lines"
+      - "No functionality broken"
+      - "Imports updated correctly"
+      - "Tests still pass"
+
+    testing:
+      - "Run: wc -l on all refactored files"
+      - "Run: pnpm run test (backend)"
+      - "Run: pnpm run build (all apps)"
+
+  # ----------------------------------------------------------
+  # TASK-101: LOW - Bundle Size
+  # ----------------------------------------------------------
+  - id: "TASK-101"
+    title: "Reduce frontend bundle size"
+    priority: "P2"
+    status: "pending"
+
+    problem: |
+      user-web bundle is 798KB, target is <500KB.
+      Large bundle affects initial load time.
+
+    solution: |
+      1. Analyze bundle with `npx vite-bundle-visualizer`
+      2. Implement code splitting:
+         - Lazy load routes with React.lazy()
+         - Dynamic import heavy components (date pickers, charts)
+      3. Tree-shake unused imports
+      4. Consider lighter alternatives for heavy dependencies
+
+    files:
+      - "apps/user-web/vite.config.ts"
+      - "apps/user-web/src/App.tsx"
+      - "apps/user-web/src/router.tsx"
+
+    acceptance_criteria:
+      - "Initial bundle < 500KB"
+      - "Route-based code splitting implemented"
+      - "No functionality broken"
+      - "Build completes without errors"
+
+    testing:
+      - "Run: cd apps/user-web && pnpm run build"
+      - "Check bundle size in dist/ folder"
+
+# ============================================================
+# IMPLEMENTATION ORDER
+# ============================================================
+implementation_order:
+  - phase: 1
+    name: "Critical Security"
+    tasks: ["TASK-095", "TASK-096", "TASK-097"]
+    description: "Fix security vulnerabilities first"
+
+  - phase: 2
+    name: "Code Quality"
+    tasks: ["TASK-098", "TASK-099"]
+    description: "Fix linting and test failures"
+
+  - phase: 3
+    name: "Refactoring"
+    tasks: ["TASK-100", "TASK-101"]
+    description: "File size and bundle optimization"
+
+# ============================================================
+# NOTES FOR B SESSION
+# ============================================================
+notes:
+  - "Run full test suite after each task to catch regressions"
+  - "Create feature branch: git checkout -b feature/iter-016-security"
+  - "Commit after each task with descriptive message"
+  - "If TASK-095 requires frontend changes, coordinate carefully"
+  - "Document any architectural decisions in code comments"

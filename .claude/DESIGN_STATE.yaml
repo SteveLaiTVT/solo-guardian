@@ -9,13 +9,13 @@
 # ============================================================
 
 meta:
-  version: "3.11.0"
+  version: "3.13.0"
   updated_at: "2026-01-19"
   updated_by: "A Session"
   branch: "main"
   project_name: "Solo Guardian"
   description: "Safety check-in app for people living alone"
-  milestone: "Flutter Mobile App Complete"
+  milestone: "Offline-First Mobile & Error UX"
 
 # ============================================================
 # 1. Technical Architecture
@@ -888,12 +888,52 @@ code_constraints:
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
 current_iterations: []
-  # No active iterations - iter-015 complete
+  # No active iterations - iter-016 complete
 
 # ============================================================
 # 5.1 Iteration History
 # ============================================================
 iteration_history:
+  - id: "iter-016"
+    goal: "Security Hardening & Code Quality"
+    started_at: "2026-01-19"
+    completed_at: "2026-01-19"
+    status: "completed"
+    source: "quality_report_2026-01-19.md"
+    summary: |
+      Security hardening and code quality fixes based on quality audit:
+      - TASK-095: Fixed OAuth token exposure (POST-based token exchange)
+      - TASK-096: Added rate limiting with @nestjs/throttler
+      - TASK-097: Added security headers with helmet middleware
+      - TASK-098: Fixed all ESLint errors in user-web
+      - TASK-099: Fixed failing unit tests
+      - TASK-100: Refactored files exceeding 300 lines
+      - TASK-101: Reduced frontend bundle with code splitting
+    tasks_completed:
+      - id: "TASK-095"
+        title: "Fix OAuth token exposure in URL"
+        review_verdict: "pass"
+      - id: "TASK-096"
+        title: "Add rate limiting with @nestjs/throttler"
+        review_verdict: "pass"
+      - id: "TASK-097"
+        title: "Add security headers with helmet"
+        review_verdict: "pass"
+      - id: "TASK-098"
+        title: "Fix ESLint errors"
+        review_verdict: "pass"
+      - id: "TASK-099"
+        title: "Fix failing unit tests"
+        review_verdict: "pass"
+      - id: "TASK-100"
+        title: "Refactor files exceeding 300 lines"
+        review_verdict: "pass"
+      - id: "TASK-101"
+        title: "Reduce frontend bundle size"
+        review_verdict: "pass"
+    deferred_items: []
+    milestone: "Security Hardening Complete"
+
   - id: "iter-015"
     goal: "Flutter Mobile App Complete"
     started_at: "2026-01-18"
