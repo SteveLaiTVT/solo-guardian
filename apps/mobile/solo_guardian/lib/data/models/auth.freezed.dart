@@ -410,176 +410,6 @@ abstract class _AuthResult implements AuthResult {
       throw _privateConstructorUsedError;
 }
 
-LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) {
-  return _LoginRequest.fromJson(json);
-}
-
-/// @nodoc
-mixin _$LoginRequest {
-  String get identifier => throw _privateConstructorUsedError;
-  String get password => throw _privateConstructorUsedError;
-
-  /// Serializes this LoginRequest to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LoginRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $LoginRequestCopyWith<LoginRequest> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $LoginRequestCopyWith<$Res> {
-  factory $LoginRequestCopyWith(
-    LoginRequest value,
-    $Res Function(LoginRequest) then,
-  ) = _$LoginRequestCopyWithImpl<$Res, LoginRequest>;
-  @useResult
-  $Res call({String identifier, String password});
-}
-
-/// @nodoc
-class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
-    implements $LoginRequestCopyWith<$Res> {
-  _$LoginRequestCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of LoginRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? identifier = null, Object? password = null}) {
-    return _then(
-      _value.copyWith(
-            identifier: null == identifier
-                ? _value.identifier
-                : identifier // ignore: cast_nullable_to_non_nullable
-                      as String,
-            password: null == password
-                ? _value.password
-                : password // ignore: cast_nullable_to_non_nullable
-                      as String,
-          )
-          as $Val,
-    );
-  }
-}
-
-/// @nodoc
-abstract class _$$LoginRequestImplCopyWith<$Res>
-    implements $LoginRequestCopyWith<$Res> {
-  factory _$$LoginRequestImplCopyWith(
-    _$LoginRequestImpl value,
-    $Res Function(_$LoginRequestImpl) then,
-  ) = __$$LoginRequestImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String identifier, String password});
-}
-
-/// @nodoc
-class __$$LoginRequestImplCopyWithImpl<$Res>
-    extends _$LoginRequestCopyWithImpl<$Res, _$LoginRequestImpl>
-    implements _$$LoginRequestImplCopyWith<$Res> {
-  __$$LoginRequestImplCopyWithImpl(
-    _$LoginRequestImpl _value,
-    $Res Function(_$LoginRequestImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of LoginRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? identifier = null, Object? password = null}) {
-    return _then(
-      _$LoginRequestImpl(
-        identifier: null == identifier
-            ? _value.identifier
-            : identifier // ignore: cast_nullable_to_non_nullable
-                  as String,
-        password: null == password
-            ? _value.password
-            : password // ignore: cast_nullable_to_non_nullable
-                  as String,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$LoginRequestImpl implements _LoginRequest {
-  const _$LoginRequestImpl({required this.identifier, required this.password});
-
-  factory _$LoginRequestImpl.fromJson(Map<String, dynamic> json) =>
-      _$$LoginRequestImplFromJson(json);
-
-  @override
-  final String identifier;
-  @override
-  final String password;
-
-  @override
-  String toString() {
-    return 'LoginRequest(identifier: $identifier, password: $password)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$LoginRequestImpl &&
-            (identical(other.identifier, identifier) ||
-                other.identifier == identifier) &&
-            (identical(other.password, password) ||
-                other.password == password));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, identifier, password);
-
-  /// Create a copy of LoginRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
-      __$$LoginRequestImplCopyWithImpl<_$LoginRequestImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$LoginRequestImplToJson(this);
-  }
-}
-
-abstract class _LoginRequest implements LoginRequest {
-  const factory _LoginRequest({
-    required final String identifier,
-    required final String password,
-  }) = _$LoginRequestImpl;
-
-  factory _LoginRequest.fromJson(Map<String, dynamic> json) =
-      _$LoginRequestImpl.fromJson;
-
-  @override
-  String get identifier;
-  @override
-  String get password;
-
-  /// Create a copy of LoginRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
 RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) {
   return _RegisterRequest.fromJson(json);
 }
@@ -826,6 +656,176 @@ abstract class _RegisterRequest implements RegisterRequest {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$RegisterRequestImplCopyWith<_$RegisterRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) {
+  return _LoginRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LoginRequest {
+  String get identifier => throw _privateConstructorUsedError;
+  String get password => throw _privateConstructorUsedError;
+
+  /// Serializes this LoginRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of LoginRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $LoginRequestCopyWith<LoginRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LoginRequestCopyWith<$Res> {
+  factory $LoginRequestCopyWith(
+    LoginRequest value,
+    $Res Function(LoginRequest) then,
+  ) = _$LoginRequestCopyWithImpl<$Res, LoginRequest>;
+  @useResult
+  $Res call({String identifier, String password});
+}
+
+/// @nodoc
+class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
+    implements $LoginRequestCopyWith<$Res> {
+  _$LoginRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of LoginRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? identifier = null, Object? password = null}) {
+    return _then(
+      _value.copyWith(
+            identifier: null == identifier
+                ? _value.identifier
+                : identifier // ignore: cast_nullable_to_non_nullable
+                      as String,
+            password: null == password
+                ? _value.password
+                : password // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$LoginRequestImplCopyWith<$Res>
+    implements $LoginRequestCopyWith<$Res> {
+  factory _$$LoginRequestImplCopyWith(
+    _$LoginRequestImpl value,
+    $Res Function(_$LoginRequestImpl) then,
+  ) = __$$LoginRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String identifier, String password});
+}
+
+/// @nodoc
+class __$$LoginRequestImplCopyWithImpl<$Res>
+    extends _$LoginRequestCopyWithImpl<$Res, _$LoginRequestImpl>
+    implements _$$LoginRequestImplCopyWith<$Res> {
+  __$$LoginRequestImplCopyWithImpl(
+    _$LoginRequestImpl _value,
+    $Res Function(_$LoginRequestImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of LoginRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? identifier = null, Object? password = null}) {
+    return _then(
+      _$LoginRequestImpl(
+        identifier: null == identifier
+            ? _value.identifier
+            : identifier // ignore: cast_nullable_to_non_nullable
+                  as String,
+        password: null == password
+            ? _value.password
+            : password // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LoginRequestImpl implements _LoginRequest {
+  const _$LoginRequestImpl({required this.identifier, required this.password});
+
+  factory _$LoginRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LoginRequestImplFromJson(json);
+
+  @override
+  final String identifier;
+  @override
+  final String password;
+
+  @override
+  String toString() {
+    return 'LoginRequest(identifier: $identifier, password: $password)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LoginRequestImpl &&
+            (identical(other.identifier, identifier) ||
+                other.identifier == identifier) &&
+            (identical(other.password, password) ||
+                other.password == password));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, identifier, password);
+
+  /// Create a copy of LoginRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
+      __$$LoginRequestImplCopyWithImpl<_$LoginRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LoginRequestImplToJson(this);
+  }
+}
+
+abstract class _LoginRequest implements LoginRequest {
+  const factory _LoginRequest({
+    required final String identifier,
+    required final String password,
+  }) = _$LoginRequestImpl;
+
+  factory _LoginRequest.fromJson(Map<String, dynamic> json) =
+      _$LoginRequestImpl.fromJson;
+
+  @override
+  String get identifier;
+  @override
+  String get password;
+
+  /// Create a copy of LoginRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

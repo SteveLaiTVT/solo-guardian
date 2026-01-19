@@ -29,18 +29,6 @@ _$AuthResultImpl _$$AuthResultImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$AuthResultImplToJson(_$AuthResultImpl instance) =>
     <String, dynamic>{'user': instance.user, 'tokens': instance.tokens};
 
-_$LoginRequestImpl _$$LoginRequestImplFromJson(Map<String, dynamic> json) =>
-    _$LoginRequestImpl(
-      identifier: json['identifier'] as String,
-      password: json['password'] as String,
-    );
-
-Map<String, dynamic> _$$LoginRequestImplToJson(_$LoginRequestImpl instance) =>
-    <String, dynamic>{
-      'identifier': instance.identifier,
-      'password': instance.password,
-    };
-
 _$RegisterRequestImpl _$$RegisterRequestImplFromJson(
   Map<String, dynamic> json,
 ) => _$RegisterRequestImpl(
@@ -60,6 +48,18 @@ Map<String, dynamic> _$$RegisterRequestImplToJson(
   'email': instance.email,
   'phone': instance.phone,
 };
+
+_$LoginRequestImpl _$$LoginRequestImplFromJson(Map<String, dynamic> json) =>
+    _$LoginRequestImpl(
+      identifier: json['identifier'] as String,
+      password: json['password'] as String,
+    );
+
+Map<String, dynamic> _$$LoginRequestImplToJson(_$LoginRequestImpl instance) =>
+    <String, dynamic>{
+      'identifier': instance.identifier,
+      'password': instance.password,
+    };
 
 _$RefreshRequestImpl _$$RefreshRequestImplFromJson(Map<String, dynamic> json) =>
     _$RefreshRequestImpl(refreshToken: json['refreshToken'] as String);
