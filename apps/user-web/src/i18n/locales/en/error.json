@@ -37,7 +37,11 @@
     "invalidFeature": "Invalid feature name."
   },
   "network": {
-    "failed": "Unable to connect. Please check your internet connection."
+    "failed": "Unable to connect. Please check your internet connection.",
+    "offline": "You're offline. Some features may be limited.",
+    "offlineHint": "Your changes are saved locally and will sync when you're back online.",
+    "reconnected": "You're back online!",
+    "reconnecting": "Reconnecting..."
   },
   "system": {
     "internal": "We're sorry, something went wrong on our end. Please try again later.",

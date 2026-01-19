@@ -31,6 +31,14 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
 
+  # Local Database (Offline-first)
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+  # Network Connectivity
+  connectivity_plus: ^6.1.4
+
   # Environment
   flutter_dotenv: ^5.1.0
 
