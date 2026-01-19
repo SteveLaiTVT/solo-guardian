@@ -40,12 +40,14 @@ export function LoginPage(): JSX.Element {
   })
 
   const loginMutation = hooks.useLogin()
+  const refreshMutation = hooks.useRefresh()
 
   const onSubmit = (data: LoginFormData): void => {
     setError(null)
     loginMutation.mutate(data, {
       onSuccess: (result) => {
         setTokens(result.tokens.accessToken, result.tokens.refreshToken)
+        refreshMutation.mutate(result.tokens.refreshToken)
         navigate('/')
       },
       onError: (err) => {

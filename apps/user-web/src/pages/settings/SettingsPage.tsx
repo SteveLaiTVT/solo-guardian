@@ -32,8 +32,10 @@ export function SettingsPage(): JSX.Element {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const clearTokens = useAuthStore((s) => s.clearTokens)
+  const getRefreshToken = useAuthStore((s) => s.getRefreshToken)
   const { data: settings, isLoading, error } = hooks.useSettings()
   const updateMutation = hooks.useUpdateSettings()
+  const logoutMutation = hooks.useLogout()
 
   // Local state for pending edits (null = use server value)
   const [localDeadline, setLocalDeadline] = useState<string | null>(null)
@@ -74,8 +76,17 @@ export function SettingsPage(): JSX.Element {
   }
 
   const handleLogout = (): void => {
+    const refreshToken = getRefreshToken()
     queryClient.clear() // Clear all cached queries to prevent data leak between users
     clearTokens()
+    if (refreshToken) {
+      logoutMutation.mutate(refreshToken, {
+        onSettled: () => {
+          navigate('/login')
+        },
+      })
+      return
+    }
     navigate('/login')
   }
 

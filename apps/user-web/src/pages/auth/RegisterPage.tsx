@@ -86,6 +86,7 @@ export function RegisterPage(): JSX.Element {
   })
 
   const registerMutation = hooks.useRegister()
+  const refreshMutation = hooks.useRefresh()
 
   const hasAnyIdentifier = (data: RegisterFormData): boolean => {
     const hasUsername = data.username && data.username.trim().length > 0
@@ -107,6 +108,7 @@ export function RegisterPage(): JSX.Element {
       {
         onSuccess: (result) => {
           setTokens(result.tokens.accessToken, result.tokens.refreshToken)
+          refreshMutation.mutate(result.tokens.refreshToken)
           navigate('/onboarding')
         },
         onError: (err) => {

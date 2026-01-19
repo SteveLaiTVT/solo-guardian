@@ -39,7 +39,8 @@ adminApi.interceptors.response.use(
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refreshToken,
           });
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+            response.data.data.tokens;
           setTokens(newAccessToken, newRefreshToken);
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return adminApi(originalRequest);
