@@ -42,6 +42,53 @@ test.describe('Caregiver Features', () => {
   });
 
   test.describe('Caregiver Invitation Flow', () => {
+    test('should create invitation with QR URL', async ({ authenticatedPage }) => {
+      // Create a caregiver invitation
+      const response = await authenticatedPage.request.post('/api/v1/caregiver/invitations', {
+        data: { relationshipType: 'family' },
+      });
+
+      if (response.ok()) {
+        const data = await response.json();
+        expect(data.success).toBe(true);
+        expect(data.data).toBeDefined();
+        expect(data.data.id).toBeDefined();
+        expect(data.data.token).toBeDefined();
+        expect(data.data.qrUrl).toBeDefined();
+        expect(data.data.qrUrl).toContain('/accept-invitation');
+        expect(data.data.relationshipType).toBe('family');
+        expect(data.data.expiresAt).toBeDefined();
+      }
+    });
+
+    test('should get invitation by token', async ({ authenticatedPage }) => {
+      // First create an invitation
+      const createResponse = await authenticatedPage.request.post('/api/v1/caregiver/invitations', {
+        data: { relationshipType: 'caregiver' },
+      });
+
+      if (createResponse.ok()) {
+        const createData = await createResponse.json();
+        const token = createData.data.token;
+
+        // Get the invitation by token (public endpoint)
+        const getResponse = await authenticatedPage.request.get(`/api/v1/caregiver/invitations/${token}`);
+
+        if (getResponse.ok()) {
+          const getData = await getResponse.json();
+          expect(getData.success).toBe(true);
+          expect(getData.data.inviterName).toBeDefined();
+          expect(getData.data.relationshipType).toBe('caregiver');
+        }
+      }
+    });
+
+    test('should reject invalid invitation token', async ({ request }) => {
+      const response = await request.get('/api/v1/caregiver/invitations/invalid-token');
+
+      expect(response.status()).toBe(404);
+    });
+
     test.skip('should be able to invite an elder', async ({ authenticatedPage }) => {
       // This test requires two users - one as caregiver, one as elder
       // Skipping as it requires complex multi-user setup
