@@ -1,14 +1,16 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * @file ThemeContext.tsx
  * @description Theme provider for visual preferences
- * @task TASK-022
- * @design_state_version 1.6.0
+ * @task TASK-022, TASK-098
+ * @design_state_version 3.12.0
  */
 import {
   createContext,
   useContext,
   useEffect,
   useMemo,
+  useCallback,
   type ReactNode,
 } from 'react';
 import type { UserPreferences, UpdatePreferencesRequest } from '@solo-guardian/api-client';
@@ -40,12 +42,15 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
   });
   const updateMutation = hooks.useUpdatePreferences();
 
-  const updatePreference = <K extends keyof UpdatePreferencesRequest>(
-    key: K,
-    value: UpdatePreferencesRequest[K]
-  ): void => {
-    updateMutation.mutate({ [key]: value });
-  };
+  const updatePreference = useCallback(
+    <K extends keyof UpdatePreferencesRequest>(
+      key: K,
+      value: UpdatePreferencesRequest[K]
+    ): void => {
+      updateMutation.mutate({ [key]: value });
+    },
+    [updateMutation]
+  );
 
   // Only check onboarding when authenticated and preferences loaded
   const isOnboardingRequired = isAuthenticated && !isLoading && !!preferences && !preferences.onboardingCompleted;
@@ -84,7 +89,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
       updatePreference,
       isOnboardingRequired,
     }),
-    [preferences, isLoading, isOnboardingRequired]
+    [preferences, isLoading, updatePreference, isOnboardingRequired]
   );
 
   return (

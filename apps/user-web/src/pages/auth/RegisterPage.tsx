@@ -36,7 +36,7 @@ interface RegisterFormData {
   phone?: string
 }
 
-export function RegisterPage(): JSX.Element {
+function RegisterPage(): JSX.Element {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const setTokens = useAuthStore((s) => s.setTokens)
@@ -281,3 +281,5 @@ export function RegisterPage(): JSX.Element {
     </div>
   )
 }
+
+export default RegisterPage

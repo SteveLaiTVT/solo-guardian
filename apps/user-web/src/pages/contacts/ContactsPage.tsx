@@ -19,7 +19,7 @@ import type { EmergencyContact } from '@solo-guardian/api-client'
 const MAX_CONTACTS = 5
 
 // DONE(B): Updated ContactsPage with phone verification - TASK-037
-export function ContactsPage(): JSX.Element {
+function ContactsPage(): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
   const { data: contacts, isLoading, error, refetch } = hooks.useContacts()
@@ -159,3 +159,5 @@ export function ContactsPage(): JSX.Element {
     </div>
   )
 }
+
+export default ContactsPage

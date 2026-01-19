@@ -1,7 +1,7 @@
 /**
  * @file index.ts
  * @description Accept contact link page export
- * @task TASK-073
- * @design_state_version 3.9.0
+ * @task TASK-073, TASK-101
+ * @design_state_version 3.12.0
  */
-export { AcceptContactLinkPage } from './AcceptContactLinkPage'
+export { default as AcceptContactLinkPage } from './AcceptContactLinkPage'

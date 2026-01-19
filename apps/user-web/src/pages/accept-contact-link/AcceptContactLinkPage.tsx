@@ -1,10 +1,10 @@
 /**
  * @file AcceptContactLinkPage.tsx
  * @description Page for accepting contact link invitation
- * @task TASK-073
- * @design_state_version 3.9.0
+ * @task TASK-073, TASK-098
+ * @design_state_version 3.12.0
  */
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Loader2, CheckCircle2, XCircle, Link2 } from 'lucide-react'
@@ -14,39 +14,43 @@ import { useAuthStore } from '@/stores/auth.store'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-export function AcceptContactLinkPage(): JSX.Element {
+function AcceptContactLinkPage(): JSX.Element {
   const { token } = useParams<{ token: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
   const { isAuthenticated } = useAuthStore()
 
-  const [status, setStatus] = useState<'loading' | 'ready' | 'success' | 'error'>('loading')
+  const [acceptStatus, setAcceptStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   const { data: invitation, isLoading, error } = hooks.useContactLinkInvitation(token ?? '')
   const acceptMutation = hooks.useAcceptContactLink()
 
-  useEffect(() => {
-    if (isLoading) {
-      setStatus('loading')
-    } else if (error) {
-      setStatus('error')
-      setErrorMessage('Invalid or expired invitation')
-    } else if (invitation) {
-      setStatus('ready')
-    }
-  }, [isLoading, error, invitation])
+  const status = useMemo((): 'loading' | 'ready' | 'success' | 'error' => {
+    if (acceptStatus === 'success') return 'success'
+    if (acceptStatus === 'error') return 'error'
+    if (isLoading) return 'loading'
+    if (error) return 'error'
+    if (invitation) return 'ready'
+    return 'loading'
+  }, [isLoading, error, invitation, acceptStatus])
+
+  const displayErrorMessage = useMemo((): string => {
+    if (errorMessage) return errorMessage
+    if (error) return 'Invalid or expired invitation'
+    return ''
+  }, [error, errorMessage])
 
   const handleAccept = async (): Promise<void> => {
     if (!token) return
 
     try {
       const result = await acceptMutation.mutateAsync(token)
-      setStatus('success')
+      setAcceptStatus('success')
       toast.success(t('linked.acceptSuccess', { name: result.elderName }))
     } catch {
-      setStatus('error')
+      setAcceptStatus('error')
       setErrorMessage(t('linked.acceptError'))
     }
   }
@@ -79,7 +83,7 @@ export function AcceptContactLinkPage(): JSX.Element {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <XCircle className="h-12 w-12 text-red-500 mb-4" />
             <CardTitle className="text-lg mb-2">Error</CardTitle>
-            <CardDescription className="text-center">{errorMessage}</CardDescription>
+            <CardDescription className="text-center">{displayErrorMessage}</CardDescription>
             <Button onClick={() => navigate('/')} className="mt-6">
               {tCommon('backToHome')}
             </Button>
@@ -160,3 +164,5 @@ export function AcceptContactLinkPage(): JSX.Element {
     </div>
   )
 }
+
+export default AcceptContactLinkPage

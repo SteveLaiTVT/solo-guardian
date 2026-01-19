@@ -14,7 +14,7 @@ const formatDate = (dateString: string): string => {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(dateString))
 }
 
-export function LinkedContactsPage(): JSX.Element {
+function LinkedContactsPage(): JSX.Element {
   const { t } = useTranslation('contacts')
   const { t: tCommon } = useTranslation('common')
 
@@ -158,3 +158,5 @@ export function LinkedContactsPage(): JSX.Element {
     </div>
   )
 }
+
+export default LinkedContactsPage

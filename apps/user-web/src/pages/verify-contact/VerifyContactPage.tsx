@@ -11,7 +11,7 @@ import { api } from '@/lib/api'
 import { CheckCircle, XCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react'
 
 // DONE(B): Implemented VerifyContactPage - TASK-033
-export function VerifyContactPage(): JSX.Element {
+function VerifyContactPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
 
@@ -168,3 +168,5 @@ function getErrorMessage(error: unknown): string {
   }
   return 'Unknown error'
 }
+
+export default VerifyContactPage

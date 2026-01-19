@@ -1,1 +1,1 @@
-export { AcceptInvitationPage } from './AcceptInvitationPage';
+export { default as AcceptInvitationPage } from './AcceptInvitationPage';

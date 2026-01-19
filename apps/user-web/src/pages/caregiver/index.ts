@@ -1,1 +1,1 @@
-export { CaregiverPage } from './CaregiverPage';
+export { default as CaregiverPage } from './CaregiverPage';

@@ -21,7 +21,7 @@ function useGreeting(): string {
   return t('greeting.evening')
 }
 
-export function DashboardPage(): JSX.Element {
+function DashboardPage(): JSX.Element {
   const { t } = useTranslation('dashboard')
   const { t: tCommon } = useTranslation('common')
   const greeting = useGreeting()
@@ -114,3 +114,5 @@ export function DashboardPage(): JSX.Element {
     </div>
   )
 }
+
+export default DashboardPage

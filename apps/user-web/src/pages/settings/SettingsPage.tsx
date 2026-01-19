@@ -25,7 +25,7 @@ function timeToMinutes(time: string): number {
 
 // DONE(B): Added i18n support - TASK-013
 // DONE(B): Added reminder settings validation - TASK-030
-export function SettingsPage(): JSX.Element {
+function SettingsPage(): JSX.Element {
   const { t } = useTranslation('settings')
   const { t: tCommon } = useTranslation('common')
   const { t: tAuth } = useTranslation('auth')
@@ -210,3 +210,5 @@ export function SettingsPage(): JSX.Element {
     </div>
   )
 }
+
+export default SettingsPage

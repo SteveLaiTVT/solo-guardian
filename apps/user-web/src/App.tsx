@@ -1,34 +1,32 @@
 /**
  * @file App.tsx
  * @description Main application component with routing configuration
- * @task TASK-010, TASK-016, TASK-019, TASK-022, TASK-033, TASK-062, TASK-063, TASK-072, TASK-073
- * @design_state_version 3.9.0
+ * @task TASK-010, TASK-016, TASK-019, TASK-022, TASK-033, TASK-062, TASK-063, TASK-072, TASK-073, TASK-095, TASK-098, TASK-101
+ * @design_state_version 3.12.0
  */
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import { ProtectedRoute, GuestRoute, OnboardingGuard } from '@/components/auth'
+import { ProtectedRoute, GuestRoute, OnboardingGuard, OAuthCallback } from '@/components/auth'
 import { Layout } from '@/components/layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeProvider } from '@/contexts/ThemeContext'
-import { LoginPage, RegisterPage } from '@/pages/auth'
-import { DashboardPage, HistoryPage } from '@/pages/dashboard'
-import { SettingsPage } from '@/pages/settings'
-import { ContactsPage, LinkedContactsPage } from '@/pages/contacts'
-import { OnboardingPage } from '@/pages/onboarding'
-import { VerifyContactPage } from '@/pages/verify-contact'
-import { AcceptInvitationPage } from '@/pages/accept-invitation'
-import { AcceptContactLinkPage } from '@/pages/accept-contact-link'
-import { CaregiverPage } from '@/pages/caregiver'
+import { queryClient } from '@/lib/queryClient'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-    },
-  },
-})
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+const HistoryPage = lazy(() => import('@/pages/dashboard/HistoryPage'))
+const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'))
+const ContactsPage = lazy(() => import('@/pages/contacts/ContactsPage'))
+const LinkedContactsPage = lazy(() => import('@/pages/contacts/LinkedContactsPage'))
+const OnboardingPage = lazy(() => import('@/pages/onboarding/OnboardingPage'))
+const VerifyContactPage = lazy(() => import('@/pages/verify-contact/VerifyContactPage'))
+const AcceptInvitationPage = lazy(() => import('@/pages/accept-invitation/AcceptInvitationPage'))
+const AcceptContactLinkPage = lazy(() => import('@/pages/accept-contact-link/AcceptContactLinkPage'))
+const CaregiverPage = lazy(() => import('@/pages/caregiver/CaregiverPage'))
 
 function App(): JSX.Element {
   return (
@@ -37,8 +35,10 @@ function App(): JSX.Element {
         <ThemeProvider>
           <Toaster position="top-right" />
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<LoadingSpinner fullScreen />}>
+              <Routes>
               {/* Public routes (no auth check) */}
+              <Route path="/auth/callback" element={<OAuthCallback />} />
               <Route path="/verify-contact" element={<VerifyContactPage />} />
               <Route path="/accept-invitation/:token" element={<AcceptInvitationPage />} />
               <Route path="/accept-contact-link/:token" element={<AcceptContactLinkPage />} />
@@ -69,7 +69,8 @@ function App(): JSX.Element {
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>

@@ -13,7 +13,7 @@ import { CaregiverSection } from '@/components/caregiver/CaregiverSection';
 import { ElderDetailSheet } from './ElderDetailSheet';
 import { hooks } from '@/lib/api';
 
-export function CaregiverPage(): JSX.Element {
+function CaregiverPage(): JSX.Element {
   const { t } = useTranslation('caregiver');
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
 
@@ -70,3 +70,5 @@ export function CaregiverPage(): JSX.Element {
     </div>
   );
 }
+
+export default CaregiverPage

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { hooks } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 
-export function AcceptInvitationPage(): JSX.Element {
+function AcceptInvitationPage(): JSX.Element {
   const { token } = useParams<{ token: string }>();
   const { t } = useTranslation('caregiver');
   const navigate = useNavigate();
@@ -207,3 +207,5 @@ export function AcceptInvitationPage(): JSX.Element {
     </div>
   );
 }
+
+export default AcceptInvitationPage

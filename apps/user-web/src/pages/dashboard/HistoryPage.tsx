@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 const PAGE_SIZE = 10
 
 // DONE(B): Added i18n support - TASK-013
-export function HistoryPage(): JSX.Element {
+function HistoryPage(): JSX.Element {
   const { t } = useTranslation('history')
   const { t: tCommon } = useTranslation('common')
   const [page, setPage] = useState(1)
@@ -86,3 +86,5 @@ export function HistoryPage(): JSX.Element {
     </div>
   )
 }
+
+export default HistoryPage

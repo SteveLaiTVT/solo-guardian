@@ -18,7 +18,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
 import { OAuthButtons } from '@/components/auth'
 
-export function LoginPage(): JSX.Element {
+function LoginPage(): JSX.Element {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const setTokens = useAuthStore((s) => s.setTokens)
@@ -126,3 +126,5 @@ export function LoginPage(): JSX.Element {
     </div>
   )
 }
+
+export default LoginPage

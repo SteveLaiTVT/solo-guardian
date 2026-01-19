@@ -1,7 +1,7 @@
 /**
  * @file index.ts
  * @description Exports for verify-contact page
- * @task TASK-033
- * @design_state_version 2.0.0
+ * @task TASK-033, TASK-101
+ * @design_state_version 3.12.0
  */
-export { VerifyContactPage } from './VerifyContactPage';
+export { default as VerifyContactPage } from './VerifyContactPage';

@@ -43,7 +43,7 @@ interface OnboardingState {
   warmColors: boolean;
 }
 
-export function OnboardingPage(): JSX.Element {
+function OnboardingPage(): JSX.Element {
   const navigate = useNavigate();
   const updatePreferences = hooks.useUpdatePreferences();
   const updateProfile = hooks.useUpdateProfile();
@@ -240,3 +240,5 @@ export function OnboardingPage(): JSX.Element {
     </div>
   );
 }
+
+export default OnboardingPage
