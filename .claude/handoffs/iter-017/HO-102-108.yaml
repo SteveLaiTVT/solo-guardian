@@ -1,0 +1,650 @@
+# ============================================================
+# HANDOFF: iter-017 Offline-First Mobile & Error UX
+# ============================================================
+# From: A Session (Architect)
+# To: B Session (Implementer)
+# Created: 2026-01-19
+# ============================================================
+
+meta:
+  iteration: "iter-017"
+  handoff_id: "HO-102-108"
+  created_at: "2026-01-19"
+  created_by: "A Session"
+  priority: "HIGH"
+
+# ============================================================
+# CONTEXT
+# ============================================================
+context:
+  summary: |
+    Mobile app needs offline-first support for weak internet environments.
+    Users should be able to:
+    - View contacts and check-in history instantly (from local cache)
+    - Perform check-in even when offline
+    - See friendly error messages instead of technical errors
+    - Know their offline/online status clearly
+
+  architecture_reference: "ADR-023 in DESIGN_STATE.yaml"
+
+  key_principles:
+    - "Local-first: Always read from local DB first, sync in background"
+    - "Optimistic updates: Write locally immediately, sync later"
+    - "Resilient sync: Queue operations, retry with backoff"
+    - "User-friendly: Clear status indicators, no technical jargon"
+
+# ============================================================
+# TASKS
+# ============================================================
+tasks:
+  # ----------------------------------------------------------
+  # TASK-102: Local Database Setup
+  # ----------------------------------------------------------
+  - id: "TASK-102"
+    title: "Mobile: Local database with Isar"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      Currently all data is fetched from server on every request.
+      No local persistence means:
+      - Slow initial loads
+      - No offline access
+      - Poor UX on weak networks
+
+    solution: |
+      Use Isar (high-performance NoSQL for Flutter):
+      1. Add isar and isar_flutter_libs to pubspec.yaml
+      2. Create local data models with @Collection annotations
+      3. Initialize Isar on app startup
+      4. Create DatabaseService for CRUD operations
+
+    files_to_create:
+      - path: "apps/mobile/solo_guardian/lib/core/database/database_service.dart"
+        content: |
+          - Isar instance initialization
+          - Generic CRUD methods
+          - Migration support
+
+      - path: "apps/mobile/solo_guardian/lib/core/database/collections/local_check_in.dart"
+        content: |
+          @Collection()
+          class LocalCheckIn {
+            Id? id;
+            String? serverId;  // Server-assigned ID (null if not synced)
+            @Index()
+            DateTime date;
+            String? note;
+            String status;  // pending, completed, missed
+            SyncStatus syncStatus;  // synced, pending, failed
+            DateTime createdAt;
+            DateTime? syncedAt;
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/database/collections/local_contact.dart"
+        content: |
+          @Collection()
+          class LocalContact {
+            Id? id;
+            String? serverId;
+            String name;
+            String email;
+            String? phone;
+            int priority;
+            bool isVerified;
+            SyncStatus syncStatus;
+            DateTime createdAt;
+            DateTime? syncedAt;
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/database/collections/local_settings.dart"
+        content: |
+          @Collection()
+          class LocalSettings {
+            Id id = 0;  // Singleton
+            String deadline;  // "10:00"
+            String reminderTime;  // "09:00"
+            String timezone;
+            bool reminderEnabled;
+            DateTime? syncedAt;
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/database/collections/pending_operation.dart"
+        content: |
+          @Collection()
+          class PendingOperation {
+            Id? id;
+            @Index()
+            OperationType type;
+            String dataJson;  // Serialized operation data
+            DateTime createdAt;
+            int retryCount;
+            String? lastError;
+          }
+
+          enum OperationType {
+            createCheckIn,
+            updateSettings,
+            createContact,
+            updateContact,
+            deleteContact,
+          }
+
+          enum SyncStatus {
+            synced,
+            pending,
+            failed,
+          }
+
+    dependencies:
+      - "isar: ^3.1.0"
+      - "isar_flutter_libs: ^3.1.0"
+      - "path_provider: ^2.1.0"
+
+    dev_dependencies:
+      - "isar_generator: ^3.1.0"
+      - "build_runner: ^2.4.0"
+
+    acceptance_criteria:
+      - "Isar database initializes on app start"
+      - "All collections created with proper indexes"
+      - "CRUD operations work for all collections"
+      - "Database persists across app restarts"
+
+    testing:
+      - "Unit: Test DatabaseService CRUD operations"
+      - "Manual: Kill app, restart, verify data persists"
+
+  # ----------------------------------------------------------
+  # TASK-103: Offline-First Repository Pattern
+  # ----------------------------------------------------------
+  - id: "TASK-103"
+    title: "Mobile: Offline-first repository pattern"
+    priority: "P0"
+    status: "pending"
+    depends_on: ["TASK-102"]
+
+    problem: |
+      Current repositories directly call remote API.
+      Need to implement local-first with background sync pattern.
+
+    solution: |
+      Create a layered repository architecture:
+
+      1. LocalDatasource: Reads/writes to Isar
+      2. RemoteDatasource: Existing API calls
+      3. SyncableRepository: Coordinates local + remote
+
+      Read Flow:
+        repository.getData() {
+          // 1. Return local data immediately
+          localData = await localDatasource.get();
+          yield localData;  // Stream immediate result
+
+          // 2. Fetch remote in background if online
+          if (isOnline) {
+            remoteData = await remoteDatasource.get();
+            await localDatasource.saveAll(remoteData);
+            yield remoteData;  // Stream updated result
+          }
+        }
+
+      Write Flow:
+        repository.createData(data) {
+          // 1. Save locally with pending status
+          localData = await localDatasource.create(data, syncStatus: pending);
+
+          // 2. Queue for sync
+          await syncQueue.enqueue(OperationType.create, data);
+
+          // 3. Return local data (optimistic)
+          return localData;
+        }
+
+    files_to_modify:
+      - path: "apps/mobile/solo_guardian/lib/data/repositories/check_in_repository_impl.dart"
+        changes: |
+          - Add LocalCheckInDatasource dependency
+          - Implement read-through cache pattern
+          - Queue write operations for sync
+
+      - path: "apps/mobile/solo_guardian/lib/data/repositories/contacts_repository_impl.dart"
+        changes: |
+          - Add LocalContactDatasource dependency
+          - Implement read-through cache pattern
+          - Queue CRUD operations for sync
+
+      - path: "apps/mobile/solo_guardian/lib/data/repositories/settings_repository_impl.dart"
+        changes: |
+          - Add LocalSettingsDatasource dependency
+          - Implement read-through cache pattern
+          - Queue update operations for sync
+
+    files_to_create:
+      - path: "apps/mobile/solo_guardian/lib/data/datasources/local/"
+        content: |
+          - local_check_in_datasource.dart
+          - local_contacts_datasource.dart
+          - local_settings_datasource.dart
+
+    acceptance_criteria:
+      - "Read operations return local data immediately"
+      - "Write operations save locally first"
+      - "Background sync fetches latest from server"
+      - "UI updates when fresh data arrives"
+
+    testing:
+      - "Manual: Turn off network, verify read still works"
+      - "Manual: Turn off network, create check-in, verify saved locally"
+
+  # ----------------------------------------------------------
+  # TASK-104: Pending Operations Queue
+  # ----------------------------------------------------------
+  - id: "TASK-104"
+    title: "Mobile: Pending operations queue"
+    priority: "P0"
+    status: "pending"
+    depends_on: ["TASK-102"]
+
+    problem: |
+      When offline, write operations need to be queued and synced later.
+      Need reliable queue with retry mechanism.
+
+    solution: |
+      Implement SyncQueue and SyncManager:
+
+      SyncQueue:
+        - Enqueue operations with serialized data
+        - Persist queue to Isar (survives app restart)
+        - FIFO processing order
+        - Track retry count per operation
+
+      SyncManager:
+        - Process queue when online
+        - Retry failed operations with exponential backoff
+        - Mark permanently failed after max retries
+        - Emit sync status for UI
+
+    files_to_create:
+      - path: "apps/mobile/solo_guardian/lib/core/sync/sync_queue.dart"
+        content: |
+          class SyncQueue {
+            final DatabaseService _db;
+
+            Future<void> enqueue(OperationType type, Map<String, dynamic> data);
+            Future<PendingOperation?> dequeue();
+            Future<void> markCompleted(int operationId);
+            Future<void> markFailed(int operationId, String error);
+            Future<List<PendingOperation>> getPending();
+            Future<int> getPendingCount();
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/sync/sync_manager.dart"
+        content: |
+          class SyncManager {
+            final SyncQueue _queue;
+            final ApiClient _api;
+            final ConnectivityService _connectivity;
+
+            // Riverpod state
+            final _syncStatusProvider = StateProvider<SyncStatus>(...);
+
+            Future<void> processQueue();
+            Future<void> retryFailed();
+            Stream<SyncStatus> get syncStatusStream;
+          }
+
+          enum SyncStatus {
+            idle,
+            syncing,
+            error,
+            offline,
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/sync/sync_operations.dart"
+        content: |
+          // Type-safe operation handlers
+          abstract class SyncOperation {
+            Future<void> execute(ApiClient api, Map<String, dynamic> data);
+          }
+
+          class CreateCheckInOperation extends SyncOperation { ... }
+          class UpdateSettingsOperation extends SyncOperation { ... }
+          class CreateContactOperation extends SyncOperation { ... }
+          // etc.
+
+    acceptance_criteria:
+      - "Operations queued when offline"
+      - "Queue persists across app restart"
+      - "Queue processes automatically when online"
+      - "Failed operations retry with backoff"
+      - "Sync status available via Riverpod provider"
+
+    testing:
+      - "Unit: Test queue enqueue/dequeue"
+      - "Unit: Test retry logic with backoff"
+      - "Manual: Queue operations offline, verify sync on reconnect"
+
+  # ----------------------------------------------------------
+  # TASK-105: Network Connectivity Monitor
+  # ----------------------------------------------------------
+  - id: "TASK-105"
+    title: "Mobile: Network connectivity monitor"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      Need to know online/offline status to:
+      - Decide whether to attempt API calls
+      - Trigger sync when connection restored
+      - Show status to user
+
+    solution: |
+      Use connectivity_plus package:
+      1. Create ConnectivityService singleton
+      2. Stream connectivity status changes
+      3. Expose isOnline getter for sync decisions
+      4. Trigger SyncManager on reconnect
+
+    files_to_create:
+      - path: "apps/mobile/solo_guardian/lib/core/network/connectivity_service.dart"
+        content: |
+          class ConnectivityService {
+            final Connectivity _connectivity;
+
+            // Stream of connectivity changes
+            Stream<bool> get onConnectivityChanged;
+
+            // Current status
+            bool get isOnline;
+
+            // Check actual internet (not just WiFi connected)
+            Future<bool> hasInternetAccess();
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/core/providers/connectivity_provider.dart"
+        content: |
+          // Riverpod provider for connectivity
+          final connectivityProvider = StreamProvider<bool>((ref) {
+            return ref.watch(connectivityServiceProvider).onConnectivityChanged;
+          });
+
+          final isOnlineProvider = Provider<bool>((ref) {
+            return ref.watch(connectivityProvider).value ?? true;
+          });
+
+    dependencies:
+      - "connectivity_plus: ^5.0.0"
+
+    acceptance_criteria:
+      - "Connectivity changes detected within 1 second"
+      - "isOnline accurately reflects network status"
+      - "SyncManager triggers on reconnect"
+      - "UI can react to connectivity changes"
+
+    testing:
+      - "Manual: Toggle airplane mode, verify status updates"
+      - "Manual: Verify sync triggers on reconnect"
+
+  # ----------------------------------------------------------
+  # TASK-106: Friendly Error Messages
+  # ----------------------------------------------------------
+  - id: "TASK-106"
+    title: "Mobile: Friendly error messages and offline tips"
+    priority: "P1"
+    status: "pending"
+    depends_on: ["TASK-105"]
+
+    problem: |
+      Current errors show technical messages.
+      Users need friendly, actionable messages.
+
+    solution: |
+      1. Create error message mapping
+      2. Add offline banner widget
+      3. Add sync status indicator
+      4. Add pending operations badge
+
+    files_to_create:
+      - path: "apps/mobile/solo_guardian/lib/core/errors/user_friendly_errors.dart"
+        content: |
+          // Map technical errors to user-friendly messages
+          String getUserFriendlyMessage(AppException error, AppLocalizations l10n) {
+            switch (error.code) {
+              case 'NETWORK_ERROR':
+                return l10n.errorNoInternet;
+              case 'TIMEOUT':
+                return l10n.errorTimeout;
+              case 'SERVER_ERROR':
+                return l10n.errorServer;
+              case 'AUTH_EXPIRED':
+                return l10n.errorSessionExpired;
+              default:
+                return l10n.errorUnknown;
+            }
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/shared/widgets/offline_banner.dart"
+        content: |
+          // Banner shown at top when offline
+          class OfflineBanner extends ConsumerWidget {
+            @override
+            Widget build(BuildContext context, WidgetRef ref) {
+              final isOnline = ref.watch(isOnlineProvider);
+              if (isOnline) return SizedBox.shrink();
+
+              return Container(
+                color: Colors.orange,
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    Icon(Icons.wifi_off),
+                    Text(l10n.offlineMode),
+                    if (pendingCount > 0)
+                      Text('$pendingCount ${l10n.pendingSync}'),
+                  ],
+                ),
+              );
+            }
+          }
+
+      - path: "apps/mobile/solo_guardian/lib/shared/widgets/sync_status_indicator.dart"
+        content: |
+          // Small icon showing sync status
+          class SyncStatusIndicator extends ConsumerWidget {
+            @override
+            Widget build(BuildContext context, WidgetRef ref) {
+              final status = ref.watch(syncStatusProvider);
+
+              return switch (status) {
+                SyncStatus.syncing => CircularProgressIndicator(),
+                SyncStatus.error => Icon(Icons.sync_problem, color: Colors.red),
+                SyncStatus.offline => Icon(Icons.cloud_off),
+                SyncStatus.idle => Icon(Icons.cloud_done),
+              };
+            }
+          }
+
+    i18n_keys_to_add:
+      en:
+        errorNoInternet: "No internet connection. Your changes are saved locally."
+        errorTimeout: "Connection timed out. Please try again."
+        errorServer: "Something went wrong. Please try again later."
+        errorSessionExpired: "Your session has expired. Please log in again."
+        errorUnknown: "An unexpected error occurred."
+        offlineMode: "You're offline"
+        pendingSync: "changes pending"
+        syncFailed: "Some changes couldn't sync"
+        tapToRetry: "Tap to retry"
+      zh:
+        errorNoInternet: "无网络连接。您的更改已保存在本地。"
+        errorTimeout: "连接超时，请重试。"
+        errorServer: "出现问题，请稍后重试。"
+        errorSessionExpired: "会话已过期，请重新登录。"
+        errorUnknown: "发生意外错误。"
+        offlineMode: "您已离线"
+        pendingSync: "项待同步"
+        syncFailed: "部分更改无法同步"
+        tapToRetry: "点击重试"
+      ja:
+        errorNoInternet: "インターネット接続がありません。変更はローカルに保存されました。"
+        errorTimeout: "接続がタイムアウトしました。もう一度お試しください。"
+        errorServer: "問題が発生しました。後でもう一度お試しください。"
+        errorSessionExpired: "セッションが期限切れです。再度ログインしてください。"
+        errorUnknown: "予期しないエラーが発生しました。"
+        offlineMode: "オフライン中"
+        pendingSync: "件の同期待ち"
+        syncFailed: "一部の変更を同期できませんでした"
+        tapToRetry: "タップしてリトライ"
+
+    acceptance_criteria:
+      - "No technical errors shown to users"
+      - "Offline banner appears when offline"
+      - "Pending count shown in banner"
+      - "Sync status indicator in app bar"
+      - "i18n for all error messages"
+
+    testing:
+      - "Manual: Trigger each error type, verify friendly message"
+      - "Manual: Go offline, verify banner appears"
+
+  # ----------------------------------------------------------
+  # TASK-107: Token Refresh Resilience
+  # ----------------------------------------------------------
+  - id: "TASK-107"
+    title: "Mobile: Token refresh resilience"
+    priority: "P0"
+    status: "pending"
+
+    problem: |
+      Current AuthInterceptor may fail on token refresh if:
+      - Network is unavailable during refresh
+      - Multiple concurrent requests trigger refresh
+      - Refresh token itself is expired
+
+    solution: |
+      Enhance AuthInterceptor for offline resilience:
+      1. Check connectivity before refresh attempt
+      2. Queue 401 requests for retry when online
+      3. Use QueuedInterceptor for concurrency safety
+      4. Graceful handling of expired refresh token
+
+    files_to_modify:
+      - path: "apps/mobile/solo_guardian/lib/core/network/auth_interceptor.dart"
+        changes: |
+          class AuthInterceptor extends QueuedInterceptor {
+            final ConnectivityService _connectivity;
+
+            @override
+            void onError(DioException err, handler) async {
+              if (err.response?.statusCode == 401) {
+                if (!_connectivity.isOnline) {
+                  // Queue request for later retry
+                  await _queueForRetry(err.requestOptions);
+                  handler.reject(err);
+                  return;
+                }
+
+                try {
+                  final refreshed = await _refreshToken();
+                  if (refreshed) {
+                    // Retry original request
+                    final response = await _retryRequest(err.requestOptions);
+                    handler.resolve(response);
+                    return;
+                  }
+                } catch (refreshError) {
+                  if (refreshError is RefreshTokenExpiredException) {
+                    // Redirect to login, preserve pending operations
+                    await _handleSessionExpired();
+                  }
+                }
+              }
+              handler.next(err);
+            }
+          }
+
+    acceptance_criteria:
+      - "Token refresh works when online"
+      - "401 requests queued when offline"
+      - "Queued requests retry on reconnect"
+      - "Expired refresh token redirects to login"
+      - "Pending operations preserved after re-login"
+
+    testing:
+      - "Manual: Let token expire offline, verify queued"
+      - "Manual: Let refresh token expire, verify redirect to login"
+
+  # ----------------------------------------------------------
+  # TASK-108: Web Friendly Error Messages
+  # ----------------------------------------------------------
+  - id: "TASK-108"
+    title: "Web: Friendly error messages"
+    priority: "P1"
+    status: "pending"
+
+    problem: |
+      Web frontend also needs user-friendly error messages.
+      Should show network status and friendly errors.
+
+    solution: |
+      1. Enhance useErrorHandler hook
+      2. Add network status indicator
+      3. Add toast for offline mode
+
+    files_to_modify:
+      - path: "apps/user-web/src/hooks/useErrorHandler.ts"
+        changes: |
+          - Map error codes to i18n keys
+          - Add isNetworkError helper
+          - Add retry mechanism for failed requests
+
+      - path: "apps/user-web/src/i18n/locales/*/errors.json"
+        changes: |
+          Add user-friendly error messages
+
+    files_to_create:
+      - path: "apps/user-web/src/components/ui/network-status.tsx"
+        content: |
+          - Show offline indicator
+          - Show reconnecting status
+          - Use navigator.onLine + periodic check
+
+    acceptance_criteria:
+      - "User-friendly error messages in toasts"
+      - "Network status indicator visible"
+      - "i18n for all error messages"
+
+    testing:
+      - "Manual: Trigger errors, verify friendly messages"
+      - "Manual: Go offline, verify indicator"
+
+# ============================================================
+# IMPLEMENTATION ORDER
+# ============================================================
+implementation_order:
+  - phase: 1
+    name: "Foundation"
+    tasks: ["TASK-102", "TASK-105"]
+    description: "Database and connectivity monitoring"
+
+  - phase: 2
+    name: "Sync Infrastructure"
+    tasks: ["TASK-104", "TASK-103"]
+    description: "Queue and repository pattern"
+
+  - phase: 3
+    name: "Resilience & UX"
+    tasks: ["TASK-107", "TASK-106", "TASK-108"]
+    description: "Token handling and error UX"
+
+# ============================================================
+# NOTES FOR B SESSION
+# ============================================================
+notes:
+  - "Use isar_generator with build_runner for collection code generation"
+  - "Run: flutter pub run build_runner build after creating collections"
+  - "Test offline mode with airplane mode on real device"
+  - "Preserve existing API calls, wrap with local-first logic"
+  - "Keep backward compatibility - app should work without local DB on fresh install"
+  - "Consider using drift instead of isar if SQL is preferred"

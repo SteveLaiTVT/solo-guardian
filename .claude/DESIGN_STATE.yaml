@@ -887,8 +887,66 @@ code_constraints:
 # ============================================================
 # 5. Current Iterations (Running in Parallel)
 # ============================================================
-current_iterations: []
-  # No active iterations - iter-016 complete
+current_iterations:
+  - id: "iter-017"
+    goal: "Offline-First Mobile & Error UX"
+    started_at: "2026-01-19"
+    status: "in_progress"
+    tasks:
+      - id: "TASK-102"
+        title: "Mobile: Local database with SQLite/Isar"
+        priority: "P0"
+        status: "pending"
+        description: "Add local persistence layer for offline data storage"
+        files:
+          - "apps/mobile/solo_guardian/lib/core/database/"
+          - "apps/mobile/solo_guardian/pubspec.yaml"
+      - id: "TASK-103"
+        title: "Mobile: Offline-first repository pattern"
+        priority: "P0"
+        status: "pending"
+        description: "Implement repository chain: Local -> Remote with sync queue"
+        files:
+          - "apps/mobile/solo_guardian/lib/data/repositories/"
+          - "apps/mobile/solo_guardian/lib/core/sync/"
+      - id: "TASK-104"
+        title: "Mobile: Pending operations queue"
+        priority: "P0"
+        status: "pending"
+        description: "Queue pending operations when offline, sync when online"
+        files:
+          - "apps/mobile/solo_guardian/lib/core/sync/sync_queue.dart"
+          - "apps/mobile/solo_guardian/lib/core/sync/sync_manager.dart"
+      - id: "TASK-105"
+        title: "Mobile: Network connectivity monitor"
+        priority: "P0"
+        status: "pending"
+        description: "Monitor network status and trigger sync on reconnect"
+        files:
+          - "apps/mobile/solo_guardian/lib/core/network/connectivity_service.dart"
+      - id: "TASK-106"
+        title: "Mobile: Friendly error messages and offline tips"
+        priority: "P1"
+        status: "pending"
+        description: "User-friendly error UI with offline mode indicators"
+        files:
+          - "apps/mobile/solo_guardian/lib/core/errors/"
+          - "apps/mobile/solo_guardian/lib/shared/widgets/"
+      - id: "TASK-107"
+        title: "Mobile: Token refresh resilience"
+        priority: "P0"
+        status: "pending"
+        description: "Ensure refresh token works offline with proper retry"
+        files:
+          - "apps/mobile/solo_guardian/lib/core/network/auth_interceptor.dart"
+      - id: "TASK-108"
+        title: "Web: Friendly error messages"
+        priority: "P1"
+        status: "pending"
+        description: "User-friendly error toasts and network status indicators"
+        files:
+          - "apps/user-web/src/hooks/useErrorHandler.ts"
+          - "apps/user-web/src/components/ui/"
 
 # ============================================================
 # 5.1 Iteration History
@@ -1864,6 +1922,76 @@ decision_log:
         - "Only authenticated users can accept invitations"
         - "Token must match accepting user's linkedUserId"
         - "Only accepted linked contacts can view alerts"
+
+  - id: "ADR-023"
+    date: "2026-01-19"
+    decision: "Offline-First Mobile Architecture with Local-First Data Strategy"
+    rationale: |
+      - Mobile users often have weak or intermittent internet connectivity
+      - Core check-in functionality must work reliably even offline
+      - Users need to view contacts and history without network dependency
+      - Data should sync seamlessly when connection is restored
+    implementation:
+      database:
+        library: "isar (or sqflite)"
+        tables:
+          - "LocalCheckIn: id, date, note, status, syncStatus, createdAt"
+          - "LocalContact: id, name, email, phone, priority, syncStatus"
+          - "LocalSettings: userId, deadline, reminderTime, timezone"
+          - "PendingOperation: id, type, data, createdAt, retryCount"
+      repository_pattern: |
+        Data Read Flow:
+          1. Read from local database first (instant)
+          2. If online, fetch from server in background
+          3. Merge server data with local, update UI
+
+        Data Write Flow:
+          1. Write to local database immediately (optimistic)
+          2. Queue operation for server sync
+          3. If online, sync immediately
+          4. If offline, sync when connection restored
+      sync_strategy:
+        queue_operations:
+          - "CREATE_CHECKIN: Queue check-in creation"
+          - "UPDATE_SETTINGS: Queue settings update"
+          - "CREATE_CONTACT: Queue contact creation"
+          - "UPDATE_CONTACT: Queue contact update"
+          - "DELETE_CONTACT: Queue contact deletion (soft)"
+        conflict_resolution:
+          - "Last-write-wins with server timestamp"
+          - "Server data takes precedence for non-local-only fields"
+          - "Local pending operations retry with exponential backoff"
+        retry_policy:
+          max_retries: 5
+          backoff: "exponential (1s, 2s, 4s, 8s, 16s)"
+          on_failure: "Mark as failed, allow manual retry"
+      connectivity:
+        library: "connectivity_plus"
+        events:
+          - "onConnected: Trigger sync queue processing"
+          - "onDisconnected: Switch to offline mode"
+        ui_indicators:
+          - "Offline banner at top of screen"
+          - "Sync status icon in app bar"
+          - "Pending operations badge"
+      token_refresh:
+        strategy: |
+          1. Store refresh token securely (flutter_secure_storage)
+          2. On 401, attempt refresh
+          3. If refresh fails due to network, queue request for retry
+          4. If refresh fails due to expired token, redirect to login
+          5. Preserve pending operations across re-login
+      error_ux:
+        principles:
+          - "Never show technical errors to users"
+          - "Provide clear offline/online status"
+          - "Show retry options for failed operations"
+          - "Indicate pending sync status"
+        messages:
+          network_error: "No internet connection. Your changes are saved locally."
+          sync_pending: "Changes will sync when online."
+          sync_failed: "Some changes couldn't sync. Tap to retry."
+          server_error: "Something went wrong. Please try again later."
 
 # ============================================================
 # 8. Review History (Recorded by A Session)
