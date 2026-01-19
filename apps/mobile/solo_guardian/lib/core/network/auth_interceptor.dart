@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import '../storage/secure_storage.dart';
 
-class AuthInterceptor extends Interceptor {
+class AuthInterceptor extends QueuedInterceptor {
   final Dio _dio;
   final SecureStorageService _storage;
   bool _isRefreshing = false;
@@ -13,7 +13,7 @@ class AuthInterceptor extends Interceptor {
       _storage = storage;
 
   @override
-  void onRequest(
+  Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
@@ -29,7 +29,7 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode != 401) {
       return handler.next(err);
     }
