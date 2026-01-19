@@ -12,7 +12,7 @@ test.describe('Authentication', () => {
       await page.goto('/login');
 
       await expect(page.locator('h3[data-slot="card-title"], [data-slot="card-title"]')).toContainText(/welcome|sign in/i);
-      await expect(page.locator('input[type="email"]')).toBeVisible();
+      await expect(page.locator('input#identifier')).toBeVisible();
       await expect(page.locator('input[type="password"]')).toBeVisible();
       await expect(page.locator('button[type="submit"]')).toBeVisible();
     });
@@ -45,10 +45,11 @@ test.describe('Authentication', () => {
 
       // First register
       await page.goto('/register');
-      await page.fill('input[name="name"]', 'Login Test User');
-      await page.fill('input[type="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', password);
-      await page.fill('input[name="confirmPassword"]', password);
+      await page.fill('input#name', 'Login Test User');
+      await page.fill('input#email', uniqueEmail);
+      await page.fill('input#password', password);
+      await page.fill('input#confirmPassword', password);
+
       await page.click('button[type="submit"]');
       await page.waitForURL(/\/(onboarding)?$/);
 
@@ -79,10 +80,10 @@ test.describe('Authentication', () => {
       await page.goto('/register');
 
       await expect(page.locator('h3[data-slot="card-title"], [data-slot="card-title"]')).toContainText(/create|sign up|register/i);
-      await expect(page.locator('input[name="name"]')).toBeVisible();
-      await expect(page.locator('input[type="email"]')).toBeVisible();
-      await expect(page.locator('input[name="password"]')).toBeVisible();
-      await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
+      await expect(page.locator('input#name')).toBeVisible();
+      await expect(page.locator('input#email')).toBeVisible();
+      await expect(page.locator('input#password')).toBeVisible();
+      await expect(page.locator('input#confirmPassword')).toBeVisible();
       await expect(page.locator('button[type="submit"]')).toBeVisible();
     });
 
@@ -98,10 +99,10 @@ test.describe('Authentication', () => {
     test('should show error for password mismatch', async ({ page }) => {
       await page.goto('/register');
 
-      await page.fill('input[name="name"]', 'Test User');
-      await page.fill('input[type="email"]', 'mismatch@example.com');
-      await page.fill('input[name="password"]', 'Password123!');
-      await page.fill('input[name="confirmPassword"]', 'DifferentPassword456!');
+      await page.fill('input#name', 'Test User');
+      await page.fill('input#email', 'mismatch@example.com');
+      await page.fill('input#password', 'Password123!');
+      await page.fill('input#confirmPassword', 'DifferentPassword456!');
       await page.click('button[type="submit"]');
 
       await expect(page.locator('.text-red-500')).toContainText(/match|mismatch/i);
@@ -111,20 +112,20 @@ test.describe('Authentication', () => {
       // First registration
       const duplicateEmail = `duplicate-${Date.now()}@example.com`;
       await page.goto('/register');
-      await page.fill('input[name="name"]', 'First User');
-      await page.fill('input[type="email"]', duplicateEmail);
-      await page.fill('input[name="password"]', 'TestPassword123!');
-      await page.fill('input[name="confirmPassword"]', 'TestPassword123!');
+      await page.fill('input#name', 'First User');
+      await page.fill('input#email', duplicateEmail);
+      await page.fill('input#password', 'TestPassword123!');
+      await page.fill('input#confirmPassword', 'TestPassword123!');
       await page.click('button[type="submit"]');
       await page.waitForURL(/\/(onboarding)?$/);
 
       // Clear storage and try to register again with same email
       await page.evaluate(() => localStorage.clear());
       await page.goto('/register');
-      await page.fill('input[name="name"]', 'Second User');
-      await page.fill('input[type="email"]', duplicateEmail);
-      await page.fill('input[name="password"]', 'TestPassword123!');
-      await page.fill('input[name="confirmPassword"]', 'TestPassword123!');
+      await page.fill('input#name', 'Second User');
+      await page.fill('input#email', duplicateEmail);
+      await page.fill('input#password', 'TestPassword123!');
+      await page.fill('input#confirmPassword', 'TestPassword123!');
       await page.click('button[type="submit"]');
 
       // API returns 409 for duplicate email - accept either specific message or generic error

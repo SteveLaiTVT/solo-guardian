@@ -17,10 +17,10 @@ setup('authenticate', async ({ page }) => {
 
   // Check if we need to register or just login
   try {
-    await page.fill('input[name="name"]', TEST_USER.name);
-    await page.fill('input[type="email"]', TEST_USER.email);
-    await page.fill('input[name="password"]', TEST_USER.password);
-    await page.fill('input[name="confirmPassword"]', TEST_USER.password);
+    await page.fill('input#name', TEST_USER.name);
+    await page.fill('input#email', TEST_USER.email);
+    await page.fill('input#password', TEST_USER.password);
+    await page.fill('input#confirmPassword', TEST_USER.password);
     await page.click('button[type="submit"]');
 
     // Wait for either redirect to dashboard/onboarding or error
@@ -35,8 +35,8 @@ setup('authenticate', async ({ page }) => {
   // If we see an error (user exists), login instead
   if (await page.locator('.text-red-500').isVisible().catch(() => false)) {
     await page.goto('/login');
-    await page.fill('input[type="email"]', TEST_USER.email);
-    await page.fill('input[type="password"]', TEST_USER.password);
+    await page.fill('input#identifier', TEST_USER.email);
+    await page.fill('input#password', TEST_USER.password);
     await page.click('button[type="submit"]');
     await page.waitForURL('/');
   }

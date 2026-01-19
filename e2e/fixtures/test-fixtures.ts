@@ -54,8 +54,8 @@ export const test = base.extend<TestFixtures>({
   loginAs: async ({ page }, use) => {
     const login = async (email: string, password: string): Promise<void> => {
       await page.goto('/login');
-      await page.fill('input[type="email"]', email);
-      await page.fill('input[type="password"]', password);
+      await page.fill('input#identifier', email);
+      await page.fill('input#password', password);
       await page.click('button[type="submit"]');
       await page.waitForURL('/');
     };
@@ -65,10 +65,10 @@ export const test = base.extend<TestFixtures>({
   registerUser: async ({ page }, use) => {
     const register = async (email: string, password: string, name: string): Promise<void> => {
       await page.goto('/register');
-      await page.fill('input[name="name"]', name);
-      await page.fill('input[type="email"]', email);
-      await page.fill('input[name="password"]', password);
-      await page.fill('input[name="confirmPassword"]', password);
+      await page.fill('input#name', name);
+      await page.fill('input#email', email);
+      await page.fill('input#password', password);
+      await page.fill('input#confirmPassword', password);
       await page.click('button[type="submit"]');
       await page.waitForURL(/\/(onboarding)?$/);
     };
@@ -97,8 +97,8 @@ export class LoginPage {
   }
 
   async login(email: string, password: string): Promise<void> {
-    await this.page.fill('input[type="email"]', email);
-    await this.page.fill('input[type="password"]', password);
+    await this.page.fill('input#identifier', email);
+    await this.page.fill('input#password', password);
     await this.page.click('button[type="submit"]');
   }
 
@@ -122,10 +122,10 @@ export class RegisterPage {
   }
 
   async register(name: string, email: string, password: string): Promise<void> {
-    await this.page.fill('input[name="name"]', name);
-    await this.page.fill('input[type="email"]', email);
-    await this.page.fill('input[name="password"]', password);
-    await this.page.fill('input[name="confirmPassword"]', password);
+    await this.page.fill('input#name', name);
+    await this.page.fill('input#email', email);
+    await this.page.fill('input#password', password);
+    await this.page.fill('input#confirmPassword', password);
     await this.page.click('button[type="submit"]');
   }
 
@@ -200,20 +200,26 @@ export class ApiHelper {
     this.baseUrl = baseUrl;
   }
 
-  async createTestUser(email: string, password: string, name: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async createTestUser(
+    email: string,
+    password: string,
+    name: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await fetch(`${this.baseUrl}/api/v1/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to create test user: ${error.message}`);
+      const errorMessage =
+        data?.error?.message ?? data?.message ?? 'Registration failed';
+      throw new Error(`Failed to create test user: ${errorMessage}`);
     }
 
-    const data = await response.json();
-    return data.tokens;
+    return data?.data?.tokens ?? data.tokens;
   }
 
   async deleteTestUser(accessToken: string): Promise<void> {
