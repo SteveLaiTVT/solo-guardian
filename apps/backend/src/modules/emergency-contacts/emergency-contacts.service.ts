@@ -1,8 +1,8 @@
 /**
  * @file emergency-contacts.service.ts
  * @description Service for emergency contacts CRUD operations
- * @task TASK-015, TASK-066, TASK-067, TASK-068, TASK-069, TASK-070
- * @design_state_version 3.9.0
+ * @task TASK-015, TASK-066, TASK-067, TASK-068, TASK-069, TASK-070, TASK-100
+ * @design_state_version 3.12.0
  */
 import {
   Injectable,
@@ -189,17 +189,24 @@ export class EmergencyContactsService {
     );
 
     this.logger.log(`User ${userId} reordered emergency contacts`);
-    return updated.map((c) => this.mapToResponseSimple(c));
+    return updated.map((c) => this.mapToResponse(c));
   }
 
   // DONE(B): Updated mapToResponse to include phoneVerified, preferredChannel, and linked user fields - TASK-036, TASK-065
-  private mapToResponse(contact: EmergencyContactWithLinkedUser): ContactResponseDto {
-    let invitationStatus: 'none' | 'pending' | 'accepted' = 'none';
-    if (contact.invitationAcceptedAt) {
-      invitationStatus = 'accepted';
-    } else if (contact.invitationSentAt) {
-      invitationStatus = 'pending';
-    }
+  // DONE(B): Combined mapToResponse and mapToResponseSimple to reduce duplication - TASK-100
+  private mapToResponse(
+    contact: EmergencyContact | EmergencyContactWithLinkedUser,
+  ): ContactResponseDto {
+    const invitationStatus = contact.invitationAcceptedAt
+      ? 'accepted'
+      : contact.invitationSentAt
+        ? 'pending'
+        : 'none';
+
+    const linkedUserName =
+      'linkedUser' in contact && contact.linkedUser
+        ? contact.linkedUser.name
+        : null;
 
     return {
       id: contact.id,
@@ -215,34 +222,7 @@ export class EmergencyContactsService {
       phoneVerified: contact.phoneVerified,
       preferredChannel: contact.preferredChannel as 'email' | 'sms',
       linkedUserId: contact.linkedUserId,
-      linkedUserName: contact.linkedUser?.name ?? null,
-      invitationStatus,
-    };
-  }
-
-  private mapToResponseSimple(contact: EmergencyContact): ContactResponseDto {
-    let invitationStatus: 'none' | 'pending' | 'accepted' = 'none';
-    if (contact.invitationAcceptedAt) {
-      invitationStatus = 'accepted';
-    } else if (contact.invitationSentAt) {
-      invitationStatus = 'pending';
-    }
-
-    return {
-      id: contact.id,
-      userId: contact.userId,
-      name: contact.name,
-      email: contact.email,
-      phone: contact.phone,
-      priority: contact.priority,
-      isVerified: contact.isVerified,
-      isActive: contact.isActive,
-      createdAt: contact.createdAt,
-      updatedAt: contact.updatedAt,
-      phoneVerified: contact.phoneVerified,
-      preferredChannel: contact.preferredChannel as 'email' | 'sms',
-      linkedUserId: contact.linkedUserId,
-      linkedUserName: null,
+      linkedUserName,
       invitationStatus,
     };
   }
