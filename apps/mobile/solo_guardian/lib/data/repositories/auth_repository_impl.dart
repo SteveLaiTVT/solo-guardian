@@ -90,6 +90,7 @@ class AuthRepositoryImpl implements AuthRepository {
     await _storage.setUser(result.user.toJson());
   }
 
+  @override
   Future<void> updateStoredUser(User user) async {
     await _storage.setUser(user.toJson());
   }
