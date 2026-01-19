@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/cache/check_in_cache_service.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/auth_interceptor.dart';
+import '../../core/network/connectivity_service.dart';
 import '../../core/storage/preferences_storage.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../data/datasources/auth_datasource.dart';
@@ -22,6 +24,7 @@ import '../../domain/repositories/check_in_repository.dart';
 import '../../domain/repositories/contacts_repository.dart';
 import '../../domain/repositories/preferences_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
+import 'auth_provider.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService();
@@ -84,9 +87,25 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(datasource: datasource, storage: storage);
 });
 
+final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
+  return ConnectivityService();
+});
+
+final checkInCacheServiceProvider = Provider<CheckInCacheService>((ref) {
+  return CheckInCacheService();
+});
+
 final checkInRepositoryProvider = Provider<CheckInRepository>((ref) {
   final datasource = ref.watch(checkInDatasourceProvider);
-  return CheckInRepositoryImpl(datasource: datasource);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  final cacheService = ref.watch(checkInCacheServiceProvider);
+
+  return CheckInRepositoryImpl(
+    datasource: datasource,
+    connectivity: connectivity,
+    cacheService: cacheService,
+    getUserId: () => ref.read(currentUserProvider)?.id,
+  );
 });
 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
