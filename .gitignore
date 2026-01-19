@@ -82,6 +82,15 @@ Pods/
 xcuserdata/
 DerivedData/
 
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.dart_tool/
+flutter_*.log
+pubspec.lock
+
 # Database
 *.sqlite
 *.sqlite3
