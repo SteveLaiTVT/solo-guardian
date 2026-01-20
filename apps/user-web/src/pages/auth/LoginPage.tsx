@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
 import { OAuthButtons } from '@/components/auth'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 
@@ -49,6 +50,8 @@ function LoginPage(): JSX.Element {
     setError(null)
     loginMutation.mutate(data, {
       onSuccess: (result) => {
+        // DONE(B): Clear all cached queries to prevent data leak between users - BUG FIX
+        queryClient.clear()
         setTokens(result.tokens.accessToken, result.tokens.refreshToken)
         refreshMutation.mutate(result.tokens.refreshToken)
         navigate('/')

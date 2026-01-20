@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 interface RegisterFormData {
@@ -110,6 +111,8 @@ function RegisterPage(): JSX.Element {
       },
       {
         onSuccess: (result) => {
+          // DONE(B): Clear all cached queries to prevent data leak between users - BUG FIX
+          queryClient.clear()
           setTokens(result.tokens.accessToken, result.tokens.refreshToken)
           refreshMutation.mutate(result.tokens.refreshToken)
           navigate('/onboarding')
