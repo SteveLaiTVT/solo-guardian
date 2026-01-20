@@ -102,6 +102,10 @@ pubspec.lock
 *.cert
 secrets/
 
+# Docker
+.env.docker.local
+docker-compose.override.yml
+
 # Generated files
 *.generated.*
 generated/
