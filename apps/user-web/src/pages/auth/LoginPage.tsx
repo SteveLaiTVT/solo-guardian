@@ -55,8 +55,9 @@ function LoginPage(): JSX.Element {
       },
       onError: (err) => {
         const parsed = parseApiError(err)
-        // Use translated error message, fallback to generic login failed
-        const message = tError(parsed.i18nKey, { defaultValue: t('login.failed') })
+        // Strip 'error.' prefix since we're using 'error' namespace
+        const key = parsed.i18nKey.replace(/^error\./, '')
+        const message = tError(key, { defaultValue: t('login.failed') })
         setError(message)
       },
     })

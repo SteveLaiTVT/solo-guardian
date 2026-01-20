@@ -116,8 +116,9 @@ function RegisterPage(): JSX.Element {
         },
         onError: (err) => {
           const parsed = parseApiError(err)
-          // Use translated error message, fallback to generic register failed
-          const message = tError(parsed.i18nKey, { defaultValue: t('register.failed') })
+          // Strip 'error.' prefix since we're using 'error' namespace
+          const key = parsed.i18nKey.replace(/^error\./, '')
+          const message = tError(key, { defaultValue: t('register.failed') })
           setError(message)
         },
       }
