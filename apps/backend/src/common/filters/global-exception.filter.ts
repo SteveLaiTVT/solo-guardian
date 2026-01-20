@@ -141,7 +141,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       case 400:
         return ErrorCodes.VALIDATION_FAILED;
       case 401:
-        return ErrorCodes.AUTH_TOKEN_INVALID;
+        // Use invalid credentials for login failures (most common 401 case)
+        return ErrorCodes.AUTH_INVALID_CREDENTIALS;
       case 403:
         return ErrorCodes.AUTH_UNAUTHORIZED;
       case 404:
