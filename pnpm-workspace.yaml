@@ -4,4 +4,8 @@ packages:
   - e2e
 
 onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/engines'
   - esbuild
+  - prisma
+  - unrs-resolver
