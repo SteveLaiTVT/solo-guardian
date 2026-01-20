@@ -296,6 +296,11 @@ export function createHooks(client: AxiosInstance) {
         queryKey: ["oauth", "providers"],
         queryFn: () =>
           api.oauth.getProviders().then((r: AxiosResponse<{ providers: ('google' | 'apple')[] }>) => r.data),
+        // Don't retry on 404 - OAuth may not be configured
+        retry: false,
+        // Return empty providers on error instead of throwing
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        throwOnError: false as any,
       }),
 
     // Caregiver hooks

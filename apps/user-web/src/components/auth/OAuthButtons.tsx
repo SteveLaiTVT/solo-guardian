@@ -86,7 +86,8 @@ export function OAuthButtons({
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
 
   // Fetch enabled providers from backend
-  const { data: enabledProviders, isLoading: isLoadingProviders } = hooks.useOAuthProviders()
+  // If endpoint returns 404 or error, isError will be true and we hide OAuth buttons
+  const { data: enabledProviders, isLoading: isLoadingProviders, isError } = hooks.useOAuthProviders()
 
   const handleOAuthClick = (providerId: string): void => {
     setLoadingProvider(providerId)
@@ -112,13 +113,15 @@ export function OAuthButtons({
     enabledProviders?.providers?.includes(p.id as 'google' | 'apple')
   )
 
-  // If no providers are enabled, don't render anything
+  // If loading, show placeholder
   if (isLoadingProviders) {
     return <div className="h-10" /> // Placeholder height
   }
 
-  if (availableProviders.length === 0) {
-    return <></> // No OAuth providers enabled
+  // If OAuth endpoint is not available (404) or no providers enabled, hide OAuth section
+  // This is expected behavior when OAuth is not configured on the backend
+  if (isError || availableProviders.length === 0) {
+    return <></> // OAuth not available or no providers enabled
   }
 
   const actionText = mode === 'login' ? t('oauth.signInWith') : t('oauth.signUpWith')
