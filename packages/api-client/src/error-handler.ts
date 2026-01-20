@@ -56,10 +56,11 @@ export function parseApiError(error: unknown): ParsedError {
   // - Extract error info and return ParsedError
 
   // Axios error with response
-  if (isAxiosError(error) && error.response?.data) {
+  if (isAxiosError(error) && error.response) {
     const apiError = error.response.data as ApiErrorResponse;
 
-    if (apiError.error) {
+    // Handle structured API error response
+    if (apiError?.error) {
       return {
         code: apiError.error.code,
         category: apiError.error.category,
@@ -70,6 +71,13 @@ export function parseApiError(error: unknown): ParsedError {
         isUserError: isUserError(apiError.error.category),
         isNetworkError: false,
       };
+    }
+
+    // Handle HTTP status codes without structured error response
+    const status = error.response.status;
+    const statusError = parseHttpStatus(status);
+    if (statusError) {
+      return statusError;
     }
   }
 
@@ -90,6 +98,81 @@ export function parseApiError(error: unknown): ParsedError {
 // DONE(B): Implement isAxiosError type guard
 function isAxiosError(
   error: unknown,
-): error is { response?: { data?: unknown } } {
+): error is { response?: { data?: unknown; status?: number } } {
   return typeof error === 'object' && error !== null && 'response' in error;
+}
+
+/**
+ * Parse HTTP status codes into user-friendly errors
+ */
+function parseHttpStatus(status: number): ParsedError | null {
+  switch (status) {
+    case 400:
+      return {
+        code: 'BAD_REQUEST',
+        category: ErrorCategory.VALIDATION,
+        i18nKey: 'error.validation.failed',
+        message: 'Invalid request',
+        isUserError: true,
+        isNetworkError: false,
+      };
+    case 401:
+      return {
+        code: 'UNAUTHORIZED',
+        category: ErrorCategory.AUTH,
+        i18nKey: 'error.auth.unauthorized',
+        message: 'Authentication required',
+        isUserError: true,
+        isNetworkError: false,
+      };
+    case 403:
+      return {
+        code: 'FORBIDDEN',
+        category: ErrorCategory.AUTH,
+        i18nKey: 'error.auth.unauthorized',
+        message: 'Access denied',
+        isUserError: true,
+        isNetworkError: false,
+      };
+    case 404:
+      return {
+        code: 'NOT_FOUND',
+        category: ErrorCategory.NOT_FOUND,
+        i18nKey: 'error.user.notFound',
+        message: 'Resource not found',
+        isUserError: true,
+        isNetworkError: false,
+      };
+    case 429:
+      return {
+        code: 'RATE_LIMITED',
+        category: ErrorCategory.SYSTEM,
+        i18nKey: 'error.system.rateLimited',
+        message: 'Too many requests',
+        isUserError: false,
+        isNetworkError: false,
+      };
+    case 500:
+      return {
+        code: 'INTERNAL_ERROR',
+        category: ErrorCategory.SYSTEM,
+        i18nKey: 'error.system.internal',
+        message: 'Internal server error',
+        isUserError: false,
+        isNetworkError: false,
+      };
+    case 502:
+    case 503:
+    case 504:
+      return {
+        code: 'SERVICE_UNAVAILABLE',
+        category: ErrorCategory.SYSTEM,
+        i18nKey: 'error.system.unavailable',
+        message: 'Service unavailable',
+        isUserError: false,
+        isNetworkError: false,
+      };
+    default:
+      return null;
+  }
 }
