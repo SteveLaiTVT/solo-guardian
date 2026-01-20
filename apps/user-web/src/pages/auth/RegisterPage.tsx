@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 interface RegisterFormData {
   name: string
@@ -38,11 +39,13 @@ interface RegisterFormData {
 
 function RegisterPage(): JSX.Element {
   const { t } = useTranslation('auth')
+  const { t: tError } = useTranslation('error')
   const navigate = useNavigate()
   const setTokens = useAuthStore((s) => s.setTokens)
   const [error, setError] = useState<string | null>(null)
   const [showNoIdentifierDialog, setShowNoIdentifierDialog] = useState(false)
   const [pendingData, setPendingData] = useState<RegisterFormData | null>(null)
+  const { parseApiError } = useErrorHandler()
 
   const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*$/
   const phoneRegex = /^\+?[0-9]{7,15}$/
@@ -112,7 +115,9 @@ function RegisterPage(): JSX.Element {
           navigate('/onboarding')
         },
         onError: (err) => {
-          const message = err instanceof Error ? err.message : t('register.failed')
+          const parsed = parseApiError(err)
+          // Use translated error message, fallback to generic register failed
+          const message = tError(parsed.i18nKey, { defaultValue: t('register.failed') })
           setError(message)
         },
       }

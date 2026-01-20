@@ -17,12 +17,15 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { useAuthStore } from '@/stores/auth.store'
 import { hooks } from '@/lib/api'
 import { OAuthButtons } from '@/components/auth'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 function LoginPage(): JSX.Element {
   const { t } = useTranslation('auth')
+  const { t: tError } = useTranslation('error')
   const navigate = useNavigate()
   const setTokens = useAuthStore((s) => s.setTokens)
   const [error, setError] = useState<string | null>(null)
+  const { parseApiError } = useErrorHandler()
 
   const loginSchema = z.object({
     identifier: z.string().min(1, t('validation.identifierRequired')),
@@ -51,7 +54,9 @@ function LoginPage(): JSX.Element {
         navigate('/')
       },
       onError: (err) => {
-        const message = err instanceof Error ? err.message : t('login.failed')
+        const parsed = parseApiError(err)
+        // Use translated error message, fallback to generic login failed
+        const message = tError(parsed.i18nKey, { defaultValue: t('login.failed') })
         setError(message)
       },
     })
