@@ -177,7 +177,7 @@ export class EarlyWarningService {
    */
   async getAllRules(): Promise<WarningRuleResponseDto[]> {
     const rules = await this.repository.findAllRules();
-    return rules.map((r) => this.mapRuleToResponse(r));
+    return rules.map((r: Parameters<typeof this.mapRuleToResponse>[0]) => this.mapRuleToResponse(r));
   }
 
   /**

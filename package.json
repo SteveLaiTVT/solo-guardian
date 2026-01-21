@@ -1,0 +1,17 @@
+{
+  "name": "solo-guardian",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Solo Guardian - Safety check-in app for people living alone",
+  "scripts": {
+    "build:types": "pnpm --filter @solo-guardian/types build",
+    "build:api-client": "pnpm --filter @solo-guardian/api-client build",
+    "build:backend": "pnpm --filter solo-guardian-backend build",
+    "build:user-web": "pnpm --filter @solo-guardian/user-web build",
+    "dev:backend": "pnpm --filter solo-guardian-backend start:dev",
+    "dev:user-web": "pnpm --filter @solo-guardian/user-web dev"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

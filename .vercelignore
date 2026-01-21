@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs (will be rebuilt)
+dist/
+build/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+
+# E2E Test artifacts
+e2e/.auth/
+e2e/playwright-report/
+e2e/test-results/
+
+# Temporary files
+tmp/
+temp/
+ai/
+
+# Cache
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# Git
+.git/
+
+# Backend (not needed for frontend deploy)
+apps/backend/
+apps/admin-web/
+apps/mobile/
+
+# Large files
+*.sqlite
+*.sqlite3
+*.db
+*.pem
+*.key

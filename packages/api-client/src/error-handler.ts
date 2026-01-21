@@ -75,9 +75,11 @@ export function parseApiError(error: unknown): ParsedError {
 
     // Handle HTTP status codes without structured error response
     const status = error.response.status;
-    const statusError = parseHttpStatus(status);
-    if (statusError) {
-      return statusError;
+    if (status !== undefined) {
+      const statusError = parseHttpStatus(status);
+      if (statusError) {
+        return statusError;
+      }
     }
   }
 

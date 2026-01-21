@@ -29,8 +29,8 @@ import { AdminModule } from './modules/admin';
 import { CaregiverModule } from './modules/caregiver';
 // DONE(B): Import TemplatesModule - TASK-050
 import { TemplatesModule } from './modules/templates';
-// DONE(B): Import AnalyticsModule - TASK-053
-import { AnalyticsModule } from './modules/analytics';
+// NOTE: AnalyticsModule disabled - Prisma model not yet created
+// import { AnalyticsModule } from './modules/analytics';
 // Import StorageModule for file uploads
 import { StorageModule } from './modules/storage';
 
@@ -83,8 +83,8 @@ import { StorageModule } from './modules/storage';
     CaregiverModule,
     // DONE(B): Add TemplatesModule - TASK-050
     TemplatesModule,
-    // DONE(B): Add AnalyticsModule - TASK-053
-    AnalyticsModule,
+    // NOTE: AnalyticsModule disabled - Prisma model not yet created
+    // AnalyticsModule,
     // Add StorageModule for file uploads (global)
     StorageModule,
   ],

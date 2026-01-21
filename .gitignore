@@ -116,3 +116,4 @@ generated/
 
 # Local Claude settings (user-specific)
 .claude/settings.local.json
+.vercel

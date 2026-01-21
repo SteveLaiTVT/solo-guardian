@@ -6,6 +6,8 @@ settings:
 
 importers:
 
+  .: {}
+
   apps/admin-web:
     dependencies:
       '@ant-design/icons':

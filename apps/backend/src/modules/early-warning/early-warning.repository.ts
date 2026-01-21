@@ -224,7 +224,7 @@ export class EarlyWarningRepository {
       where: { id: { in: userIds } },
       include: {
         checkInSettings: {
-          select: { enabled: true },
+          select: { reminderEnabled: true },
         },
         emergencyContacts: {
           select: { id: true },
@@ -251,7 +251,7 @@ export class EarlyWarningRepository {
         warnings: userWarns,
         lastCheckInDate: user.checkIns[0]?.checkInDate || null,
         hasEmergencyContacts: user.emergencyContacts.length > 0,
-        checkInEnabled: user.checkInSettings?.enabled ?? false,
+        checkInEnabled: user.checkInSettings?.reminderEnabled ?? false,
       };
     });
   }
@@ -284,7 +284,7 @@ export class EarlyWarningRepository {
 
     // Get all users with check-in settings
     const usersWithSettings = await this.prisma.checkInSettings.findMany({
-      where: { enabled: true },
+      where: { reminderEnabled: true },
       include: {
         user: { select: { id: true, name: true, email: true } },
       },
@@ -329,7 +329,7 @@ export class EarlyWarningRepository {
     return this.prisma.user.findMany({
       where: {
         emergencyContacts: { none: {} },
-        checkInSettings: { enabled: true },
+        checkInSettings: { reminderEnabled: true },
       },
       select: {
         id: true,
@@ -340,11 +340,11 @@ export class EarlyWarningRepository {
   }
 
   /**
-   * Get users who have disabled check-in
+   * Get users who have disabled check-in reminders
    */
   async getUsersWithDisabledCheckIn() {
     return this.prisma.checkInSettings.findMany({
-      where: { enabled: false },
+      where: { reminderEnabled: false },
       include: {
         user: { select: { id: true, name: true, email: true } },
       },
