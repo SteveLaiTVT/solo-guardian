@@ -9,6 +9,7 @@ import {
   UnauthorizedException,
   Logger,
   OnModuleInit,
+  Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -38,7 +39,7 @@ export class AuthService implements OnModuleInit {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly analyticsService: AnalyticsService,
+    @Optional() private readonly analyticsService?: AnalyticsService,
   ) {}
 
   onModuleInit(): void {
@@ -104,7 +105,9 @@ export class AuthService implements OnModuleInit {
     const identifier = dto.email ?? dto.username ?? dto.phone;
     this.logger.log(`User registered: ${identifier} (role: ${role})`);
 
-    await this.analyticsService.trackRegister(user.id);
+    if (this.analyticsService) {
+      await this.analyticsService.trackRegister(user.id);
+    }
 
     return {
       user: {
@@ -158,7 +161,9 @@ export class AuthService implements OnModuleInit {
       `User logged in: ${logIdentifier} (type: ${identifierType}, role: ${role})`,
     );
 
-    await this.analyticsService.trackLogin(user.id);
+    if (this.analyticsService) {
+      await this.analyticsService.trackLogin(user.id);
+    }
 
     return {
       user: {

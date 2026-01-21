@@ -4,7 +4,7 @@
  * @task TASK-006, TASK-054
  * @design_state_version 3.8.0
  */
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { CheckIn, CheckInSettings } from '@prisma/client';
 import { CheckInRepository } from './check-in.repository';
 import { BusinessException } from '../../common/exceptions';
@@ -24,7 +24,7 @@ export class CheckInService {
 
   constructor(
     private readonly checkInRepository: CheckInRepository,
-    private readonly analyticsService: AnalyticsService,
+    @Optional() private readonly analyticsService?: AnalyticsService,
   ) {}
 
   async checkIn(
@@ -52,7 +52,9 @@ export class CheckInService {
     this.logger.log(`User ${userId} checked in for ${today}`);
 
     // DONE(B): Track check-in event - TASK-054
-    await this.analyticsService.trackCheckIn(userId, today);
+    if (this.analyticsService) {
+      await this.analyticsService.trackCheckIn(userId, today);
+    }
 
     return this.mapCheckInToResponse(checkIn);
   }
@@ -112,7 +114,9 @@ export class CheckInService {
     this.logger.log(`User ${userId} updated check-in settings`);
 
     // DONE(B): Track settings update event - TASK-054
-    await this.analyticsService.trackSettingsUpdated(userId, 'check-in');
+    if (this.analyticsService) {
+      await this.analyticsService.trackSettingsUpdated(userId, 'check-in');
+    }
 
     return this.mapSettingsToResponse(updated);
   }
