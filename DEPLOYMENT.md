@@ -2,12 +2,28 @@
 
 This document provides instructions for deploying Solo Guardian to production.
 
+## Quick Links
+
+- 🐳 **[Docker Deployment Guide](./DOCKER.md)** - Recommended for VPS and cloud deployments
+- 📱 **Frontend (Vercel)** - See below
+- 🖥️ **Backend** - Railway, Render, or Docker
+
 ## Architecture Overview
 
 Solo Guardian is a monorepo with separate frontend and backend applications:
 
 - **Frontend (apps/user-web)**: React + Vite SPA - Deploy to **Vercel**
-- **Backend (apps/backend)**: NestJS API with PostgreSQL + Redis - Deploy to **Railway/Render/VPS**
+- **Backend (apps/backend)**: NestJS API with PostgreSQL + Redis - Deploy to **Railway/Render/Docker**
+
+## Deployment Options Summary
+
+| Component | Platform | Guide |
+|-----------|----------|-------|
+| **Backend** | Docker (VPS/Cloud) | [DOCKER.md](./DOCKER.md) ⭐ Recommended |
+| Backend | Railway | See "Railway Deployment" below |
+| Backend | Render | See "Render Deployment" below |
+| Backend | Custom VPS | [DOCKER.md](./DOCKER.md) |
+| **Frontend** | Vercel | See "Frontend Deployment" below |
 
 ## Frontend Deployment (Vercel)
 

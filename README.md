@@ -70,10 +70,35 @@ Existing solutions only send email notifications, which often go unread. By the 
 
 - Node.js 20+
 - pnpm 8+
-- Docker (for local database)
+- **Docker & Docker Compose** (recommended for quick setup)
 - Android Studio (for mobile)
 
-### Setup
+### Quick Start with Docker (Recommended)
+
+The fastest way to get started is using Docker Compose:
+
+```bash
+# Clone repository
+git clone https://github.com/SteveLaiTVT/solo-guardian.git
+cd solo-guardian
+
+# Configure environment
+cp .env.docker .env
+# Edit .env and set JWT secrets, SMTP, and Twilio credentials
+
+# Start all services (PostgreSQL + Redis + Backend)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Test API
+curl http://localhost:3000/api/health
+```
+
+**See [DOCKER.md](./DOCKER.md) for complete Docker deployment guide.**
+
+### Manual Setup (Alternative)
 
 ```bash
 # Install dependencies
@@ -99,9 +124,22 @@ pnpm dev
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
-**Quick Start:**
-- Frontend (user-web): Deploy to Vercel
-- Backend: Deploy to Railway or Render
+### Quick Deployment Options:
+
+1. **Docker Compose** (Recommended for VPS/Cloud)
+   - Complete setup with PostgreSQL, Redis, and Backend
+   - See [DOCKER.md](./DOCKER.md) for detailed guide
+   - ```bash
+     docker-compose up -d
+     ```
+
+2. **Vercel** (Frontend only)
+   - Frontend (user-web): Deploy to Vercel
+   - Configure `VITE_API_URL` to point to your backend
+
+3. **Railway/Render** (Backend)
+   - Backend: Deploy to Railway or Render
+   - Managed PostgreSQL and Redis included
 
 ## 💰 Monetization
 

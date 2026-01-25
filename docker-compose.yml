@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: solo-guardian-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-solo_guardian}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-solo_guardian_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-solo_guardian}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - solo-guardian-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-solo_guardian}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for BullMQ Queue
+  redis:
+    image: redis:7-alpine
+    container_name: solo-guardian-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - solo-guardian-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (NestJS)
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: solo-guardian-backend
+    restart: unless-stopped
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-solo_guardian}:${POSTGRES_PASSWORD:-solo_guardian_pass}@postgres:5432/${POSTGRES_DB:-solo_guardian}?schema=public
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # Server
+      PORT: ${BACKEND_PORT:-3000}
+      NODE_ENV: ${NODE_ENV:-production}
+      
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:5174,https://your-app.vercel.app}
+      
+      # JWT Secrets (IMPORTANT: Change these in production!)
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-this-to-a-secure-32-char-string}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-to-a-secure-32-char-string}
+      
+      # Email (SMTP)
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      
+      # SMS (Twilio)
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+      
+      # OAuth (Optional)
+      GOOGLE_OAUTH_ENABLED: ${GOOGLE_OAUTH_ENABLED:-false}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_CALLBACK_URL: ${GOOGLE_OAUTH_CALLBACK_URL}
+      
+      APPLE_OAUTH_ENABLED: ${APPLE_OAUTH_ENABLED:-false}
+      APPLE_OAUTH_CLIENT_ID: ${APPLE_OAUTH_CLIENT_ID}
+      APPLE_OAUTH_TEAM_ID: ${APPLE_OAUTH_TEAM_ID}
+      APPLE_OAUTH_KEY_ID: ${APPLE_OAUTH_KEY_ID}
+      APPLE_OAUTH_PRIVATE_KEY: ${APPLE_OAUTH_PRIVATE_KEY}
+      APPLE_OAUTH_CALLBACK_URL: ${APPLE_OAUTH_CALLBACK_URL}
+      
+      # Aliyun OSS (Optional)
+      ALIYUN_OSS_REGION: ${ALIYUN_OSS_REGION}
+      ALIYUN_OSS_ACCESS_KEY_ID: ${ALIYUN_OSS_ACCESS_KEY_ID}
+      ALIYUN_OSS_ACCESS_KEY_SECRET: ${ALIYUN_OSS_ACCESS_KEY_SECRET}
+      ALIYUN_OSS_BUCKET: ${ALIYUN_OSS_BUCKET}
+      ALIYUN_OSS_ENDPOINT: ${ALIYUN_OSS_ENDPOINT}
+      ALIYUN_OSS_CDN_DOMAIN: ${ALIYUN_OSS_CDN_DOMAIN}
+    ports:
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - solo-guardian-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${BACKEND_PORT:-3000}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  solo-guardian-network:
+    driver: bridge
