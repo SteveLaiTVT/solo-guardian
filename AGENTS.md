@@ -248,10 +248,27 @@ APPLE_*               # Apple Sign In (optional)
 ALIYUN_OSS_*          # File storage (optional)
 ```
 
-## Cursor or Copilot rules
+## GitHub Copilot and AI tools
 
-- No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
-- No GitHub Copilot rules found in `.github/copilot-instructions.md`.
+### GitHub Copilot Instructions
+
+- See `.github/copilot-instructions.md` for GitHub Copilot specific guidance.
+
+### Skills for Specialized Tasks
+
+For detailed guidance on specific development tasks, refer to skill files in `.github/skills/`:
+
+- **Backend Development** (`.github/skills/backend.skill.md`) - NestJS, Prisma, APIs
+- **Frontend Development** (`.github/skills/frontend.skill.md`) - React, Zustand, TanStack Query
+- **Mobile Development** (`.github/skills/mobile.skill.md`) - Flutter, Riverpod, Dio
+- **Testing** (`.github/skills/testing.skill.md`) - Jest, Playwright, Flutter Test
+- **Deployment** (`.github/skills/deployment.skill.md`) - Railway, Vercel, App Stores
+
+Each skill provides:
+- When to use it
+- Code templates
+- Common commands
+- Best practices specific to this project
 
 ## Notes for agents
 
